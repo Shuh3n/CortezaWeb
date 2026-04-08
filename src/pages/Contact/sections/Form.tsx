@@ -209,7 +209,7 @@ const ContactForm = () => {
             </div>
 
             {/* Social Media Links */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -218,17 +218,17 @@ const ContactForm = () => {
             >
               <p className="text-text-muted font-bold text-sm uppercase tracking-widest mb-6">También estamos en redes:</p>
               <div className="flex gap-4">
-                <a 
-                  href="https://www.instagram.com/corteza_terrestre/" 
-                  target="_blank" 
+                <a
+                  href="https://www.instagram.com/corteza_terrestre/"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="w-14 h-14 rounded-2xl bg-neutral-soft flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group shadow-sm border border-slate-100"
                 >
                   <Instagram size={24} className="group-hover:scale-110 transition-transform" />
                 </a>
-                <a 
-                  href="https://www.facebook.com/cortezaterrestre/" 
-                  target="_blank" 
+                <a
+                  href="https://www.facebook.com/cortezaterrestre/"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="w-14 h-14 rounded-2xl bg-neutral-soft flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group shadow-sm border border-slate-100"
                 >

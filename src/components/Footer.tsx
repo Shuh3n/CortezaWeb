@@ -18,24 +18,24 @@ const Footer = () => {
               Organización sin ánimo de lucro fundada en 2007. Trabajando incansablemente por el bienestar de los animales en el Quindío.
             </p>
             <div className="flex gap-4">
-              <a 
-                href="https://www.instagram.com/corteza_terrestre/" 
-                target="_blank" 
+              <a
+                href="https://www.instagram.com/corteza_terrestre/"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group"
               >
                 <Instagram size={22} className="group-hover:scale-110 transition-transform" />
               </a>
-              <a 
-                href="https://www.facebook.com/cortezaterrestre/" 
-                target="_blank" 
+              <a
+                href="https://www.facebook.com/cortezaterrestre/"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group"
               >
                 <Facebook size={22} className="group-hover:scale-110 transition-transform" />
               </a>
-              <a 
-                href="mailto:fundacioncortezaterrestre@gmail.com" 
+              <a
+                href="mailto:fundacioncortezaterrestre@gmail.com"
                 className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group"
               >
                 <Mail size={22} className="group-hover:scale-110 transition-transform" />
