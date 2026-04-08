@@ -1,4 +1,5 @@
-import { PawPrint, Globe, Users, Mail, Heart } from 'lucide-react';
+import { Heart, Globe, MessageCircle, Mail } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
@@ -6,42 +7,59 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-2 mb-6">
-              <PawPrint className="text-primary w-8 h-8" />
-              <span className="text-2xl font-bold text-primary tracking-tight">Corteza Terrestre</span>
-            </div>
+            <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity mb-6">
+              <img src="/logo.png" alt="Corteza Terrestre Logo" className="h-10 w-auto" />
+              <div className="flex flex-col">
+                <span className="text-lg font-bold text-primary tracking-tight leading-none">Fundación</span>
+                <span className="text-xl font-black text-primary tracking-tighter leading-none">Corteza Terrestre</span>
+              </div>
+            </Link>
             <p className="text-text-muted text-lg max-w-md leading-relaxed mb-8">
               Organización sin ánimo de lucro fundada en 2007. Trabajando incansablemente por el bienestar de los animales en el Quindío.
             </p>
             <div className="flex gap-4">
-              <a href="#" className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all">
-                <Globe size={20} />
+              <a 
+                href="https://www.instagram.com/corteza_terrestre/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group"
+              >
+                <Globe size={22} className="group-hover:scale-110 transition-transform" />
               </a>
-              <a href="#" className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all">
-                <Users size={20} />
+              <a 
+                href="https://www.facebook.com/cortezaterrestre/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group"
+              >
+                <MessageCircle size={22} className="group-hover:scale-110 transition-transform" />
               </a>
-              <a href="#" className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all">
-                <Mail size={20} />
+              <a 
+                href="mailto:fundacioncortezaterrestre@gmail.com" 
+                className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group"
+              >
+                <Mail size={22} className="group-hover:scale-110 transition-transform" />
               </a>
             </div>
           </div>
 
           <div>
-            <h4 className="font-bold text-text-h mb-6">Navegación</h4>
-            <ul className="space-y-4 text-text-muted">
-              <li><a href="#inicio" className="hover:text-primary transition-colors">Inicio</a></li>
-              <li><a href="#ejes" className="hover:text-primary transition-colors">Nuestros Ejes</a></li>
-              <li><a href="#adopcion" className="hover:text-primary transition-colors">Adopción</a></li>
-              <li><a href="#contacto" className="hover:text-primary transition-colors">Contacto</a></li>
+            <h4 className="font-bold text-text-h mb-6 uppercase text-sm tracking-widest">Navegación</h4>
+            <ul className="space-y-4 text-text-muted font-medium">
+              <li><Link to="/" className="hover:text-primary transition-colors">Inicio</Link></li>
+              <li><Link to="/#adopcion" className="hover:text-primary transition-colors">Adopción</Link></li>
+              <li><Link to="/tienda" className="hover:text-primary transition-colors">Tienda Salvatore</Link></li>
+              <li><Link to="/nosotros" className="hover:text-primary transition-colors">Nosotros</Link></li>
+              <li><Link to="/contacto" className="hover:text-primary transition-colors">Contacto</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-bold text-text-h mb-6">Ayúdanos</h4>
-            <ul className="space-y-4 text-text-muted">
-              <li><a href="#" className="hover:text-primary transition-colors">Donaciones</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Tienda Solidaria</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">Apadrinar</a></li>
+            <h4 className="font-bold text-text-h mb-6 uppercase text-sm tracking-widest">Involúcrate</h4>
+            <ul className="space-y-4 text-text-muted font-medium">
+              <li><Link to="/salvaton" className="hover:text-primary transition-colors">Salvatón Animal</Link></li>
+              <li><Link to="/voluntario" className="hover:text-primary transition-colors">Ser Voluntario</Link></li>
+              <li><Link to="/contacto" className="hover:text-primary transition-colors">Apadrinar</Link></li>
             </ul>
           </div>
         </div>
@@ -60,3 +78,4 @@ const Footer = () => {
 };
 
 export default Footer;
+
