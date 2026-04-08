@@ -23,7 +23,7 @@ function App() {
       <ScrollToTop />
       <div className="min-h-screen bg-neutral-soft">
         <Navbar />
-        <main className="pt-20">
+        <main>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/voluntario" element={<Volunteer />} />

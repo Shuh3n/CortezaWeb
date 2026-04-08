@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const VolunteerHero = () => {
   return (
-    <section className="relative py-12 overflow-hidden">
+    <section className="relative pt-40 pb-16 overflow-hidden">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">
         <img 

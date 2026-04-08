@@ -6,7 +6,7 @@ const AboutHero = () => {
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6 }}
-      className="relative py-28 px-4 overflow-hidden"
+      className="relative pt-48 pb-28 px-4 overflow-hidden"
     >
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 z-0">

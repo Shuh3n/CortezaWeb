@@ -13,7 +13,7 @@ const Contact = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="relative bg-gradient-to-br from-neutral-soft via-primary/5 to-accent/5 py-12 px-4 overflow-hidden"
+        className="relative bg-gradient-to-br from-neutral-soft via-primary/5 to-accent/5 pt-32 pb-16 px-4 overflow-hidden"
       >
         {/* Background decorations */}
         <motion.div 

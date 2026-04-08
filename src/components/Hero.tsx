@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 const Hero = () => {
   return (
-    <section id="inicio" className="relative min-h-[500px] flex items-center overflow-hidden bg-neutral-soft py-10 pt-20">
+    <section id="inicio" className="relative min-h-[550px] flex items-center overflow-hidden bg-neutral-soft py-10 pt-38">
       {/* Mobile background image - visible only on small screens */}
       <div className="absolute inset-0 lg:hidden">
         <img
