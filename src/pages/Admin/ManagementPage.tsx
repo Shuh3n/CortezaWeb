@@ -1,6 +1,6 @@
 ﻿import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { PencilLine, PlusCircle, RotateCcw, Trash2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { createCategory, setCategoryStatus, updateCategory } from '../../lib/adminApi';
 import { listGalleryCategories } from '../../lib/gallery';
 import type { GalleryCategory } from '../../types/gallery';
@@ -17,6 +17,12 @@ export default function AdminManagementPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [pendingDisableCategory, setPendingDisableCategory] = useState<GalleryCategory | null>(null);
+
+  async function refreshCategories() {
+    const data = await listGalleryCategories(true, true);
+    setCategories(data);
+  }
 
   useEffect(() => {
     let ignore = false;
@@ -80,14 +86,23 @@ export default function AdminManagementPage() {
       setIsSubmitting(true);
       setErrorMessage(null);
       setFeedback(null);
-      const updated = (await setCategoryStatus(id, active, name)) as GalleryCategory;
-      setCategories((current) => current.map((category) => (category.id === id ? updated : category)));
+      await setCategoryStatus(id, active, name);
+      await refreshCategories();
       setFeedback(active ? 'La categoría se reactivó correctamente.' : 'La categoría se desactivó correctamente.');
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  async function handleConfirmDisableCategory() {
+    if (!pendingDisableCategory) {
+      return;
+    }
+
+    await handleSetCategoryStatus(pendingDisableCategory.id, false, pendingDisableCategory.nombre);
+    setPendingDisableCategory(null);
   }
 
   return (
@@ -168,7 +183,7 @@ export default function AdminManagementPage() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => void handleSetCategoryStatus(category.id, false, category.nombre)}
+                        onClick={() => setPendingDisableCategory(category)}
                         className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 font-semibold text-red-700 transition hover:-translate-y-0.5"
                       >
                         <Trash2 className="h-4 w-4" />
@@ -218,6 +233,59 @@ export default function AdminManagementPage() {
           </div>
         </div>
       </section>
+
+      <AnimatePresence>
+        {pendingDisableCategory ? (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setPendingDisableCategory(null)}
+              className="fixed inset-0 z-[100] bg-primary/20 backdrop-blur-sm"
+            />
+
+            <div className="pointer-events-none fixed inset-0 z-[101] flex items-center justify-center px-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 16 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 16 }}
+                className="pointer-events-auto w-full max-w-xl rounded-[32px] bg-white p-6 shadow-2xl sm:p-8"
+              >
+                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-red-600">Confirmación</p>
+                <h3 className="mt-2 text-2xl font-black text-text-h">¿Estás seguro de desactivar esta categoría?</h3>
+                <p className="mt-3 text-text-muted">
+                  Esta acción ocultará la categoría en formularios públicos, pero conservará su historial para poder reactivarla.
+                </p>
+
+                <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3">
+                  <p className="text-sm font-semibold text-red-800">Categoría seleccionada</p>
+                  <p className="mt-1 text-lg font-black text-red-700">{pendingDisableCategory.nombre}</p>
+                </div>
+
+                <div className="mt-6 flex flex-wrap justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setPendingDisableCategory(null)}
+                    className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => void handleConfirmDisableCategory()}
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 font-semibold text-red-700 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Sí, desactivar
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          </>
+        ) : null}
+      </AnimatePresence>
     </motion.div>
   );
 }

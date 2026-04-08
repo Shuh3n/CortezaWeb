@@ -20,6 +20,7 @@ export default function AdminGalleryManagerPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [preview, setPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [recentUploads, setRecentUploads] = useState<GalleryImage[]>([]);
@@ -87,10 +88,17 @@ export default function AdminGalleryManagerPage() {
 
     try {
       setIsSubmitting(true);
+      setUploadProgress(0);
       setErrorMessage(null);
       setSuccessMessage(null);
 
-      const createdImages = (await uploadPhotos({ categoriaId: selectedCategory.id, fecha, nombre, files })) as GalleryImage[];
+      const createdImages = (await uploadPhotos({
+        categoriaId: selectedCategory.id,
+        fecha,
+        nombre,
+        files,
+        onProgress: (progress) => setUploadProgress(progress),
+      })) as GalleryImage[];
 
       setRecentUploads((current) => [...createdImages, ...current]);
       setNombre('');
@@ -110,6 +118,7 @@ export default function AdminGalleryManagerPage() {
       setErrorMessage(getErrorMessage(error));
     } finally {
       setIsSubmitting(false);
+      setUploadProgress(0);
     }
   }
 
@@ -158,6 +167,23 @@ export default function AdminGalleryManagerPage() {
 
           {errorMessage ? <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{errorMessage}</div> : null}
           {successMessage ? <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">{successMessage}</div> : null}
+
+          {isSubmitting ? (
+            <div className="rounded-2xl border border-primary/10 bg-primary/5 px-4 py-4">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-sm font-semibold text-primary">Subiendo imágenes...</span>
+                <span className="text-sm font-black text-primary">{uploadProgress}%</span>
+              </div>
+              <div className="h-3 w-full overflow-hidden rounded-full bg-white">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${uploadProgress}%` }}
+                  transition={{ duration: 0.25, ease: 'easeOut' }}
+                  className="h-full rounded-full bg-primary"
+                />
+              </div>
+            </div>
+          ) : null}
 
           <motion.button whileHover={{ scale: 1.01, y: -2 }} whileTap={{ scale: 0.99 }} type="submit" disabled={isSubmitting} className="inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-primary px-6 py-4 text-lg font-bold text-white shadow-lg shadow-primary/20 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70">{isSubmitting ? 'Publicando fotos...' : 'Publicar en galería'}</motion.button>
         </form>
