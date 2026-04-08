@@ -12,6 +12,7 @@ const Navbar = () => {
 
   const navItems = [
     { label: 'Inicio', path: '/' },
+    { label: 'Adoptar y Apadrinar', path:'/adoptar'},
     { label: 'Nosotros', path: '/nosotros' },
     { label: 'Salvatón', path: '/salvaton' },
     { label: 'Voluntario', path: '/voluntario' },

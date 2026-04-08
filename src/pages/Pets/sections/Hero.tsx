@@ -1,0 +1,126 @@
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { Search, SlidersHorizontal } from 'lucide-react';
+import type { Species } from '../types';
+
+interface HeroProps {
+    search: string;
+    setSearch: (v: string) => void;
+    species: Species;
+    setSpecies: (v: Species) => void;
+    total: number;
+    loading: boolean;
+}
+
+const speciesFilters: { value: Species; label: string; emoji: string }[] = [
+    { value: 'all',   label: 'Todos',  emoji: '🐾' },
+    { value: 'dog',   label: 'Perros', emoji: '🐶' },
+    { value: 'cat',   label: 'Gatos',  emoji: '🐱' }
+];
+
+const Hero = ({ search, setSearch, species, setSpecies, total, loading }: HeroProps) => {
+    const [showFilters, setShowFilters] = useState(false);
+
+    return (
+        <>
+            {/* ── Banner ── */}
+            <section className="relative pt-32 pb-20 overflow-hidden px-4">
+                <div className="absolute inset-0 z-0">
+                    <img src="/images/bg-counter.jpg" alt="" className="w-full h-full object-cover" />
+                    <div className="absolute inset-0 bg-primary/80 backdrop-blur-sm" />
+                </div>
+
+                <div className="relative z-10 w-[70%] mx-auto text-center">
+                    <motion.div
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.8 }}
+                    >
+            <span className="inline-block px-5 py-2 rounded-full bg-white/20 text-white text-xs font-bold tracking-widest uppercase mb-6">
+              Fundación Corteza Terrestre
+            </span>
+                        <h1 className="text-5xl md:text-6xl font-black text-white mb-6 leading-tight">
+                            Encuentra a tu<br />
+                            <span className="italic">compañero de vida</span>
+                        </h1>
+                        <p className="text-xl text-white/80 max-w-2xl mx-auto leading-relaxed font-medium">
+                            Estos animales esperan una segunda oportunidad. Adoptar salva dos vidas: la de ellos y la tuya.
+                        </p>
+                    </motion.div>
+
+                    {/* Search bar */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.3, duration: 0.6 }}
+                        className="mt-10 flex gap-3 max-w-xl mx-auto"
+                    >
+                        <div className="flex-1 relative">
+                            <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
+                            <input
+                                type="text"
+                                placeholder="Buscar por nombre o raza..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="w-full pl-11 pr-4 py-4 rounded-2xl border-0 bg-white/95 text-text-h placeholder:text-text-muted font-medium focus:outline-none focus:ring-2 focus:ring-white/50 shadow-lg"
+                            />
+                        </div>
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => setShowFilters(!showFilters)}
+                            className={`px-5 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-lg ${
+                                showFilters
+                                    ? 'bg-white text-primary'
+                                    : 'bg-white/20 text-white border border-white/30 hover:bg-white/30'
+                            }`}
+                        >
+                            <SlidersHorizontal size={18} />
+                            <span className="hidden sm:inline">Filtros</span>
+                        </motion.button>
+                    </motion.div>
+                </div>
+            </section>
+
+            {/* ── Sticky filters bar ── */}
+            <div className="bg-white border-b border-slate-100 sticky top-20 z-40 shadow-sm">
+                <div className="w-[70%] mx-auto px-4 py-4">
+                    <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-xs font-bold text-text-muted uppercase tracking-wider">
+              Especie:
+            </span>
+                        {speciesFilters.map((f) => (
+                            <motion.button
+                                key={f.value}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => setSpecies(f.value)}
+                                className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${
+                                    species === f.value
+                                        ? 'bg-primary text-white shadow-md shadow-primary/20'
+                                        : 'bg-slate-100 text-text-muted hover:bg-primary/10 hover:text-primary'
+                                }`}
+                            >
+                                <span>{f.emoji}</span>
+                                {f.label}
+                            </motion.button>
+                        ))}
+
+                        <div className="ml-auto text-sm font-medium text-text-muted">
+                            {loading ? (
+                                <span className="animate-pulse">Cargando...</span>
+                            ) : (
+                                <span>
+                  <span className="font-black text-primary">{total}</span>{' '}
+                                    animal{total !== 1 ? 'es' : ''} disponible{total !== 1 ? 's' : ''}
+                </span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
+    );
+};
+
+export default Hero;
