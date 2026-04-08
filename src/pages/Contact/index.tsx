@@ -13,7 +13,7 @@ const Contact = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="relative bg-gradient-to-br from-neutral-soft via-primary/5 to-accent/5 pt-32 pb-16 px-4 overflow-hidden"
+        className="relative bg-gradient-to-br from-neutral-soft via-primary/5 to-accent/5 pt-52 pb-24 px-4 overflow-hidden"
       >
         {/* Background decorations */}
         <motion.div 
@@ -34,12 +34,20 @@ const Contact = () => {
           transition={{ duration: 2, delay: 0.4 }}
           className="absolute top-1/3 right-1/4 w-[300px] h-[300px] bg-secondary/5 rounded-full blur-3xl" 
         />
-        <div className="w-[70%] mx-auto relative z-10">
-          <h1 className="text-4xl md:text-5xl font-bold text-text-h mb-4">
-            Contáctanos
+        <div className="w-[70%] mx-auto relative z-10 text-center md:text-left">
+          <motion.span
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3 }}
+            className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-sm mb-6 tracking-widest uppercase"
+          >
+            Contacto
+          </motion.span>
+          <h1 className="text-5xl md:text-7xl font-black text-text-h mb-6 leading-tight">
+            ¿Hablamos?
           </h1>
-          <p className="text-xl text-text-muted font-medium">
-            Estamos aquí para escucharte
+          <p className="text-xl text-text-muted font-medium max-w-xl">
+            Estamos aquí para escucharte y trabajar juntos por el bienestar animal. Escríbenos y nos pondremos en contacto pronto.
           </p>
         </div>
       </motion.section>

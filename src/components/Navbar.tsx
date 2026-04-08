@@ -1,15 +1,19 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useModal } from '../context/ModalContext';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { openDonationModal } = useModal();
+  const location = useLocation();
 
   const navItems = [
     { label: 'Inicio', path: '/' },
     { label: 'Voluntario', path: '/voluntario' },
     { label: 'Nosotros', path: '/nosotros' },
+    { label: 'Salvatón', path: '/salvaton' },
     { label: 'Contacto', path: '/contacto' },
   ];
 
@@ -37,17 +41,26 @@ const Navbar = () => {
               <motion.div key={item.label}>
                 <Link 
                   to={item.path}
-                  className="text-text-muted hover:text-primary transition-colors font-medium"
+                  className={`relative transition-colors font-bold ${
+                    location.pathname === item.path ? 'text-primary' : 'text-text-muted hover:text-primary'
+                  }`}
                 >
                   <motion.span whileHover={{ y: -2 }}>
                     {item.label}
                   </motion.span>
+                  {location.pathname === item.path && (
+                    <motion.div 
+                      layoutId="nav-active"
+                      className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full"
+                    />
+                  )}
                 </Link>
               </motion.div>
             ))}
             <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={openDonationModal}
               className="bg-primary text-white px-6 py-2.5 rounded-full font-bold hover:bg-opacity-90 transition-all shadow-md shadow-primary/10"
             >
               Donar
@@ -106,7 +119,11 @@ const Navbar = () => {
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: i * 0.1 }}
                     onClick={() => setIsOpen(false)}
-                    className="block px-3 py-2 text-lg text-text-muted hover:text-primary font-medium border-l-4 border-transparent hover:border-primary transition-all"
+                    className={`block px-3 py-2 text-lg font-bold border-l-4 transition-all ${
+                      location.pathname === item.path 
+                        ? 'text-primary border-primary bg-primary/5' 
+                        : 'text-text-muted border-transparent hover:border-primary hover:text-primary'
+                    }`}
                   >
                     {item.label}
                   </motion.div>
@@ -116,6 +133,10 @@ const Navbar = () => {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}
+                onClick={() => {
+                  setIsOpen(false);
+                  openDonationModal();
+                }}
                 className="w-full bg-primary text-white px-6 py-4 rounded-2xl font-bold mt-4 shadow-lg shadow-primary/20"
               >
                 Donar Ahora

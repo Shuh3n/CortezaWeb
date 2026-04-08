@@ -6,6 +6,9 @@ import Home from './pages/Home';
 import Volunteer from './pages/Volunteer';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import Salvaton from './pages/Salvaton';
+
+import { ModalProvider } from './context/ModalContext';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -21,18 +24,21 @@ function App() {
   return (
     <Router>
       <ScrollToTop />
-      <div className="min-h-screen bg-neutral-soft">
-        <Navbar />
-        <main>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/voluntario" element={<Volunteer />} />
-            <Route path="/nosotros" element={<About />} />
-            <Route path="/contacto" element={<Contact />} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
+      <ModalProvider>
+        <div className="min-h-screen bg-neutral-soft">
+          <Navbar />
+          <main>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/voluntario" element={<Volunteer />} />
+              <Route path="/nosotros" element={<About />} />
+              <Route path="/contacto" element={<Contact />} />
+              <Route path="/salvaton" element={<Salvaton />} />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
+      </ModalProvider>
     </Router>
   );
 }

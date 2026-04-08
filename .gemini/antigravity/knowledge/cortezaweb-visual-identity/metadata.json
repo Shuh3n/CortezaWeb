@@ -1,0 +1,14 @@
+{
+  "title": "CortezaWeb Visual Identity & Hero System",
+  "summary": "Repository-level knowledge about the visual design system, specifically focusing on non-fixed background implementations and component size standards for CortezaWeb.",
+  "created_at": "2026-04-08T17:22:56.000Z",
+  "topic_key": "architecture/visual-standarization",
+  "tags": ["design", "hero", "parallax", "stats", "react"],
+  "references": [
+    {
+      "type": "conversation",
+      "id": "a77fdd0b-8d9e-4cbe-a375-41e74f1de581",
+      "note": "Initial standardization session"
+    }
+  ]
+}

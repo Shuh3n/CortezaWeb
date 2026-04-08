@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 
 const Stats = () => {
   return (
-    <section className="relative py-24 overflow-hidden px-4">
-      {/* Background Image with Overlay */}
+    <section className="relative py-20 overflow-hidden px-4">
+      {/* Standard Background Image - No Fixed Effect */}
       <div className="absolute inset-0 z-0">
         <img 
           src="/images/bg-counter.jpg" 
@@ -35,7 +35,6 @@ const Stats = () => {
           </motion.div>
           
           <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-6 w-full">
-            {/* Stats Card 1 - Liquid Glass */}
             <div className="bg-white/10 backdrop-blur-md p-8 rounded-[32px] border border-white/20 shadow-xl relative overflow-hidden group">
               <div className="absolute -top-4 -right-4 opacity-10 group-hover:scale-110 transition-transform">
                 <Heart size={80} className="text-white fill-white" />
@@ -50,7 +49,6 @@ const Stats = () => {
               </div>
             </div>
 
-            {/* Stats Card 2 - Liquid Glass */}
             <div className="bg-white/10 backdrop-blur-md p-8 rounded-[32px] border border-white/20 shadow-xl relative overflow-hidden group">
               <div className="absolute -top-4 -right-4 opacity-10 group-hover:scale-110 transition-transform">
                 <Heart size={80} className="text-white fill-white" />
@@ -65,7 +63,6 @@ const Stats = () => {
               </div>
             </div>
 
-            {/* Stats Card 3 - Liquid Glass */}
             <div className="bg-white/10 backdrop-blur-md p-8 rounded-[32px] border border-white/20 shadow-xl relative overflow-hidden group sm:col-span-2">
               <div className="flex items-center gap-6">
                 <div>

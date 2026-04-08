@@ -1,7 +1,9 @@
 import { ShoppingBag, Heart, HandHelping } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useModal } from '../context/ModalContext';
 
 const Hero = () => {
+  const { openDonationModal } = useModal();
   return (
     <section id="inicio" className="relative min-h-[550px] flex items-center overflow-hidden bg-neutral-soft py-10 pt-32">
       {/* Mobile background image - visible only on small screens */}
@@ -72,6 +74,7 @@ const Hero = () => {
                 <motion.button
                   whileHover={{ scale: 1.05, translateY: -4 }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={openDonationModal}
                   className="flex items-center justify-center gap-2 bg-accent text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-accent/20 group transition-shadow hover:shadow-accent/40"
                 >
                   <HandHelping className="w-5 h-5 transition-transform group-hover:scale-110" />
