@@ -1,0 +1,186 @@
+﻿import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { PencilLine, PlusCircle, Trash2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { createCategory, softDeleteCategory, updateCategory } from '../../lib/adminApi';
+import { listGalleryCategories } from '../../lib/gallery';
+import type { GalleryCategory } from '../../types/gallery';
+
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : 'No se pudo completar la operación.';
+}
+
+export default function AdminManagementPage() {
+  const [categories, setCategories] = useState<GalleryCategory[]>([]);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingName, setEditingName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadCategories() {
+      try {
+        const data = await listGalleryCategories(true);
+        if (!ignore) {
+          setCategories(data);
+        }
+      } catch (error) {
+        console.error('No se pudieron cargar las categorías.', error);
+      }
+    }
+
+    void loadCategories();
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  const activeCategories = useMemo(() => categories.filter((category) => category.activa && !category.deleted_at), [categories]);
+
+  async function handleCreateCategory(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    try {
+      setIsSubmitting(true);
+      setErrorMessage(null);
+      setFeedback(null);
+      const created = (await createCategory(newCategoryName)) as GalleryCategory;
+      setCategories((current) => [...current, created].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')));
+      setNewCategoryName('');
+      setFeedback('La categoría se creó correctamente.');
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleSaveCategory(id: number) {
+    try {
+      setIsSubmitting(true);
+      setErrorMessage(null);
+      setFeedback(null);
+      const updated = (await updateCategory(id, editingName)) as GalleryCategory;
+      setCategories((current) => current.map((category) => (category.id === id ? updated : category)).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es')));
+      setEditingId(null);
+      setEditingName('');
+      setFeedback('La categoría se actualizó correctamente.');
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleDeleteCategory(id: number) {
+    try {
+      setIsSubmitting(true);
+      setErrorMessage(null);
+      setFeedback(null);
+      const deleted = (await softDeleteCategory(id)) as GalleryCategory;
+      setCategories((current) => current.map((category) => (category.id === id ? deleted : category)));
+      setFeedback('La categoría se eliminó de forma lógica.');
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: 'easeOut' }} className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+      <section className="rounded-[32px] bg-white p-6 shadow-lg shadow-primary/5 sm:p-8">
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/60">Gestión</p>
+        <h1 className="mt-2 text-3xl font-black text-text-h">Crear categorías</h1>
+        <p className="mt-3 text-text-muted">Desde aquí se crean, editan y eliminan lógicamente las categorías de la galería.</p>
+
+        <form className="mt-8 space-y-5" onSubmit={handleCreateCategory}>
+          <label className="block">
+            <span className="mb-2 block text-sm font-bold text-text-main">Nombre visible</span>
+            <input
+              type="text"
+              value={newCategoryName}
+              onChange={(event) => setNewCategoryName(event.target.value)}
+              required
+              placeholder="Ej: Historias con final feliz"
+              className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:-translate-y-0.5 focus:border-primary"
+            />
+          </label>
+
+          {errorMessage ? <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{errorMessage}</div> : null}
+          {feedback ? <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">{feedback}</div> : null}
+
+          <motion.button whileHover={{ scale: 1.01, y: -2 }} whileTap={{ scale: 0.99 }} type="submit" disabled={isSubmitting} className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-4 text-lg font-bold text-white shadow-lg shadow-primary/20 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70">
+            <PlusCircle className="h-5 w-5" />
+            Crear categoría
+          </motion.button>
+        </form>
+      </section>
+
+      <section className="rounded-[32px] bg-white p-6 shadow-lg shadow-primary/5 sm:p-8">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/60">Categorías activas</p>
+            <h2 className="mt-2 text-3xl font-black text-text-h">Administra tu estructura</h2>
+          </div>
+          <div className="rounded-3xl bg-primary/5 px-5 py-4">
+            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary/60">Total</p>
+            <p className="mt-2 text-lg font-black text-primary">{activeCategories.length}</p>
+          </div>
+        </div>
+
+        <div className="mt-8 space-y-4">
+          {activeCategories.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-primary/20 bg-primary/5 px-5 py-8 text-center text-text-muted">Todavía no hay categorías activas.</div>
+          ) : (
+            activeCategories.map((category) => (
+              <div key={category.id} className="rounded-3xl border border-primary/10 p-4">
+                {editingId === category.id ? (
+                  <div className="space-y-4">
+                    <input
+                      type="text"
+                      value={editingName}
+                      onChange={(event) => setEditingName(event.target.value)}
+                      className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
+                    />
+                    <div className="flex flex-wrap gap-3">
+                      <button type="button" onClick={() => void handleSaveCategory(category.id)} className="cursor-pointer rounded-2xl bg-primary px-4 py-3 font-semibold text-white">Guardar</button>
+                      <button type="button" onClick={() => { setEditingId(null); setEditingName(''); }} className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary">Cancelar</button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <p className="text-xl font-black text-text-h">{category.nombre}</p>
+                      <p className="mt-1 text-sm text-text-muted">Slug: {category.slug}</p>
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={() => { setEditingId(category.id); setEditingName(category.nombre); }}
+                        className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary shadow-sm transition hover:-translate-y-0.5"
+                      >
+                        <PencilLine className="h-4 w-4" />
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void handleDeleteCategory(category.id)}
+                        className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 font-semibold text-red-700 transition hover:-translate-y-0.5"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Eliminar
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      </section>
+    </motion.div>
+  );
+}
