@@ -1,8 +1,50 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+}
+
+/** Swap the <link rel="manifest"> tag to the given href and return a cleanup fn. */
+function swapManifest(href: string): () => void {
+  const existing = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
+  const previousHref = existing?.href ?? '/manifest.webmanifest';
+
+  if (existing) {
+    existing.setAttribute('href', href);
+  } else {
+    const link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = href;
+    document.head.appendChild(link);
+  }
+
+  return () => {
+    const link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
+    if (link) {
+      link.setAttribute('href', previousHref);
+    }
+  };
+}
+
+/** Register the admin SW (scoped to /admin/) and return a cleanup fn. */
+async function registerAdminSw(): Promise<() => void> {
+  if (!('serviceWorker' in navigator)) {
+    return () => undefined;
+  }
+
+  try {
+    const registration = await navigator.serviceWorker.register('/admin-sw.js', {
+      scope: '/admin/',
+    });
+
+    return () => {
+      void registration.unregister();
+    };
+  } catch {
+    // SW registration is non-critical; silently ignore in unsupported envs.
+    return () => undefined;
+  }
 }
 
 export function useAdminPwa(enabled: boolean) {
@@ -10,6 +52,26 @@ export function useAdminPwa(enabled: boolean) {
   const [isStandalone, setIsStandalone] = useState(false);
   const [isIos, setIsIos] = useState(false);
 
+  // Swap manifest + register admin SW when entering admin routes.
+  useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
+    const restoreManifest = swapManifest('/admin-manifest.webmanifest');
+
+    let cleanupSw: () => void = () => undefined;
+    void registerAdminSw().then((fn) => {
+      cleanupSw = fn;
+    });
+
+    return () => {
+      restoreManifest();
+      cleanupSw();
+    };
+  }, [enabled]);
+
+  // Detect device + standalone mode + install prompt.
   useEffect(() => {
     if (!enabled || typeof document === 'undefined') {
       return;
@@ -20,17 +82,18 @@ export function useAdminPwa(enabled: boolean) {
     setIsIos(iosDevice);
 
     const standaloneMatch = window.matchMedia('(display-mode: standalone)');
-    const fromSafariStandalone = typeof (window.navigator as Navigator & { standalone?: boolean }).standalone === 'boolean'
-      ? Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone)
-      : false;
+    const fromSafariStandalone =
+      typeof (window.navigator as Navigator & { standalone?: boolean }).standalone === 'boolean'
+        ? Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone)
+        : false;
     setIsStandalone(standaloneMatch.matches || fromSafariStandalone);
 
     function handleDisplayModeChange(event: MediaQueryListEvent) {
-      const nextStandalone = event.matches;
-      setIsStandalone(nextStandalone || fromSafariStandalone);
+      setIsStandalone(event.matches || fromSafariStandalone);
     }
 
     function handleBeforeInstallPrompt(event: Event) {
+      event.preventDefault();
       setDeferredPrompt(event as BeforeInstallPromptEvent);
     }
 

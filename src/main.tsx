@@ -1,19 +1,16 @@
-﻿import { StrictMode } from 'react';
+import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.tsx';
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    void navigator.serviceWorker.getRegistrations().then((registrations) => {
-      registrations.forEach((registration) => {
-        if (registration.active?.scriptURL.includes('/admin-sw.js')) {
-          void registration.unregister();
-        }
-      });
-    });
-
-    void navigator.serviceWorker.register('/sw.js');
+    // Register the public SW only for non-admin routes.
+    // The admin SW (/admin-sw.js scoped to /admin/) is registered
+    // dynamically by useAdminPwa when the user enters an /admin/ route.
+    if (!window.location.pathname.startsWith('/admin')) {
+      void navigator.serviceWorker.register('/sw.js');
+    }
   });
 }
 
