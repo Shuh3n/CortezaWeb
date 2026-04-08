@@ -5,17 +5,6 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
 }
 
-function upsertHeadTag<K extends keyof HTMLElementTagNameMap>(selector: string, factory: () => HTMLElementTagNameMap[K]) {
-  let element = document.head.querySelector(selector) as HTMLElementTagNameMap[K] | null;
-
-  if (!element) {
-    element = factory();
-    document.head.appendChild(element);
-  }
-
-  return element;
-}
-
 export function useAdminPwa(enabled: boolean) {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isStandalone, setIsStandalone] = useState(false);
@@ -29,18 +18,6 @@ export function useAdminPwa(enabled: boolean) {
     const previousTitle = document.title;
     document.title = 'Panel administrativo | Fundación Corteza Terrestre';
 
-    const manifestLink = upsertHeadTag<'link'>('link[rel="manifest"]', () => document.createElement('link'));
-    manifestLink.rel = 'manifest';
-    manifestLink.href = '/admin-manifest.webmanifest';
-
-    const themeMeta = upsertHeadTag<'meta'>('meta[name="theme-color"]', () => document.createElement('meta'));
-    themeMeta.name = 'theme-color';
-    themeMeta.content = '#2d5a27';
-
-    if ('serviceWorker' in navigator) {
-      void navigator.serviceWorker.register('/admin-sw.js', { scope: '/admin/' });
-    }
-
     const userAgent = window.navigator.userAgent;
     const iosDevice = /iPad|iPhone|iPod/.test(userAgent);
     setIsIos(iosDevice);
@@ -52,7 +29,8 @@ export function useAdminPwa(enabled: boolean) {
     setIsStandalone(standaloneMatch.matches || fromSafariStandalone);
 
     function handleDisplayModeChange(event: MediaQueryListEvent) {
-      setIsStandalone(event.matches || fromSafariStandalone);
+      const nextStandalone = event.matches;
+      setIsStandalone(nextStandalone || fromSafariStandalone);
     }
 
     function handleBeforeInstallPrompt(event: Event) {
@@ -72,7 +50,7 @@ export function useAdminPwa(enabled: boolean) {
 
   const canInstallPrompt = useMemo(() => deferredPrompt !== null, [deferredPrompt]);
   const canShowIosGuide = useMemo(() => isIos && !isStandalone, [isIos, isStandalone]);
-  const canInstall = useMemo(() => canInstallPrompt || canShowIosGuide, [canInstallPrompt, canShowIosGuide]);
+  const canInstall = useMemo(() => !isStandalone, [isStandalone]);
 
   async function installApp() {
     if (!deferredPrompt) {

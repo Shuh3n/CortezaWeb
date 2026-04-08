@@ -66,7 +66,7 @@ export default function AdminLayout() {
   }
 
   async function handleInstall() {
-    if (!canInstallPrompt && canShowIosGuide) {
+    if (!canInstallPrompt) {
       setShowIosInstallGuide(true);
       return;
     }
@@ -241,22 +241,40 @@ export default function AdminLayout() {
                   <Info className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-text-h">Instalar en iPhone</h3>
-                  <p className="mt-1 text-sm text-text-muted">Safari no muestra botón automático. Hazlo manualmente en 3 pasos:</p>
+                  <h3 className="text-xl font-black text-text-h">Instalar aplicación</h3>
+                  <p className="mt-1 text-sm text-text-muted">
+                    {canShowIosGuide
+                      ? 'Safari no muestra botón automático. Hazlo manualmente en 3 pasos:'
+                      : 'Si el navegador no mostró el prompt, puedes instalarla manualmente desde el menú del navegador.'}
+                  </p>
                 </div>
               </div>
 
-              <ol className="mt-5 space-y-3 text-sm text-text-main">
-                <li className="rounded-2xl bg-neutral-soft px-4 py-3">
-                  1. Tocá el botón <span className="font-semibold">Compartir</span> en Safari.
-                </li>
-                <li className="rounded-2xl bg-neutral-soft px-4 py-3">
-                  2. Elegí <span className="font-semibold">Agregar a pantalla de inicio</span>.
-                </li>
-                <li className="rounded-2xl bg-neutral-soft px-4 py-3">
-                  3. Confirmá con <span className="font-semibold">Agregar</span> y abrí el panel desde el ícono.
-                </li>
-              </ol>
+              {canShowIosGuide ? (
+                <ol className="mt-5 space-y-3 text-sm text-text-main">
+                  <li className="rounded-2xl bg-neutral-soft px-4 py-3">
+                    1. Tocá el botón <span className="font-semibold">Compartir</span> en Safari.
+                  </li>
+                  <li className="rounded-2xl bg-neutral-soft px-4 py-3">
+                    2. Elegí <span className="font-semibold">Agregar a pantalla de inicio</span>.
+                  </li>
+                  <li className="rounded-2xl bg-neutral-soft px-4 py-3">
+                    3. Confirmá con <span className="font-semibold">Agregar</span> y abrí el panel desde el ícono.
+                  </li>
+                </ol>
+              ) : (
+                <ol className="mt-5 space-y-3 text-sm text-text-main">
+                  <li className="rounded-2xl bg-neutral-soft px-4 py-3">
+                    1. Abrí el menú del navegador (Chrome/Edge: <span className="font-semibold">⋮</span>).
+                  </li>
+                  <li className="rounded-2xl bg-neutral-soft px-4 py-3">
+                    2. Seleccioná <span className="font-semibold">Instalar app</span> o <span className="font-semibold">Agregar a escritorio</span>.
+                  </li>
+                  <li className="rounded-2xl bg-neutral-soft px-4 py-3">
+                    3. Confirmá instalación y abrí Corteza desde el acceso directo.
+                  </li>
+                </ol>
+              )}
 
               <div className="mt-6 flex justify-end">
                 <button
