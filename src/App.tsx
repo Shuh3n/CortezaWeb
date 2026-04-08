@@ -1,4 +1,4 @@
-﻿import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { useLayoutEffect } from 'react';
 import Home from './pages/Home';
 import Volunteer from './pages/Volunteer';
@@ -42,6 +42,7 @@ function App() {
               <Route path="/nosotros" element={<About />} />
               <Route path="/contacto" element={<Contact />} />
               <Route path="/salvaton" element={<Salvaton />} />
+              <Route path="/tienda" element={<StorePage />} />
             </Route>
 
             <Route path="/admin" element={<AdminLoginPage />} />
@@ -63,12 +64,6 @@ function App() {
           </Routes>
         </ModalProvider>
       </AuthProvider>
-              <Route path="/tienda" element={<StorePage />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      </ModalProvider>
     </Router>
   );
 }

@@ -1,4 +1,4 @@
-import { Heart, Instagram, Facebook, Mail } from 'lucide-react';
+import { Heart, Globe, MessageCircle, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
@@ -24,7 +24,7 @@ const Footer = () => {
                 rel="noopener noreferrer"
                 className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group"
               >
-                <Instagram size={22} className="group-hover:scale-110 transition-transform" />
+                <Globe size={22} className="group-hover:scale-110 transition-transform" />
               </a>
               <a 
                 href="https://www.facebook.com/cortezaterrestre/" 
@@ -32,7 +32,7 @@ const Footer = () => {
                 rel="noopener noreferrer"
                 className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group"
               >
-                <Facebook size={22} className="group-hover:scale-110 transition-transform" />
+                <MessageCircle size={22} className="group-hover:scale-110 transition-transform" />
               </a>
               <a 
                 href="mailto:fundacioncortezaterrestre@gmail.com" 

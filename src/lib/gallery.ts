@@ -64,12 +64,15 @@ export function getDefaultImageName(fileName: string) {
   return normalizeText(baseName) || 'Imagen';
 }
 
-export async function listGalleryCategories(includeInactive = false) {
+export async function listGalleryCategories(includeInactive = false, includeDeleted = false) {
   let query = supabase
     .from('galeria_categorias')
     .select('id, nombre, slug, activa, created_at, updated_at, deleted_at')
-    .is('deleted_at', null)
     .order('nombre', { ascending: true });
+
+  if (!includeDeleted) {
+    query = query.is('deleted_at', null);
+  }
 
   if (!includeInactive) {
     query = query.eq('activa', true);

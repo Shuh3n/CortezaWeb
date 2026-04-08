@@ -1,4 +1,4 @@
-import { Mail, Phone, Clock, Instagram, Facebook } from 'lucide-react';
+import { Mail, Phone, Clock, Globe, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Contact = () => {
@@ -80,7 +80,7 @@ const Contact = () => {
                   rel="noopener noreferrer"
                   className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all shadow-sm group"
                 >
-                  <Instagram size={24} className="group-hover:scale-110 transition-transform" />
+                  <Globe size={24} className="group-hover:scale-110 transition-transform" />
                 </a>
                 <a 
                   href="https://www.facebook.com/cortezaterrestre/" 
@@ -88,7 +88,7 @@ const Contact = () => {
                   rel="noopener noreferrer"
                   className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all shadow-sm group"
                 >
-                  <Facebook size={24} className="group-hover:scale-110 transition-transform" />
+                  <MessageCircle size={24} className="group-hover:scale-110 transition-transform" />
                 </a>
               </div>
             </motion.div>

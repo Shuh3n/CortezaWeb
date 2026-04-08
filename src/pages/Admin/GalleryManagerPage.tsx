@@ -50,6 +50,15 @@ export default function AdminGalleryManagerPage() {
   const selectedCategory = useMemo(() => categories.find((category) => category.id === categoriaId) ?? null, [categories, categoriaId]);
   const recentImages = useMemo(() => recentUploads.slice(0, 5), [recentUploads]);
 
+  function resolveCategoryName(image: GalleryImage) {
+    if (image.categoria?.nombre) {
+      return image.categoria.nombre;
+    }
+
+    const categoryFromState = categories.find((category) => category.id === image.categoria_id);
+    return categoryFromState?.nombre ?? 'Sin categoría';
+  }
+
   function handleFilesChange(event: ChangeEvent<HTMLInputElement>) {
     const selectedFiles = Array.from(event.target.files ?? []);
     setFiles(selectedFiles);
@@ -192,10 +201,10 @@ export default function AdminGalleryManagerPage() {
             ) : (
               recentImages.map((image) => (
                 <div key={image.id} className="flex items-center gap-4 rounded-3xl border border-primary/10 p-4">
-                  <img src={image.url} alt={image.nombre} className="h-20 w-20 rounded-2xl object-cover" />
+                  <img src={image.url} alt={image.nombre ?? 'Imagen subida'} className="h-20 w-20 rounded-2xl object-cover" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-lg font-black text-text-h">{image.nombre}</p>
-                    <p className="text-sm text-text-muted">{image.categoria.nombre} • {image.fecha}</p>
+                    <p className="truncate text-lg font-black text-text-h">{image.nombre ?? 'Sin nombre'}</p>
+                    <p className="text-sm text-text-muted">{resolveCategoryName(image)} • {image.fecha}</p>
                   </div>
                 </div>
               ))

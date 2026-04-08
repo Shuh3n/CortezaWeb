@@ -29,11 +29,11 @@ export function useAdminPwa(enabled: boolean) {
     const previousTitle = document.title;
     document.title = 'Panel administrativo | Fundación Corteza Terrestre';
 
-    const manifestLink = upsertHeadTag<HTMLLinkElement>('link[rel="manifest"]', () => document.createElement('link'));
+    const manifestLink = upsertHeadTag<'link'>('link[rel="manifest"]', () => document.createElement('link'));
     manifestLink.rel = 'manifest';
     manifestLink.href = '/admin-manifest.webmanifest';
 
-    const themeMeta = upsertHeadTag<HTMLMetaElement>('meta[name="theme-color"]', () => document.createElement('meta'));
+    const themeMeta = upsertHeadTag<'meta'>('meta[name="theme-color"]', () => document.createElement('meta'));
     themeMeta.name = 'theme-color';
     themeMeta.content = '#2d5a27';
 

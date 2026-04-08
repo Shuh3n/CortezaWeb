@@ -1,37 +1,79 @@
 ﻿import { supabase } from './supabase';
 
 const functionsBaseUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 async function getAccessToken() {
   const {
     data: { session },
   } = await supabase.auth.getSession();
 
-  if (!session?.access_token) {
+  if (session?.access_token) {
+    return session.access_token;
+  }
+
+  const {
+    data: { session: refreshedSession },
+  } = await supabase.auth.refreshSession();
+
+  if (!refreshedSession?.access_token) {
     throw new Error('No hay una sesión activa para ejecutar esta acción.');
   }
 
-  return session.access_token;
+  return refreshedSession.access_token;
 }
 
 async function parseResponse<T>(response: Response): Promise<T> {
   const payload = (await response.json().catch(() => null)) as { data?: T; error?: string } | null;
 
   if (!response.ok) {
-    throw new Error(payload?.error ?? 'No se pudo completar la operación.');
+    throw new Error(payload?.error ?? `No se pudo completar la operación (${response.status}).`);
   }
 
   return (payload?.data ?? payload) as T;
 }
 
+function getFunctionHeaders(accessToken: string, contentType?: 'application/json') {
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${accessToken}`,
+    apikey: supabaseAnonKey,
+  };
+
+  if (contentType) {
+    headers['Content-Type'] = contentType;
+  }
+
+  return headers;
+}
+
+async function fetchFunctionWithAuth(path: string, method: 'POST' | 'PATCH' | 'DELETE', options?: { body?: BodyInit; contentType?: 'application/json' }) {
+  let accessToken = await getAccessToken();
+  let response = await fetch(`${functionsBaseUrl}${path}`, {
+    method,
+    headers: getFunctionHeaders(accessToken, options?.contentType),
+    body: options?.body,
+  });
+
+  if (response.status !== 401) {
+    return response;
+  }
+
+  // Retry once after refreshing the auth session, common for expired access tokens.
+  await supabase.auth.refreshSession();
+  accessToken = await getAccessToken();
+
+  response = await fetch(`${functionsBaseUrl}${path}`, {
+    method,
+    headers: getFunctionHeaders(accessToken, options?.contentType),
+    body: options?.body,
+  });
+
+  return response;
+}
+
 export async function createCategory(name: string) {
-  const accessToken = await getAccessToken();
-  const response = await fetch(`${functionsBaseUrl}/manage-categories`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
+  const response = await fetchFunctionWithAuth('/manage-categories', 'POST', {
+    contentType: 'application/json',
     body: JSON.stringify({ nombre: name }),
   });
 
@@ -39,13 +81,8 @@ export async function createCategory(name: string) {
 }
 
 export async function updateCategory(id: number, name: string) {
-  const accessToken = await getAccessToken();
-  const response = await fetch(`${functionsBaseUrl}/manage-categories`, {
-    method: 'PATCH',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
+  const response = await fetchFunctionWithAuth('/manage-categories', 'PATCH', {
+    contentType: 'application/json',
     body: JSON.stringify({ id, nombre: name }),
   });
 
@@ -53,19 +90,42 @@ export async function updateCategory(id: number, name: string) {
 }
 
 export async function softDeleteCategory(id: number) {
-  const accessToken = await getAccessToken();
-  const response = await fetch(`${functionsBaseUrl}/manage-categories?id=${id}`, {
-    method: 'DELETE',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+  return setCategoryStatus(id, false);
+}
+
+export async function setCategoryStatus(id: number, active: boolean, name?: string) {
+  const response = await fetchFunctionWithAuth('/manage-categories', 'PATCH', {
+    contentType: 'application/json',
+    body: JSON.stringify({
+      id,
+      nombre: name,
+      activa: active,
+    }),
   });
 
-  return parseResponse(response);
+  if (response.ok) {
+    return parseResponse(response);
+  }
+
+  if (!active) {
+    // Compatibility fallback for deployments that still use DELETE for logical removal.
+    const deleteResponse = await fetchFunctionWithAuth(`/manage-categories?id=${id}`, 'DELETE', {
+      body: undefined,
+    });
+
+    if (deleteResponse.ok) {
+      return parseResponse(deleteResponse);
+    }
+
+    const deletePayload = (await deleteResponse.json().catch(() => null)) as { error?: string } | null;
+    throw new Error(deletePayload?.error ?? 'No se pudo desactivar la categoría.');
+  }
+
+  const payload = (await response.json().catch(() => null)) as { error?: string } | null;
+  throw new Error(payload?.error ?? 'No se pudo reactivar la categoría.');
 }
 
 export async function uploadPhotos(payload: { categoriaId: number; fecha: string; nombre?: string; files: File[] }) {
-  const accessToken = await getAccessToken();
   const formData = new FormData();
   formData.append('categoriaId', String(payload.categoriaId));
   formData.append('fecha', payload.fecha);
@@ -76,11 +136,7 @@ export async function uploadPhotos(payload: { categoriaId: number; fecha: string
 
   payload.files.forEach((file) => formData.append('files', file));
 
-  const response = await fetch(`${functionsBaseUrl}/manage-photos`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+  const response = await fetchFunctionWithAuth('/manage-photos', 'POST', {
     body: formData,
   });
 
@@ -88,13 +144,8 @@ export async function uploadPhotos(payload: { categoriaId: number; fecha: string
 }
 
 export async function updatePhoto(payload: { id: number; categoriaId: number; fecha: string; nombre?: string }) {
-  const accessToken = await getAccessToken();
-  const response = await fetch(`${functionsBaseUrl}/manage-photos`, {
-    method: 'PATCH',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
+  const response = await fetchFunctionWithAuth('/manage-photos', 'PATCH', {
+    contentType: 'application/json',
     body: JSON.stringify(payload),
   });
 
@@ -102,12 +153,8 @@ export async function updatePhoto(payload: { id: number; categoriaId: number; fe
 }
 
 export async function deletePhoto(id: number) {
-  const accessToken = await getAccessToken();
-  const response = await fetch(`${functionsBaseUrl}/manage-photos?id=${id}`, {
-    method: 'DELETE',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+  const response = await fetchFunctionWithAuth(`/manage-photos?id=${id}`, 'DELETE', {
+    body: undefined,
   });
 
   return parseResponse(response);
