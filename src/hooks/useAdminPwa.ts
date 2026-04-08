@@ -8,7 +8,8 @@ interface BeforeInstallPromptEvent extends Event {
 /** Swap the <link rel="manifest"> tag to the given href and return a cleanup fn. */
 function swapManifest(href: string): () => void {
   const existing = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
-  const previousHref = existing?.href ?? '/manifest.webmanifest';
+  const previousHref = existing?.getAttribute('href') ?? null;
+  const hadExistingManifest = Boolean(existing);
 
   if (existing) {
     existing.setAttribute('href', href);
@@ -22,7 +23,11 @@ function swapManifest(href: string): () => void {
   return () => {
     const link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
     if (link) {
-      link.setAttribute('href', previousHref);
+      if (hadExistingManifest && previousHref) {
+        link.setAttribute('href', previousHref);
+      } else {
+        link.remove();
+      }
     }
   };
 }
@@ -35,7 +40,7 @@ async function registerAdminSw(): Promise<() => void> {
 
   try {
     const registration = await navigator.serviceWorker.register('/admin-sw.js', {
-      scope: '/admin/',
+      scope: '/admin',
     });
 
     return () => {
@@ -93,7 +98,6 @@ export function useAdminPwa(enabled: boolean) {
     }
 
     function handleBeforeInstallPrompt(event: Event) {
-      event.preventDefault();
       setDeferredPrompt(event as BeforeInstallPromptEvent);
     }
 

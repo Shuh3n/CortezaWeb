@@ -5,11 +5,16 @@ import App from './App.tsx';
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    // Register the public SW only for non-admin routes.
-    // The admin SW (/admin-sw.js scoped to /admin/) is registered
-    // dynamically by useAdminPwa when the user enters an /admin/ route.
+    // Keep installability restricted to /admin routes.
+    // Remove any non-admin SW registrations that may exist from older deployments.
     if (!window.location.pathname.startsWith('/admin')) {
-      void navigator.serviceWorker.register('/sw.js');
+      void navigator.serviceWorker.getRegistrations().then((registrations) => {
+        registrations.forEach((registration) => {
+          if (!registration.scope.includes('/admin')) {
+            void registration.unregister();
+          }
+        });
+      });
     }
   });
 }

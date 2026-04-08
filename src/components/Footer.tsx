@@ -1,4 +1,4 @@
-import { Heart, Globe, MessageCircle, Mail } from 'lucide-react';
+import { Globe, MessageCircle, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
@@ -68,8 +68,8 @@ const Footer = () => {
           <p className="text-text-muted text-sm font-medium">
             © 2026 Fundación Corteza Terrestre. Armenia, Quindío.
           </p>
-          <div className="flex items-center gap-2 text-sm text-text-muted font-medium">
-            Hecho con <Heart size={14} className="text-red-500 fill-red-500" /> por los animales.
+          <div className="text-sm text-text-muted font-medium">
+            Hecho por los estudiantes de Ingeniería de sistemas y computación de la Uniquindio
           </div>
         </div>
       </div>

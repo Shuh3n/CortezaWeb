@@ -1,10 +1,10 @@
 {
-  "id": "/admin/",
+  "id": "/admin",
   "name": "Panel Admin · Corteza Terrestre",
   "short_name": "Corteza Admin",
   "description": "Panel administrativo para gestionar galería y contenido de Fundación Corteza Terrestre.",
   "start_url": "/admin/dashboard",
-  "scope": "/admin/",
+  "scope": "/admin",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#fdfaf6",
