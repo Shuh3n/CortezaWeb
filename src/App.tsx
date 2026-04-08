@@ -6,6 +6,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import Salvaton from './pages/Salvaton';
 import PublicGalleryPage from './pages/Gallery';
+import StorePage from './pages/StorePage';
 import { ModalProvider } from './context/ModalContext';
 import { AuthProvider } from './context/AuthContext';
 import PublicLayout from './layouts/PublicLayout';
@@ -62,6 +63,12 @@ function App() {
           </Routes>
         </ModalProvider>
       </AuthProvider>
+              <Route path="/tienda" element={<StorePage />} />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
+      </ModalProvider>
     </Router>
   );
 }
