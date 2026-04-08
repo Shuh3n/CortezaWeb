@@ -1,12 +1,20 @@
 import { useState } from 'react';
-import { Menu, X, PawPrint } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
+  const navItems = [
+    { label: 'Inicio', path: '/' },
+    { label: 'Voluntario', path: '/voluntario' },
+    { label: 'Nosotros', path: '/nosotros' },
+    { label: 'Contacto', path: '/contacto' },
+  ];
+
   return (
-    <nav className="fixed w-full z-50 bg-neutral-soft/80 backdrop-blur-md border-b border-slate-200">
+    <nav className="fixed top-0 left-0 w-full z-50 bg-neutral-soft/80 backdrop-blur-md border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
           <motion.div 
@@ -14,21 +22,28 @@ const Navbar = () => {
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center gap-2"
           >
-            <PawPrint className="text-primary w-8 h-8" />
-            <span className="text-xl font-bold text-primary tracking-tight">Corteza Terrestre</span>
+            <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+              <img src="/logo.png" alt="Corteza Terrestre Logo" className="h-10 w-auto" />
+              <div className="flex flex-col">
+                <span className="text-lg font-bold text-primary tracking-tight leading-none">Fundación</span>
+                <span className="text-xl font-black text-primary tracking-tighter leading-none">Corteza Terrestre</span>
+              </div>
+            </Link>
           </motion.div>
           
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-8">
-            {['Inicio', 'Ejes', 'Adopción', 'Contacto'].map((item) => (
-              <motion.a 
-                key={item}
-                href={`#${item.toLowerCase()}`} 
-                whileHover={{ y: -2 }}
-                className="text-text-muted hover:text-primary transition-colors font-medium"
-              >
-                {item}
-              </motion.a>
+            {navItems.map((item) => (
+              <motion.div key={item.label}>
+                <Link 
+                  to={item.path}
+                  className="text-text-muted hover:text-primary transition-colors font-medium"
+                >
+                  <motion.span whileHover={{ y: -2 }}>
+                    {item.label}
+                  </motion.span>
+                </Link>
+              </motion.div>
             ))}
             <motion.button 
               whileHover={{ scale: 1.05 }}
@@ -84,18 +99,18 @@ const Navbar = () => {
             className="md:hidden bg-white border-t border-slate-100 overflow-hidden shadow-xl"
           >
             <div className="px-4 py-6 space-y-4">
-              {['Inicio', 'Ejes', 'Adopción', 'Contacto'].map((item, i) => (
-                <motion.a 
-                  key={item}
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: i * 0.1 }}
-                  href={`#${item.toLowerCase()}`} 
-                  className="block px-3 py-2 text-lg text-text-muted hover:text-primary font-medium border-l-4 border-transparent hover:border-primary transition-all" 
-                  onClick={() => setIsOpen(false)}
-                >
-                  {item}
-                </motion.a>
+              {navItems.map((item, i) => (
+                <Link key={item.label} to={item.path}>
+                  <motion.div
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: i * 0.1 }}
+                    onClick={() => setIsOpen(false)}
+                    className="block px-3 py-2 text-lg text-text-muted hover:text-primary font-medium border-l-4 border-transparent hover:border-primary transition-all"
+                  >
+                    {item.label}
+                  </motion.div>
+                </Link>
               ))}
               <motion.button 
                 initial={{ y: 20, opacity: 0 }}

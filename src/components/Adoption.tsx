@@ -3,8 +3,8 @@ import { motion } from 'framer-motion';
 
 const Adoption = () => {
   return (
-    <section id="adopcion" className="py-24 bg-white overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="adopcion" className="py-16 bg-white overflow-hidden px-4">
+      <div className="w-[70%] mx-auto">
         <motion.div 
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -22,10 +22,10 @@ const Adoption = () => {
           </motion.div>
 
           <div className="relative z-10 max-w-2xl">
-            <h2 className="text-4xl md:text-5xl font-bold text-text-h mb-8">
+            <h2 className="text-4xl md:text-5xl font-bold text-text-h mb-6">
               Adopta un amor para toda la vida
             </h2>
-            <p className="text-xl text-text-muted mb-10 leading-relaxed font-medium">
+            <p className="text-xl text-text-muted mb-8 leading-relaxed font-medium">
               Hay muchas razones para adoptar un animal, pero la mejor de todas es que salvarás una vida y a cambio tendrás su amor incondicional e inigualable.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
