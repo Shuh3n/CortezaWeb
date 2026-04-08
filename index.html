@@ -47,6 +47,16 @@
     <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
     <link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-128x128.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
+    <script>
+      // Swap the manifest BEFORE Chrome fetches it — this determines
+      // start_url and scope used when the user installs the PWA.
+      (function () {
+        if (window.location.pathname.startsWith('/admin')) {
+          document.querySelector('link[rel="manifest"]')
+            .setAttribute('href', '/admin-manifest.webmanifest');
+        }
+      })();
+    </script>
     <title>Fundación Corteza Terrestre</title>
   </head>
   <body>

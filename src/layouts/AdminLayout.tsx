@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Download, FolderCog, ImagePlus, Info, LayoutDashboard, LogOut, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -20,10 +20,23 @@ export default function AdminLayout() {
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { canInstall, canInstallPrompt, canShowIosGuide, isStandalone, installApp } = useAdminPwa(location.pathname.startsWith('/admin'));
+  const { canInstallPrompt, canShowIosGuide, isStandalone, installApp } = useAdminPwa(location.pathname.startsWith('/admin'));
 
   const adminName = useMemo(() => user?.email ?? 'Administrador', [user?.email]);
   const showExpandedDesktop = !isCollapsed || isHoverExpanded;
+
+  // Auto-show iOS guide on first admin visit (no install button on iOS).
+  useEffect(() => {
+    if (!canShowIosGuide) return;
+    const shown = localStorage.getItem('corteza-ios-install-shown');
+    if (!shown) {
+      const timer = window.setTimeout(() => {
+        setShowInstallGuide(true);
+        localStorage.setItem('corteza-ios-install-shown', '1');
+      }, 2000);
+      return () => window.clearTimeout(timer);
+    }
+  }, [canShowIosGuide]);
 
   useEffect(() => {
     return () => {
@@ -78,12 +91,11 @@ export default function AdminLayout() {
     }
   }
 
-  const installLabel = canInstallPrompt ? 'Instalar app' : canShowIosGuide ? 'Instalar en iPhone' : 'Instalar en PC';
-  const installTitle = canInstallPrompt
-    ? 'Instalar el panel en este dispositivo'
-    : canShowIosGuide
-      ? 'Ver pasos para instalar el panel en iPhone'
-      : 'Ver pasos para instalar el panel en PC';
+  // Button visible only when native install prompt is available (Android / PC).
+  // iOS users see the guide modal automatically — no button needed.
+  const showInstallButton = canInstallPrompt;
+  const installLabel = 'Instalar app';
+  const installTitle = 'Instalar el panel en este dispositivo';
 
   return (
     <div className="min-h-screen bg-neutral-soft text-text-main">
@@ -157,7 +169,7 @@ export default function AdminLayout() {
             </nav>
 
             <div className="space-y-3 border-t border-white/10 p-3">
-              {canInstall ? (
+              {showInstallButton ? (
                 <button
                   type="button"
                   onClick={handleInstall}
@@ -194,7 +206,7 @@ export default function AdminLayout() {
               </div>
 
               <div className="flex items-center gap-3">
-                {canInstall ? (
+                {showInstallButton ? (
                   <button
                     type="button"
                     onClick={handleInstall}
