@@ -162,6 +162,21 @@ async function uploadPhotosDirect(payload: { categoriaId: number; fecha: string;
   const createdImages: GalleryImage[] = [];
   const totalFiles = payload.files.length;
 
+  const normalizeCategory = (value: GalleryCategory | GalleryCategory[] | null | undefined): GalleryCategory => {
+    if (Array.isArray(value)) {
+      const first = value[0];
+      if (first) {
+        return first;
+      }
+    }
+
+    if (value && !Array.isArray(value)) {
+      return value;
+    }
+
+    throw new Error('No se pudo resolver la categoría de la imagen creada.');
+  };
+
   for (let index = 0; index < totalFiles; index += 1) {
     const file = payload.files[index];
     const storagePath = buildGalleryStoragePath(file.name, new Date(Date.now() + index));
@@ -215,7 +230,14 @@ async function uploadPhotosDirect(payload: { categoriaId: number; fecha: string;
       throw new Error(insertError?.message || 'No se pudo registrar una de las imágenes en la base de datos.');
     }
 
-    createdImages.push(row as GalleryImage);
+    const normalizedRow = row as Omit<GalleryImage, 'categoria'> & {
+      categoria: GalleryCategory | GalleryCategory[] | null;
+    };
+
+    createdImages.push({
+      ...normalizedRow,
+      categoria: normalizeCategory(normalizedRow.categoria),
+    });
     payload.onProgress?.(Math.round(((index + 1) / totalFiles) * 100));
   }
 
