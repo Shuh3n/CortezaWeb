@@ -83,7 +83,7 @@ const Team = () => {
           whileInView="visible"
           className="grid md:grid-cols-3 gap-8"
         >
-          {teamMembers.map((member, index) => (
+          {teamMembers.map((member) => (
             <motion.div
               key={member.name}
               variants={itemVariants}
