@@ -11,9 +11,8 @@ const Navbar = () => {
 
   const navItems = [
     { label: 'Inicio', path: '/' },
-    { label: 'Tienda', path: '/tienda' },
-    { label: 'Ejes', path: '/#ejes' },
     { label: 'Adopción', path: '/#adopcion' },
+    { label: 'Tienda', path: '/tienda' },
     { label: 'Nosotros', path: '/nosotros' },
     { label: 'Voluntario', path: '/voluntario' },
     { label: 'Salvatón', path: '/salvaton' },
@@ -22,8 +21,29 @@ const Navbar = () => {
 
   const isHome = location.pathname === '/';
 
+  const isActive = (path: string) => {
+    const currentPath = location.pathname;
+    const currentHash = location.hash;
+
+    if (path === '/') {
+      return currentPath === '/' && !currentHash;
+    }
+    
+    if (path.includes('#')) {
+      const [p, h] = path.split('#');
+      return currentPath === p && currentHash === `#${h}`;
+    }
+
+    return currentPath === path;
+  };
+
   const handleNavClick = (path: string) => {
     setIsOpen(false);
+    if (path === '/' && isHome) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    
     if (path.startsWith('/#') && isHome) {
       const id = path.substring(2);
       const element = document.getElementById(id);
@@ -37,7 +57,7 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 w-full z-50 bg-neutral-soft/80 backdrop-blur-md border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-20 items-center">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             className="flex items-center gap-2"
@@ -50,21 +70,20 @@ const Navbar = () => {
               </div>
             </Link>
           </motion.div>
-          
+
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-6 lg:gap-8">
             {navItems.map((item) => (
               <motion.div key={item.label} whileHover={{ y: -2 }}>
-                <Link 
+                <Link
                   to={item.path}
                   onClick={() => handleNavClick(item.path)}
-                  className={`relative transition-colors font-bold ${
-                    location.pathname === item.path ? 'text-primary' : 'text-text-muted hover:text-primary'
-                  }`}
+                  className={`relative transition-colors font-bold ${isActive(item.path) ? 'text-primary' : 'text-text-muted hover:text-primary'
+                    }`}
                 >
                   {item.label}
-                  {location.pathname === item.path && (
-                    <motion.div 
+                  {isActive(item.path) && (
+                    <motion.div
                       layoutId="nav-active"
                       className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full"
                     />
@@ -72,7 +91,7 @@ const Navbar = () => {
                 </Link>
               </motion.div>
             ))}
-            <motion.button 
+            <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={openDonationModal}
@@ -119,7 +138,7 @@ const Navbar = () => {
       {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
-          <motion.div 
+          <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -133,17 +152,16 @@ const Navbar = () => {
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: i * 0.1 }}
-                    className={`block px-3 py-2 text-lg font-bold border-l-4 transition-all ${
-                      location.pathname === item.path 
-                        ? 'text-primary border-primary bg-primary/5' 
-                        : 'text-text-muted border-transparent hover:border-primary hover:text-primary'
-                    }`}
+                    className={`block px-3 py-2 text-lg font-bold border-l-4 transition-all ${isActive(item.path)
+                      ? 'text-primary border-primary bg-primary/5'
+                      : 'text-text-muted border-transparent hover:border-primary hover:text-primary'
+                      }`}
                   >
                     {item.label}
                   </motion.div>
                 </Link>
               ))}
-              <motion.button 
+              <motion.button
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.4 }}

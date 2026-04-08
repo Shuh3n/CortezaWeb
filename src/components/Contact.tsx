@@ -1,4 +1,4 @@
-import { Mail, Phone, Clock } from 'lucide-react';
+import { Mail, Phone, Clock, Instagram, Facebook } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Contact = () => {
@@ -63,6 +63,35 @@ const Contact = () => {
                 </motion.div>
               ))}
             </div>
+
+            {/* Social Media Links */}
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.4 }}
+              className="mt-12 flex items-center gap-6"
+            >
+              <p className="text-text-muted font-bold text-sm uppercase tracking-widest">Síguenos:</p>
+              <div className="flex gap-4">
+                <a 
+                  href="https://www.instagram.com/corteza_terrestre/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all shadow-sm group"
+                >
+                  <Instagram size={24} className="group-hover:scale-110 transition-transform" />
+                </a>
+                <a 
+                  href="https://www.facebook.com/cortezaterrestre/" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all shadow-sm group"
+                >
+                  <Facebook size={24} className="group-hover:scale-110 transition-transform" />
+                </a>
+              </div>
+            </motion.div>
           </motion.div>
 
           <motion.div 

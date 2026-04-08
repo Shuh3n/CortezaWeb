@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Coffee,
@@ -7,8 +7,6 @@ import {
   Home,
   ShoppingCart,
   Send,
-  Instagram,
-  Facebook,
   MessageCircle,
   CheckCircle2,
   Info,
@@ -402,16 +400,11 @@ const SalvatoreStore = () => {
           </div>
         </div>
 
-        {/* Footer Info */}
-        <div className="mt-24 pt-12 border-t border-slate-200 flex flex-col md:flex-row justify-between items-center gap-8 text-text-muted font-medium">
-          <div className="flex items-center gap-4">
+        {/* Quality Seal integrated */}
+        <div className="mt-16 flex justify-center">
+          <div className="flex items-center gap-4 text-text-muted font-bold bg-white px-8 py-4 rounded-full border border-slate-100 shadow-sm">
             <CheckCircle2 className="text-primary" />
             <p>100% materiales de calidad y sentido social</p>
-          </div>
-          <div className="flex gap-6">
-            <a href="#" className="hover:text-primary transition-colors"><Instagram /></a>
-            <a href="#" className="hover:text-primary transition-colors"><Facebook /></a>
-            <a href="#" className="hover:text-primary transition-colors"><MessageCircle /></a>
           </div>
         </div>
       </div>
