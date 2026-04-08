@@ -15,7 +15,7 @@ export default function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isHoverExpanded, setIsHoverExpanded] = useState(false);
-  const [showIosInstallGuide, setShowIosInstallGuide] = useState(false);
+  const [showInstallGuide, setShowInstallGuide] = useState(false);
   const hoverExpandTimeoutRef = useRef<number | null>(null);
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
@@ -67,7 +67,7 @@ export default function AdminLayout() {
 
   async function handleInstall() {
     if (!canInstallPrompt) {
-      setShowIosInstallGuide(true);
+      setShowInstallGuide(true);
       return;
     }
 
@@ -78,10 +78,12 @@ export default function AdminLayout() {
     }
   }
 
-  const installLabel = canInstallPrompt ? 'Descargar app' : 'Instalar en iPhone';
+  const installLabel = canInstallPrompt ? 'Instalar app' : canShowIosGuide ? 'Instalar en iPhone' : 'Instalar en PC';
   const installTitle = canInstallPrompt
     ? 'Instalar el panel en este dispositivo'
-    : 'Ver pasos para instalar el panel en iPhone';
+    : canShowIosGuide
+      ? 'Ver pasos para instalar el panel en iPhone'
+      : 'Ver pasos para instalar el panel en PC';
 
   return (
     <div className="min-h-screen bg-neutral-soft text-text-main">
@@ -227,7 +229,7 @@ export default function AdminLayout() {
       </div>
 
       <AnimatePresence>
-        {showIosInstallGuide ? (
+        {showInstallGuide ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
             <motion.div
               initial={{ opacity: 0, y: 20, scale: 0.98 }}
@@ -245,7 +247,7 @@ export default function AdminLayout() {
                   <p className="mt-1 text-sm text-text-muted">
                     {canShowIosGuide
                       ? 'Safari no muestra botón automático. Hazlo manualmente en 3 pasos:'
-                      : 'Si el navegador no mostró el prompt, puedes instalarla manualmente desde el menú del navegador.'}
+                      : 'Si el navegador no mostró el prompt, puedes instalarla manualmente en PC desde el menú del navegador.'}
                   </p>
                 </div>
               </div>
@@ -279,7 +281,7 @@ export default function AdminLayout() {
               <div className="mt-6 flex justify-end">
                 <button
                   type="button"
-                  onClick={() => setShowIosInstallGuide(false)}
+                  onClick={() => setShowInstallGuide(false)}
                   className="rounded-xl bg-primary px-4 py-2 font-semibold text-white transition hover:opacity-90"
                 >
                   Entendido

@@ -15,9 +15,6 @@ export function useAdminPwa(enabled: boolean) {
       return;
     }
 
-    const previousTitle = document.title;
-    document.title = 'Panel administrativo | Fundación Corteza Terrestre';
-
     const userAgent = window.navigator.userAgent;
     const iosDevice = /iPad|iPhone|iPod/.test(userAgent);
     setIsIos(iosDevice);
@@ -34,7 +31,6 @@ export function useAdminPwa(enabled: boolean) {
     }
 
     function handleBeforeInstallPrompt(event: Event) {
-      event.preventDefault();
       setDeferredPrompt(event as BeforeInstallPromptEvent);
     }
 
@@ -44,7 +40,6 @@ export function useAdminPwa(enabled: boolean) {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       standaloneMatch.removeEventListener('change', handleDisplayModeChange);
-      document.title = previousTitle;
     };
   }, [enabled]);
 
