@@ -11,11 +11,27 @@ const Navbar = () => {
 
   const navItems = [
     { label: 'Inicio', path: '/' },
-    { label: 'Voluntario', path: '/voluntario' },
+    { label: 'Tienda', path: '/tienda' },
+    { label: 'Ejes', path: '/#ejes' },
+    { label: 'Adopción', path: '/#adopcion' },
     { label: 'Nosotros', path: '/nosotros' },
+    { label: 'Voluntario', path: '/voluntario' },
     { label: 'Salvatón', path: '/salvaton' },
     { label: 'Contacto', path: '/contacto' },
   ];
+
+  const isHome = location.pathname === '/';
+
+  const handleNavClick = (path: string) => {
+    setIsOpen(false);
+    if (path.startsWith('/#') && isHome) {
+      const id = path.substring(2);
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
 
   return (
     <nav className="fixed top-0 left-0 w-full z-50 bg-neutral-soft/80 backdrop-blur-md border-b border-slate-200">
@@ -36,18 +52,17 @@ const Navbar = () => {
           </motion.div>
           
           {/* Desktop Menu */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-6 lg:gap-8">
             {navItems.map((item) => (
-              <motion.div key={item.label}>
+              <motion.div key={item.label} whileHover={{ y: -2 }}>
                 <Link 
                   to={item.path}
+                  onClick={() => handleNavClick(item.path)}
                   className={`relative transition-colors font-bold ${
                     location.pathname === item.path ? 'text-primary' : 'text-text-muted hover:text-primary'
                   }`}
                 >
-                  <motion.span whileHover={{ y: -2 }}>
-                    {item.label}
-                  </motion.span>
+                  {item.label}
                   {location.pathname === item.path && (
                     <motion.div 
                       layoutId="nav-active"
@@ -113,12 +128,11 @@ const Navbar = () => {
           >
             <div className="px-4 py-6 space-y-4">
               {navItems.map((item, i) => (
-                <Link key={item.label} to={item.path}>
+                <Link key={item.label} to={item.path} onClick={() => handleNavClick(item.path)}>
                   <motion.div
                     initial={{ x: -20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: i * 0.1 }}
-                    onClick={() => setIsOpen(false)}
                     className={`block px-3 py-2 text-lg font-bold border-l-4 transition-all ${
                       location.pathname === item.path 
                         ? 'text-primary border-primary bg-primary/5' 

@@ -1,9 +1,11 @@
 import { ShoppingBag, Heart, HandHelping } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { useModal } from '../context/ModalContext';
 
 const Hero = () => {
   const { openDonationModal } = useModal();
+  
   return (
     <section id="inicio" className="relative min-h-[550px] flex items-center overflow-hidden bg-neutral-soft py-10 pt-32">
       {/* Mobile background image - visible only on small screens */}
@@ -25,7 +27,7 @@ const Hero = () => {
       />
 
       <div className="w-full px-4 relative z-10">
-        <div className="w-[70%] mx-auto">
+        <div className="w-full lg:w-[85%] xl:w-[70%] mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
@@ -53,14 +55,16 @@ const Hero = () => {
               </p>
 
               <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
-                <motion.button
-                  whileHover={{ scale: 1.05, translateY: -4 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex items-center justify-center gap-2 bg-primary text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-primary/20 group transition-shadow hover:shadow-primary/40"
-                >
-                  <ShoppingBag className="w-5 h-5 transition-transform group-hover:scale-110" />
-                  Compra Nuestros Productos
-                </motion.button>
+                <Link to="/tienda">
+                  <motion.button
+                    whileHover={{ scale: 1.05, translateY: -4 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="w-full flex items-center justify-center gap-2 bg-primary text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-primary/20 group transition-shadow hover:shadow-primary/40"
+                  >
+                    <ShoppingBag className="w-5 h-5 transition-transform group-hover:scale-110" />
+                    Compra Nuestros Productos
+                  </motion.button>
+                </Link>
 
                 <motion.button
                   whileHover={{ scale: 1.05, translateY: -4 }}

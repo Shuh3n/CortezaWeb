@@ -7,7 +7,7 @@ import Volunteer from './pages/Volunteer';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Salvaton from './pages/Salvaton';
-
+import StorePage from './pages/StorePage';
 import { ModalProvider } from './context/ModalContext';
 
 function ScrollToTop() {
@@ -34,6 +34,7 @@ function App() {
               <Route path="/nosotros" element={<About />} />
               <Route path="/contacto" element={<Contact />} />
               <Route path="/salvaton" element={<Salvaton />} />
+              <Route path="/tienda" element={<StorePage />} />
             </Routes>
           </main>
           <Footer />
