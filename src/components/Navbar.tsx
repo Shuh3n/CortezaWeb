@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,6 +11,8 @@ const Navbar = () => {
 
   const navItems = [
     { label: 'Inicio', path: '/' },
+    { label: 'Galería', path: '/galeria' },
+    { label: 'Voluntario', path: '/voluntario' },
     { label: 'Adopción', path: '/#adopcion' },
     { label: 'Tienda', path: '/tienda' },
     { label: 'Nosotros', path: '/nosotros' },
@@ -19,6 +21,15 @@ const Navbar = () => {
     { label: 'Contacto', path: '/contacto' },
   ];
 
+  const isActive = (path: string) => (path === '/galeria' ? location.pathname.startsWith('/galeria') : location.pathname === path);
+
+  return (
+    <nav className="fixed top-0 left-0 w-full z-50 border-b border-slate-200 bg-neutral-soft/80 backdrop-blur-md">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-20 items-center justify-between">
+          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-3 transition-opacity hover:opacity-80">
+              <img src="/logo.png" alt="Fundación Corteza Terrestre" className="h-10 w-auto" />
   const isHome = location.pathname === '/';
 
   const isActive = (path: string) => {
@@ -65,12 +76,21 @@ const Navbar = () => {
             <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <img src="/logo.png" alt="Corteza Terrestre Logo" className="h-10 w-auto" />
               <div className="flex flex-col">
-                <span className="text-lg font-bold text-primary tracking-tight leading-none">Fundación</span>
-                <span className="text-xl font-black text-primary tracking-tighter leading-none">Corteza Terrestre</span>
+                <span className="leading-none tracking-tight text-lg font-bold text-primary">Fundación</span>
+                <span className="leading-none tracking-tighter text-xl font-black text-primary">Corteza Terrestre</span>
               </div>
             </Link>
           </motion.div>
 
+          <div className="hidden items-center gap-8 md:flex">
+            {navItems.map((item) => (
+              <motion.div key={item.label}>
+                <Link
+                  to={item.path}
+                  className={`relative font-bold transition-colors ${isActive(item.path) ? 'text-primary' : 'text-text-muted hover:text-primary'}`}
+                >
+                  <motion.span whileHover={{ y: -2 }}>{item.label}</motion.span>
+                  {isActive(item.path) ? <motion.div layoutId="nav-active" className="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full bg-primary" /> : null}
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center gap-6 lg:gap-8">
             {navItems.map((item) => (
@@ -95,37 +115,21 @@ const Navbar = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={openDonationModal}
-              className="bg-primary text-white px-6 py-2.5 rounded-full font-bold hover:bg-opacity-90 transition-all shadow-md shadow-primary/10"
+              className="cursor-pointer rounded-full bg-primary px-6 py-2.5 font-bold text-white shadow-md shadow-primary/10 transition-all hover:bg-opacity-90"
             >
               Donar
             </motion.button>
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-text-muted hover:text-primary focus:outline-none z-50"
-            >
+          <div className="flex items-center md:hidden">
+            <button onClick={() => setIsOpen(!isOpen)} className="z-50 text-text-muted hover:text-primary focus:outline-none cursor-pointer">
               <AnimatePresence mode="wait">
                 {isOpen ? (
-                  <motion.div
-                    key="close"
-                    initial={{ rotate: -90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
+                  <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
                     <X className="h-6 w-6" />
                   </motion.div>
                 ) : (
-                  <motion.div
-                    key="menu"
-                    initial={{ rotate: 90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: -90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
+                  <motion.div key="menu" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
                     <Menu className="h-6 w-6" />
                   </motion.div>
                 )}
@@ -135,16 +139,29 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
+        {isOpen ? (
         {isOpen && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="md:hidden bg-white border-t border-slate-100 overflow-hidden shadow-xl"
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="overflow-hidden border-t border-slate-100 bg-white shadow-xl md:hidden"
           >
+            <div className="space-y-4 px-4 py-6">
+              {navItems.map((item, index) => (
+                <Link key={item.label} to={item.path}>
+                  <motion.div
+                    initial={{ x: -20, opacity: 0 }}
+                    animate={{ x: 0, opacity: 1 }}
+                    transition={{ delay: index * 0.08 }}
+                    onClick={() => setIsOpen(false)}
+                    className={`block border-l-4 px-3 py-2 text-lg font-bold transition-all ${
+                      isActive(item.path)
+                        ? 'border-primary bg-primary/5 text-primary'
+                        : 'border-transparent text-text-muted hover:border-primary hover:text-primary'
+                    }`}
             <div className="px-4 py-6 space-y-4">
               {navItems.map((item, i) => (
                 <Link key={item.label} to={item.path} onClick={() => handleNavClick(item.path)}>
@@ -164,18 +181,18 @@ const Navbar = () => {
               <motion.button
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
+                transition={{ delay: 0.35 }}
                 onClick={() => {
                   setIsOpen(false);
                   openDonationModal();
                 }}
-                className="w-full bg-primary text-white px-6 py-4 rounded-2xl font-bold mt-4 shadow-lg shadow-primary/20"
+                className="mt-4 w-full cursor-pointer rounded-2xl bg-primary px-6 py-4 font-bold text-white shadow-lg shadow-primary/20"
               >
-                Donar Ahora
+                Donar ahora
               </motion.button>
             </div>
           </motion.div>
-        )}
+        ) : null}
       </AnimatePresence>
     </nav>
   );
