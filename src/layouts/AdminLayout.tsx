@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Download, FolderCog, ImagePlus, Info, LayoutDashboard, LogOut, Menu, X } from 'lucide-react';
+import { ChevronLeft, Download, ImagePlus, Info, LayoutDashboard, LogOut, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useAdminPwa } from '../hooks/useAdminPwa';
@@ -8,7 +8,6 @@ import { useAdminPwa } from '../hooks/useAdminPwa';
 const navigation = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/admin/galeria', label: 'Galería', icon: ImagePlus },
-  { to: '/admin/gestion', label: 'Gestión', icon: FolderCog },
 ];
 
 export default function AdminLayout() {

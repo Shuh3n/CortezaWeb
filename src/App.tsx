@@ -14,8 +14,9 @@ import AdminLayout from './layouts/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLoginPage from './pages/Admin/LoginPage';
 import AdminDashboardPage from './pages/Admin/DashboardPage';
-import AdminGalleryManagerPage from './pages/Admin/GalleryManagerPage';
-import AdminManagementPage from './pages/Admin/ManagementPage';
+import AdminGalleryPage from './pages/Admin/GalleryPage';
+import AdminGalleryCategoriesPage from './pages/Admin/GalleryCategoriesPage';
+import AdminGalleryUploadsPage from './pages/Admin/GalleryUploadsPage';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -56,8 +57,10 @@ function App() {
               }
             >
               <Route path="dashboard" element={<AdminDashboardPage />} />
-              <Route path="galeria" element={<AdminGalleryManagerPage />} />
-              <Route path="gestion" element={<AdminManagementPage />} />
+              <Route path="galeria" element={<AdminGalleryPage />} />
+              <Route path="galeria/categorias" element={<AdminGalleryCategoriesPage />} />
+              <Route path="galeria/cargas" element={<AdminGalleryUploadsPage />} />
+              <Route path="gestion" element={<Navigate to="/admin/galeria/categorias" replace />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />

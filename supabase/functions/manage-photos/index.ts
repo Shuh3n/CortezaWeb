@@ -6,7 +6,7 @@ const GALLERY_BUCKET = "fotos-peludos";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, PATCH, DELETE, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
 };
 
 function jsonResponse(status: number, payload: unknown) {
@@ -44,6 +44,23 @@ function buildGalleryStoragePath(fileName: string, now = new Date()) {
 function getDefaultImageName(fileName: string) {
   const baseName = fileName.replace(/\.[^.]+$/, "");
   return normalizeText(baseName) || "Imagen";
+}
+
+function extractStoragePathFromPublicUrl(publicUrl: string) {
+  try {
+    const parsedUrl = new URL(publicUrl);
+    const marker = `/storage/v1/object/public/${GALLERY_BUCKET}/`;
+    const markerIndex = parsedUrl.pathname.indexOf(marker);
+
+    if (markerIndex === -1) {
+      return null;
+    }
+
+    const encodedPath = parsedUrl.pathname.slice(markerIndex + marker.length);
+    return decodeURIComponent(encodedPath);
+  } catch {
+    return null;
+  }
 }
 
 function getEnvironment() {
@@ -99,6 +116,7 @@ type PhotoRow = {
   fecha: string;
   url: string;
   created_at: string;
+  deleted_at: string | null;
   categoria_id: number;
   categoria: {
     id: number;
@@ -117,6 +135,7 @@ const photoSelect = `
   fecha,
   url,
   created_at,
+  deleted_at,
   categoria_id,
   categoria:galeria_categorias (
     id,
@@ -144,6 +163,40 @@ Deno.serve(async (req) => {
         autoRefreshToken: false,
       },
     });
+
+    if (req.method === "GET") {
+      const requestUrl = new URL(req.url);
+      const categoriaId = Number(requestUrl.searchParams.get("categoriaId") ?? 0);
+      const nombre = String(requestUrl.searchParams.get("nombre") ?? "").trim();
+      const includeDeleted = requestUrl.searchParams.get("includeDeleted") === "true";
+
+      let query = adminClient
+        .from("imagenes")
+        .select(photoSelect)
+        .order("fecha", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(200);
+
+      if (!includeDeleted) {
+        query = query.is("deleted_at", null);
+      }
+
+      if (Number.isFinite(categoriaId) && categoriaId > 0) {
+        query = query.eq("categoria_id", categoriaId);
+      }
+
+      if (nombre) {
+        query = query.ilike("nombre", `%${nombre}%`);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        return jsonResponse(500, { error: error.message ?? "No se pudieron listar las imágenes." });
+      }
+
+      return jsonResponse(200, { data: (data ?? []) as PhotoRow[] });
+    }
 
     if (req.method === "POST") {
       const form = await req.formData();
@@ -195,6 +248,7 @@ Deno.serve(async (req) => {
             fecha,
             url: publicUrl,
             categoria_id: categoriaId,
+            deleted_at: null,
           })
           .select(photoSelect)
           .single();
@@ -218,13 +272,14 @@ Deno.serve(async (req) => {
       } | null;
 
       const id = Number(body?.id ?? 0);
-      const categoriaId = Number(body?.categoriaId ?? 0);
-      const fecha = String(body?.fecha ?? "").trim();
-      const nombre = String(body?.nombre ?? "").trim();
 
       if (!Number.isFinite(id) || id <= 0) {
         return jsonResponse(400, { error: "ID de imagen inválido." });
       }
+
+      const categoriaId = Number(body?.categoriaId ?? 0);
+      const fecha = String(body?.fecha ?? "").trim();
+      const nombre = String(body?.nombre ?? "").trim();
 
       if (!Number.isFinite(categoriaId) || categoriaId <= 0) {
         return jsonResponse(400, { error: "Categoría inválida." });
@@ -262,9 +317,32 @@ Deno.serve(async (req) => {
         return jsonResponse(400, { error: "ID de imagen inválido." });
       }
 
-      const { error } = await adminClient.from("imagenes").delete().eq("id", id);
-      if (error) {
-        return jsonResponse(500, { error: error.message ?? "No se pudo eliminar la imagen." });
+      const { data: existingRow, error: existingError } = await adminClient
+        .from("imagenes")
+        .select("id, url")
+        .eq("id", id)
+        .single();
+
+      if (existingError || !existingRow) {
+        return jsonResponse(404, { error: existingError?.message ?? "La imagen no existe." });
+      }
+
+      const storagePath = extractStoragePathFromPublicUrl(existingRow.url);
+
+      if (!storagePath) {
+        return jsonResponse(500, { error: "No se pudo resolver la ruta del archivo en storage." });
+      }
+
+      const { error: storageError } = await adminClient.storage.from(GALLERY_BUCKET).remove([storagePath]);
+
+      if (storageError) {
+        return jsonResponse(500, { error: storageError.message ?? "No se pudo eliminar el archivo en storage." });
+      }
+
+      const { error: deleteError } = await adminClient.from("imagenes").delete().eq("id", id);
+
+      if (deleteError) {
+        return jsonResponse(500, { error: deleteError.message ?? "No se pudo eliminar el registro de la imagen." });
       }
 
       return jsonResponse(200, { data: { id } });

@@ -14,6 +14,7 @@ export interface GalleryImage {
   fecha: string;
   url: string;
   created_at: string;
+  deleted_at?: string | null;
   categoria_id: number;
   categoria: GalleryCategory;
 }
