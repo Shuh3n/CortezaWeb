@@ -7,6 +7,7 @@ import Contact from './pages/Contact';
 import Salvaton from './pages/Salvaton';
 import PublicGalleryPage from './pages/Gallery';
 import StorePage from './pages/StorePage';
+import DianPage from './pages/Dian';
 import { ModalProvider } from './context/ModalContext';
 import { AuthProvider } from './context/AuthContext';
 import PublicLayout from './layouts/PublicLayout';
@@ -44,6 +45,7 @@ function App() {
               <Route path="/contacto" element={<Contact />} />
               <Route path="/salvaton" element={<Salvaton />} />
               <Route path="/tienda" element={<StorePage />} />
+              <Route path="/dian" element={<DianPage />} />
             </Route>
 
             <Route path="/admin" element={<AdminLoginPage />} />
