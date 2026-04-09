@@ -39,17 +39,23 @@ const Navbar = () => {
 
   const handleNavClick = (path: string) => {
     setIsOpen(false);
-    if (path === '/' && isHome) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
     
-    if (path.startsWith('/#') && isHome) {
-      const id = path.substring(2);
-      const element = document.getElementById(id);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
+    // Si el path tiene un hash (ej: /#adopcion)
+    if (path.includes('#')) {
+      const [p, h] = path.split('#');
+      // Si ya estamos en esa página, hacemos scroll al elemento
+      if (location.pathname === p) {
+        const element = document.getElementById(h);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+        return;
       }
+    }
+
+    // Si el path es exactamente igual a donde ya estamos (sin hash)
+    if (location.pathname === path && !location.hash) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 

@@ -18,11 +18,11 @@ import { supabase } from '../lib/supabase';
 const getSupabaseImageUrl = (imagePath: string) => {
   if (!imagePath) return '';
   const fileName = imagePath.split('/').pop() || '';
-  
+
   const { data } = supabase.storage
     .from('tienda-salvatore')
     .getPublicUrl(fileName);
-    
+
   return data.publicUrl;
 };
 
