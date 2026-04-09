@@ -69,7 +69,7 @@ function getFunctionHeaders(accessToken: string, contentType?: 'application/json
   return headers;
 }
 
-async function fetchFunctionWithAuth(path: string, method: 'POST' | 'PATCH' | 'DELETE', options?: { body?: BodyInit; contentType?: 'application/json' }) {
+async function fetchFunctionWithAuth(path: string, method: 'GET' | 'POST' | 'PATCH' | 'DELETE', options?: { body?: BodyInit; contentType?: 'application/json' }) {
   let accessToken = await getAccessToken();
   let response = await fetch(`${functionsBaseUrl}${path}`, {
     method,
@@ -101,6 +101,22 @@ export async function createCategory(name: string) {
   });
 
   return parseResponse(response);
+}
+
+export async function listAdminCategories(options?: { includeInactive?: boolean; includeDeleted?: boolean }) {
+  const includeInactive = options?.includeInactive ?? true;
+  const includeDeleted = options?.includeDeleted ?? true;
+
+  const params = new URLSearchParams({
+    includeInactive: String(includeInactive),
+    includeDeleted: String(includeDeleted),
+  });
+
+  const response = await fetchFunctionWithAuth(`/manage-categories?${params.toString()}`, 'GET', {
+    body: undefined,
+  });
+
+  return parseResponse<GalleryCategory[]>(response);
 }
 
 export async function updateCategory(id: number, name: string) {
@@ -162,6 +178,21 @@ async function uploadPhotosDirect(payload: { categoriaId: number; fecha: string;
   const createdImages: GalleryImage[] = [];
   const totalFiles = payload.files.length;
 
+  const normalizeCategory = (value: GalleryCategory | GalleryCategory[] | null | undefined): GalleryCategory => {
+    if (Array.isArray(value)) {
+      const first = value[0];
+      if (first) {
+        return first;
+      }
+    }
+
+    if (value && !Array.isArray(value)) {
+      return value;
+    }
+
+    throw new Error('No se pudo resolver la categoría de la imagen creada.');
+  };
+
   for (let index = 0; index < totalFiles; index += 1) {
     const file = payload.files[index];
     const storagePath = buildGalleryStoragePath(file.name, new Date(Date.now() + index));
@@ -215,7 +246,14 @@ async function uploadPhotosDirect(payload: { categoriaId: number; fecha: string;
       throw new Error(insertError?.message || 'No se pudo registrar una de las imágenes en la base de datos.');
     }
 
-    createdImages.push(row as GalleryImage);
+    const normalizedRow = row as Omit<GalleryImage, 'categoria'> & {
+      categoria: GalleryCategory | GalleryCategory[] | null;
+    };
+
+    createdImages.push({
+      ...normalizedRow,
+      categoria: normalizeCategory(normalizedRow.categoria),
+    });
     payload.onProgress?.(Math.round(((index + 1) / totalFiles) * 100));
   }
 
@@ -244,6 +282,26 @@ export async function uploadPhotos(payload: { categoriaId: number; fecha: string
   } catch {
     return uploadPhotosDirect(payload);
   }
+}
+
+export async function listAdminImages(options?: { categoriaId?: number | null; nombre?: string; includeDeleted?: boolean }) {
+  const params = new URLSearchParams();
+
+  if (options?.categoriaId && options.categoriaId > 0) {
+    params.set('categoriaId', String(options.categoriaId));
+  }
+
+  if (options?.nombre?.trim()) {
+    params.set('nombre', options.nombre.trim());
+  }
+
+  params.set('includeDeleted', String(options?.includeDeleted ?? false));
+
+  const response = await fetchFunctionWithAuth(`/manage-photos?${params.toString()}`, 'GET', {
+    body: undefined,
+  });
+
+  return parseResponse<GalleryImage[]>(response);
 }
 
 export async function updatePhoto(payload: { id: number; categoriaId: number; fecha: string; nombre?: string }) {

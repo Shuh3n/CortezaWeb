@@ -1,19 +1,55 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
 }
 
-function upsertHeadTag<K extends keyof HTMLElementTagNameMap>(selector: string, factory: () => HTMLElementTagNameMap[K]) {
-  let element = document.head.querySelector(selector) as HTMLElementTagNameMap[K] | null;
+/** Swap the <link rel="manifest"> tag to the given href and return a cleanup fn. */
+function swapManifest(href: string): () => void {
+  const existing = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
+  const previousHref = existing?.getAttribute('href') ?? null;
+  const hadExistingManifest = Boolean(existing);
 
-  if (!element) {
-    element = factory();
-    document.head.appendChild(element);
+  if (existing) {
+    existing.setAttribute('href', href);
+  } else {
+    const link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = href;
+    document.head.appendChild(link);
   }
 
-  return element;
+  return () => {
+    const link = document.querySelector<HTMLLinkElement>('link[rel="manifest"]');
+    if (link) {
+      if (hadExistingManifest && previousHref) {
+        link.setAttribute('href', previousHref);
+      } else {
+        link.remove();
+      }
+    }
+  };
+}
+
+/** Register the admin SW (scoped to /admin/) and return a cleanup fn. */
+async function registerAdminSw(): Promise<() => void> {
+  if (!('serviceWorker' in navigator)) {
+    return () => undefined;
+  }
+
+  try {
+    const registration = await navigator.serviceWorker.register('/admin-sw.js', {
+      scope: '/admin',
+    });
+
+    return () => {
+      void registration.unregister();
+    };
+  } catch {
+    // SW registration is non-critical; silently ignore in unsupported envs.
+    return () => undefined;
+  }
 }
 
 export function useAdminPwa(enabled: boolean) {
@@ -21,24 +57,29 @@ export function useAdminPwa(enabled: boolean) {
   const [isStandalone, setIsStandalone] = useState(false);
   const [isIos, setIsIos] = useState(false);
 
+  // Swap manifest + register admin SW when entering admin routes.
   useEffect(() => {
-    if (!enabled || typeof document === 'undefined') {
+    if (!enabled) {
       return;
     }
 
-    const previousTitle = document.title;
-    document.title = 'Panel administrativo | Fundación Corteza Terrestre';
+    const restoreManifest = swapManifest('/admin-manifest.webmanifest');
 
-    const manifestLink = upsertHeadTag<'link'>('link[rel="manifest"]', () => document.createElement('link'));
-    manifestLink.rel = 'manifest';
-    manifestLink.href = '/admin-manifest.webmanifest';
+    let cleanupSw: () => void = () => undefined;
+    void registerAdminSw().then((fn) => {
+      cleanupSw = fn;
+    });
 
-    const themeMeta = upsertHeadTag<'meta'>('meta[name="theme-color"]', () => document.createElement('meta'));
-    themeMeta.name = 'theme-color';
-    themeMeta.content = '#2d5a27';
+    return () => {
+      restoreManifest();
+      cleanupSw();
+    };
+  }, [enabled]);
 
-    if ('serviceWorker' in navigator) {
-      void navigator.serviceWorker.register('/admin-sw.js', { scope: '/admin/' });
+  // Detect device + standalone mode + install prompt.
+  useEffect(() => {
+    if (!enabled || typeof document === 'undefined') {
+      return;
     }
 
     const userAgent = window.navigator.userAgent;
@@ -46,9 +87,10 @@ export function useAdminPwa(enabled: boolean) {
     setIsIos(iosDevice);
 
     const standaloneMatch = window.matchMedia('(display-mode: standalone)');
-    const fromSafariStandalone = typeof (window.navigator as Navigator & { standalone?: boolean }).standalone === 'boolean'
-      ? Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone)
-      : false;
+    const fromSafariStandalone =
+      typeof (window.navigator as Navigator & { standalone?: boolean }).standalone === 'boolean'
+        ? Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone)
+        : false;
     setIsStandalone(standaloneMatch.matches || fromSafariStandalone);
 
     function handleDisplayModeChange(event: MediaQueryListEvent) {
@@ -56,7 +98,6 @@ export function useAdminPwa(enabled: boolean) {
     }
 
     function handleBeforeInstallPrompt(event: Event) {
-      event.preventDefault();
       setDeferredPrompt(event as BeforeInstallPromptEvent);
     }
 
@@ -66,13 +107,12 @@ export function useAdminPwa(enabled: boolean) {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       standaloneMatch.removeEventListener('change', handleDisplayModeChange);
-      document.title = previousTitle;
     };
   }, [enabled]);
 
   const canInstallPrompt = useMemo(() => deferredPrompt !== null, [deferredPrompt]);
   const canShowIosGuide = useMemo(() => isIos && !isStandalone, [isIos, isStandalone]);
-  const canInstall = useMemo(() => canInstallPrompt || canShowIosGuide, [canInstallPrompt, canShowIosGuide]);
+  const canInstall = useMemo(() => !isStandalone, [isStandalone]);
 
   async function installApp() {
     if (!deferredPrompt) {

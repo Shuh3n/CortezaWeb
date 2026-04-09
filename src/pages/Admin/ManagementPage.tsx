@@ -1,8 +1,7 @@
 ﻿import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import { PencilLine, PlusCircle, RotateCcw, Trash2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { createCategory, setCategoryStatus, updateCategory } from '../../lib/adminApi';
-import { listGalleryCategories } from '../../lib/gallery';
+import { createCategory, listAdminCategories, setCategoryStatus, updateCategory } from '../../lib/adminApi';
 import type { GalleryCategory } from '../../types/gallery';
 
 function getErrorMessage(error: unknown) {
@@ -20,7 +19,7 @@ export default function AdminManagementPage() {
   const [pendingDisableCategory, setPendingDisableCategory] = useState<GalleryCategory | null>(null);
 
   async function refreshCategories() {
-    const data = await listGalleryCategories(true, true);
+    const data = await listAdminCategories({ includeInactive: true, includeDeleted: true });
     setCategories(data);
   }
 
@@ -29,7 +28,7 @@ export default function AdminManagementPage() {
 
     async function loadCategories() {
       try {
-        const data = await listGalleryCategories(true, true);
+        const data = await listAdminCategories({ includeInactive: true, includeDeleted: true });
         if (!ignore) {
           setCategories(data);
         }

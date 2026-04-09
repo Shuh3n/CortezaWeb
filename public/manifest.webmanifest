@@ -1,15 +1,14 @@
 {
-  "id": "/admin",
-  "name": "Panel Admin · Corteza Terrestre",
-  "short_name": "Corteza Admin",
-  "description": "Panel administrativo para gestionar galería y contenido de Fundación Corteza Terrestre.",
-  "start_url": "/admin/dashboard",
-  "scope": "/admin",
+  "id": "/",
+  "name": "Fundación Corteza Terrestre",
+  "short_name": "Corteza",
+  "description": "Fundación Corteza Terrestre: rescate, adopción y bienestar animal.",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "orientation": "any",
+  "orientation": "portrait-primary",
   "background_color": "#fdfaf6",
   "theme_color": "#2d5a27",
-  "categories": ["productivity", "utilities"],
   "icons": [
     { "src": "/icons/icon-72x72.png", "sizes": "72x72", "type": "image/png" },
     { "src": "/icons/icon-96x96.png", "sizes": "96x96", "type": "image/png" },
@@ -26,4 +25,3 @@
     { "src": "/icons/icon-512x512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
-

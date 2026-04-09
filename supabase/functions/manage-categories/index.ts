@@ -4,7 +4,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, PATCH, DELETE, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, POST, PATCH, DELETE, OPTIONS",
 };
 
 function jsonResponse(status: number, payload: unknown) {
@@ -118,6 +118,33 @@ Deno.serve(async (req) => {
         autoRefreshToken: false,
       },
     });
+
+    if (req.method === "GET") {
+      const requestUrl = new URL(req.url);
+      const includeInactive = requestUrl.searchParams.get("includeInactive") !== "false";
+      const includeDeleted = requestUrl.searchParams.get("includeDeleted") !== "false";
+
+      let query = adminClient
+        .from("galeria_categorias")
+        .select("id, nombre, slug, activa, created_at, updated_at, deleted_at")
+        .order("nombre", { ascending: true });
+
+      if (!includeDeleted) {
+        query = query.is("deleted_at", null);
+      }
+
+      if (!includeInactive) {
+        query = query.eq("activa", true);
+      }
+
+      const { data, error } = await query;
+
+      if (error) {
+        return jsonResponse(500, { error: error.message ?? "No se pudieron listar las categorías." });
+      }
+
+      return jsonResponse(200, { data: data ?? [] });
+    }
 
     if (req.method === "POST") {
       const body = (await req.json().catch(() => null)) as { nombre?: string } | null;

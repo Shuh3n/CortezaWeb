@@ -8,6 +8,7 @@ const IMAGE_SELECT = `
   fecha,
   url,
   created_at,
+  deleted_at,
   categoria_id,
   galeria_categorias!inner (
     id,
@@ -26,6 +27,7 @@ function mapGalleryImage(row: {
   fecha: string;
   url: string;
   created_at: string;
+  deleted_at?: string | null;
   categoria_id: number;
   galeria_categorias: GalleryCategory | GalleryCategory[] | null;
 }): GalleryImage {
@@ -41,6 +43,7 @@ function mapGalleryImage(row: {
     fecha: row.fecha,
     url: row.url,
     created_at: row.created_at,
+    deleted_at: row.deleted_at ?? null,
     categoria_id: row.categoria_id,
     categoria: category,
   };
@@ -91,6 +94,7 @@ export async function listGalleryImages(categorySlug?: string) {
   let query = supabase
     .from('imagenes')
     .select(IMAGE_SELECT)
+    .is('deleted_at', null)
     .eq('galeria_categorias.activa', true)
     .is('galeria_categorias.deleted_at', null)
     .order('fecha', { ascending: false })
