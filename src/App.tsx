@@ -17,8 +17,6 @@ import AdminDashboardPage from './pages/Admin/DashboardPage';
 import AdminGalleryPage from './pages/Admin/GalleryPage';
 import AdminGalleryCategoriesPage from './pages/Admin/GalleryCategoriesPage';
 import AdminGalleryUploadsPage from './pages/Admin/GalleryUploadsPage';
-import AdminGalleryManagerPage from './pages/Admin/GalleryManagerPage';
-import AdminManagementPage from './pages/Admin/ManagementPage';
 import Pets from "./pages/Pets";
 
 function ScrollToTop() {
