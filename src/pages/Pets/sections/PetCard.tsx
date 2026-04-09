@@ -49,6 +49,14 @@ const SoundButton = ({ soundUrl }: { soundUrl: string | null }) => {
     );
 };
 
+// ─── Species Icon ──────────────────────────────────────────────────────────────
+
+const speciesIcon: Record<Pet['species'], string> = {
+    dog:   '/icons/dog_icon.svg',
+    cat:   '/icons/cat_icon.svg',
+    other: '/icons/paw_prints.svg',
+};
+
 // ─── Pet Card ──────────────────────────────────────────────────────────────────
 
 interface PetCardProps {
@@ -56,12 +64,6 @@ interface PetCardProps {
     onAdopt: (pet: Pet) => void;
     onSponsor: (pet: Pet) => void;
 }
-
-const speciesEmoji: Record<Pet['species'], string> = {
-    dog: '🐶',
-    cat: '🐱',
-    other: '🐾',
-};
 
 const sizeLabel: Record<Pet['size'], string> = {
     small: 'Pequeño',
@@ -105,8 +107,12 @@ const PetCard = ({ pet, onAdopt, onSponsor }: PetCardProps) => {
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center text-7xl">
-                        {speciesEmoji[pet.species]}
+                    <div className="w-full h-full flex items-center justify-center">
+                        <img
+                            src={speciesIcon[pet.species]}
+                            alt={pet.species}
+                            className="w-20 h-20 opacity-20"
+                        />
                     </div>
                 )}
 
@@ -114,12 +120,12 @@ const PetCard = ({ pet, onAdopt, onSponsor }: PetCardProps) => {
                 <div className="absolute top-4 left-4 flex gap-2 flex-wrap">
                     {pet.is_urgent && (
                         <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow">
-              ⚡ Urgente
-            </span>
+                            ⚡ Urgente
+                        </span>
                     )}
                     <span className="bg-white/90 backdrop-blur-sm text-primary text-xs font-bold px-3 py-1 rounded-full shadow">
-            {genderLabel[pet.gender]}
-          </span>
+                        {genderLabel[pet.gender]}
+                    </span>
                 </div>
 
                 {/* Sound button */}
@@ -135,18 +141,22 @@ const PetCard = ({ pet, onAdopt, onSponsor }: PetCardProps) => {
             <div className="p-6 flex flex-col flex-1">
                 <div className="flex items-start justify-between mb-1">
                     <h3 className="text-2xl font-black text-text-h">{pet.name}</h3>
-                    <span className="text-xl">{speciesEmoji[pet.species]}</span>
+                    <img
+                        src={speciesIcon[pet.species]}
+                        alt={pet.species}
+                        className="w-6 h-6 opacity-60"
+                    />
                 </div>
 
                 <p className="text-sm font-bold text-primary mb-3">{pet.breed}</p>
 
                 <div className="flex gap-2 flex-wrap mb-4">
-          <span className="bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full">
-            {formatAge(pet.age_years, pet.age_months)}
-          </span>
+                    <span className="bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full">
+                        {formatAge(pet.age_years, pet.age_months)}
+                    </span>
                     <span className="bg-secondary/10 text-secondary text-xs font-bold px-3 py-1 rounded-full">
-            {sizeLabel[pet.size]}
-          </span>
+                        {sizeLabel[pet.size]}
+                    </span>
                 </div>
 
                 <p className="text-text-muted text-sm leading-relaxed font-medium mb-6 flex-1 line-clamp-3">

@@ -12,10 +12,10 @@ interface HeroProps {
     loading: boolean;
 }
 
-const speciesFilters: { value: Species; label: string; emoji: string }[] = [
-    { value: 'all',   label: 'Todos',  emoji: '🐾' },
-    { value: 'dog',   label: 'Perros', emoji: '🐶' },
-    { value: 'cat',   label: 'Gatos',  emoji: '🐱' }
+const speciesFilters: { value: Species; label: string; icon: string }[] = [
+    { value: 'all',   label: 'Todos',  icon: 'icons/paw_prints.svg' },
+    { value: 'dog',   label: 'Perros', icon: 'icons/dog_icon.svg' },
+    { value: 'cat',   label: 'Gatos',  icon: 'icons/cat_icon.svg' }
 ];
 
 const Hero = ({ search, setSearch, species, setSpecies, total, loading }: HeroProps) => {
@@ -101,7 +101,12 @@ const Hero = ({ search, setSearch, species, setSpecies, total, loading }: HeroPr
                                         : 'bg-slate-100 text-text-muted hover:bg-primary/10 hover:text-primary'
                                 }`}
                             >
-                                <span>{f.emoji}</span>
+                                <img
+                                    src={f.icon}
+                                    alt={f.label}
+                                    className="w-4 h-4"
+                                    style={species === f.value ? { filter: 'brightness(0) invert(1)' } : undefined}
+                                />
                                 {f.label}
                             </motion.button>
                         ))}
