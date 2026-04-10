@@ -1,4 +1,3 @@
-import { Globe, MessageCircle, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
@@ -18,27 +17,39 @@ const Footer = () => {
               Organización sin ánimo de lucro fundada en 2007. Trabajando incansablemente por el bienestar de los animales en el Quindío.
             </p>
             <div className="flex gap-4">
-              <a 
-                href="https://www.instagram.com/corteza_terrestre/" 
-                target="_blank" 
+              <a
+                href="https://www.instagram.com/corteza_terrestre/"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group"
               >
-                <Globe size={22} className="group-hover:scale-110 transition-transform" />
+                <img
+                    src="/icons/instagram.svg"
+                    alt="Instagram"
+                    className="w-5 h-5 group-hover:brightness-0 group-hover:invert transition-all"
+                />
               </a>
-              <a 
-                href="https://www.facebook.com/cortezaterrestre/" 
-                target="_blank" 
+              <a
+                href="https://www.facebook.com/cortezaterrestre/"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group"
               >
-                <MessageCircle size={22} className="group-hover:scale-110 transition-transform" />
+                <img
+                    src="/icons/facebook.svg"
+                    alt="Facebook"
+                    className="w-5 h-5 group-hover:brightness-0 group-hover:invert transition-all"
+                />
               </a>
-              <a 
-                href="mailto:fundacioncortezaterrestre@gmail.com" 
+              <a
+                href="mailto:fundacioncortezaterrestre@gmail.com"
                 className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group"
               >
-                <Mail size={22} className="group-hover:scale-110 transition-transform" />
+                <img
+                    src="/icons/mail.svg"
+                    alt="Mail"
+                    className="w-5 h-5 group-hover:brightness-0 group-hover:invert transition-all"
+                />
               </a>
             </div>
           </div>
@@ -51,6 +62,7 @@ const Footer = () => {
               <li><Link to="/tienda" className="hover:text-primary transition-colors">Tienda Salvatore</Link></li>
               <li><Link to="/nosotros" className="hover:text-primary transition-colors">Nosotros</Link></li>
               <li><Link to="/contacto" className="hover:text-primary transition-colors">Contacto</Link></li>
+              <li><Link to="/dian" className="hover:text-primary transition-colors">Permanencia DIAN</Link></li>
             </ul>
           </div>
 

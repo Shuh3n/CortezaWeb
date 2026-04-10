@@ -7,6 +7,7 @@ import Contact from './pages/Contact';
 import Salvaton from './pages/Salvaton';
 import PublicGalleryPage from './pages/Gallery';
 import StorePage from './pages/StorePage';
+import DianPage from './pages/Dian';
 import { ModalProvider } from './context/ModalContext';
 import { AuthProvider } from './context/AuthContext';
 import PublicLayout from './layouts/PublicLayout';
@@ -17,6 +18,7 @@ import AdminDashboardPage from './pages/Admin/DashboardPage';
 import AdminGalleryPage from './pages/Admin/GalleryPage';
 import AdminGalleryCategoriesPage from './pages/Admin/GalleryCategoriesPage';
 import AdminGalleryUploadsPage from './pages/Admin/GalleryUploadsPage';
+import Pets from "./pages/Pets";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -37,6 +39,7 @@ function App() {
           <Routes>
             <Route element={<PublicLayout />}>
               <Route path="/" element={<Home />} />
+              <Route path="/adoptar" element={<Pets />} />
               <Route path="/galeria" element={<PublicGalleryPage />} />
               <Route path="/galeria/:slug" element={<PublicGalleryPage />} />
               <Route path="/voluntario" element={<Volunteer />} />
@@ -44,6 +47,7 @@ function App() {
               <Route path="/contacto" element={<Contact />} />
               <Route path="/salvaton" element={<Salvaton />} />
               <Route path="/tienda" element={<StorePage />} />
+              <Route path="/dian" element={<DianPage />} />
             </Route>
 
             <Route path="/admin" element={<AdminLoginPage />} />

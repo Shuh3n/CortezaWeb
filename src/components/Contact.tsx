@@ -37,11 +37,11 @@ const Contact = () => {
             <p className="text-xl text-text-muted mb-12 max-w-lg">
               ¿Tenés dudas o querés apadrinar a uno de nuestros protegidos? Ponete en contacto con nosotros. Estamos para escucharte.
             </p>
-            
+
             <div className="space-y-8">
               {contactInfo.map((item, index) => (
-                <motion.div 
-                  key={index} 
+                <motion.div
+                  key={index}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -53,8 +53,8 @@ const Contact = () => {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-primary uppercase tracking-wider mb-1">{item.label}</p>
-                    <a 
-                      href={item.link} 
+                    <a
+                      href={item.link}
                       className="text-xl font-medium text-text-h hover:text-primary transition-colors"
                     >
                       {item.value}
@@ -65,7 +65,7 @@ const Contact = () => {
             </div>
 
             {/* Social Media Links */}
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -74,17 +74,17 @@ const Contact = () => {
             >
               <p className="text-text-muted font-bold text-sm uppercase tracking-widest">Síguenos:</p>
               <div className="flex gap-4">
-                <a 
-                  href="https://www.instagram.com/corteza_terrestre/" 
-                  target="_blank" 
+                <a
+                  href="https://www.instagram.com/corteza_terrestre/"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all shadow-sm group"
                 >
                   <Globe size={24} className="group-hover:scale-110 transition-transform" />
                 </a>
-                <a 
-                  href="https://www.facebook.com/cortezaterrestre/" 
-                  target="_blank" 
+                <a
+                  href="https://www.facebook.com/cortezaterrestre/"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all shadow-sm group"
                 >
@@ -94,18 +94,18 @@ const Contact = () => {
             </motion.div>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9, x: 50 }}
             whileInView={{ opacity: 1, scale: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
             className="w-full h-full min-h-[400px] bg-slate-200 rounded-[48px] overflow-hidden shadow-inner border-8 border-white flex items-center justify-center"
           >
-               <div className="text-center p-8">
-                 <Mail size={48} className="mx-auto mb-4 text-primary opacity-20" />
-                 <h3 className="text-2xl font-bold text-text-h mb-2">Fundación Corteza Terrestre</h3>
-                 <p className="text-text-muted font-medium italic">"Luchamos por los que no tienen voz"</p>
-               </div>
+            <div className="text-center p-8">
+              <Mail size={48} className="mx-auto mb-4 text-primary opacity-20" />
+              <h3 className="text-2xl font-bold text-text-h mb-2">Fundación Corteza Terrestre</h3>
+              <p className="text-text-muted font-medium italic">"Luchamos por los que no tienen voz"</p>
+            </div>
           </motion.div>
         </div>
       </div>

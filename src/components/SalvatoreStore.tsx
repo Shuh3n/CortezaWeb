@@ -13,6 +13,18 @@ import {
   BadgePercent,
   X
 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+
+const getSupabaseImageUrl = (imagePath: string) => {
+  if (!imagePath) return '';
+  const fileName = imagePath.split('/').pop() || '';
+  
+  const { data } = supabase.storage
+    .from('tienda-salvatore')
+    .getPublicUrl(fileName);
+    
+  return data.publicUrl;
+};
 
 const SalvatoreStore = () => {
   const [activeTab, setActiveTab] = useState('mugs');
@@ -152,7 +164,7 @@ const SalvatoreStore = () => {
                   <div className="aspect-[4/3] bg-neutral-soft relative overflow-hidden shrink-0">
                     {product.image ? (
                       <img
-                        src={product.image}
+                        src={getSupabaseImageUrl(product.image)}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       />
@@ -218,7 +230,7 @@ const SalvatoreStore = () => {
 
                 <div className="md:w-[45%] h-[300px] md:h-auto bg-neutral-soft relative overflow-hidden">
                   <img
-                    src={selectedProduct.image}
+                    src={getSupabaseImageUrl(selectedProduct.image)}
                     alt={selectedProduct.name}
                     className="w-full h-full object-cover"
                   />
