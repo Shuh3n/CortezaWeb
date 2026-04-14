@@ -8,18 +8,18 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { openDonationModal } = useModal();
   const location = useLocation();
+  const isHome = location.pathname === '/';
 
   const navItems = [
     { label: 'Inicio', path: '/' },
-    { label: 'Adopción', path: '/#adopcion' },
-    { label: 'Tienda', path: '/tienda' },
+    { label: 'Adoptar y Apadrinar', path:'/adoptar'},
     { label: 'Nosotros', path: '/nosotros' },
-    { label: 'Voluntario', path: '/voluntario' },
     { label: 'Salvatón', path: '/salvaton' },
+    { label: 'Voluntario', path: '/voluntario' },
+    { label: 'Tienda', path: '/tienda' },
+    { label: 'Galería', path: '/galeria' },
     { label: 'Contacto', path: '/contacto' },
   ];
-
-  const isHome = location.pathname === '/';
 
   const isActive = (path: string) => {
     const currentPath = location.pathname;
@@ -34,6 +34,10 @@ const Navbar = () => {
       return currentPath === p && currentHash === `#${h}`;
     }
 
+    if (path === '/galeria') {
+      return currentPath.startsWith('/galeria');
+    }
+
     return currentPath === path;
   };
 
@@ -44,8 +48,8 @@ const Navbar = () => {
       return;
     }
     
-    if (path.startsWith('/#') && isHome) {
-      const id = path.substring(2);
+    if (path.includes('#') && isHome) {
+      const id = path.split('#')[1];
       const element = document.getElementById(id);
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
@@ -65,8 +69,8 @@ const Navbar = () => {
             <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
               <img src="/logo.png" alt="Corteza Terrestre Logo" className="h-10 w-auto" />
               <div className="flex flex-col">
-                <span className="text-lg font-bold text-primary tracking-tight leading-none">Fundación</span>
-                <span className="text-xl font-black text-primary tracking-tighter leading-none">Corteza Terrestre</span>
+                <span className="leading-none tracking-tight text-lg font-bold text-primary">Fundación</span>
+                <span className="leading-none tracking-tighter text-xl font-black text-primary">Corteza Terrestre</span>
               </div>
             </Link>
           </motion.div>
@@ -95,37 +99,21 @@ const Navbar = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={openDonationModal}
-              className="bg-primary text-white px-6 py-2.5 rounded-full font-bold hover:bg-opacity-90 transition-all shadow-md shadow-primary/10"
+              className="cursor-pointer rounded-full bg-primary px-6 py-2.5 font-bold text-white shadow-md shadow-primary/10 transition-all hover:bg-opacity-90"
             >
               Donar
             </motion.button>
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-text-muted hover:text-primary focus:outline-none z-50"
-            >
+          <div className="flex items-center md:hidden">
+            <button onClick={() => setIsOpen(!isOpen)} className="z-50 text-text-muted hover:text-primary focus:outline-none cursor-pointer">
               <AnimatePresence mode="wait">
                 {isOpen ? (
-                  <motion.div
-                    key="close"
-                    initial={{ rotate: -90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: 90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
+                  <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }}>
                     <X className="h-6 w-6" />
                   </motion.div>
                 ) : (
-                  <motion.div
-                    key="menu"
-                    initial={{ rotate: 90, opacity: 0 }}
-                    animate={{ rotate: 0, opacity: 1 }}
-                    exit={{ rotate: -90, opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
+                  <motion.div key="menu" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.2 }}>
                     <Menu className="h-6 w-6" />
                   </motion.div>
                 )}
@@ -135,15 +123,14 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
-            className="md:hidden bg-white border-t border-slate-100 overflow-hidden shadow-xl"
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
+            className="overflow-hidden border-t border-slate-100 bg-white shadow-xl md:hidden"
           >
             <div className="px-4 py-6 space-y-4">
               {navItems.map((item, i) => (
@@ -164,14 +151,14 @@ const Navbar = () => {
               <motion.button
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.4 }}
+                transition={{ delay: 0.35 }}
                 onClick={() => {
                   setIsOpen(false);
                   openDonationModal();
                 }}
-                className="w-full bg-primary text-white px-6 py-4 rounded-2xl font-bold mt-4 shadow-lg shadow-primary/20"
+                className="mt-4 w-full cursor-pointer rounded-2xl bg-primary px-6 py-4 font-bold text-white shadow-lg shadow-primary/20"
               >
-                Donar Ahora
+                Donar ahora
               </motion.button>
             </div>
           </motion.div>

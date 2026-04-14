@@ -5,6 +5,7 @@ import Stats from '../components/Stats';
 import LiveStream from '../components/LiveStream';
 import WorkAxes from '../components/WorkAxes';
 import Adoption from '../components/Adoption';
+import GallerySection from '../components/GallerySection';
 import Contact from '../components/Contact';
 
 const Home = () => {
@@ -28,6 +29,7 @@ const Home = () => {
       <Stats />
       <LiveStream />
       <WorkAxes />
+      <GallerySection />
       <Adoption />
       <Contact />
     </>
