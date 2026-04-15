@@ -77,9 +77,14 @@ const Footer = () => {
         </div>
 
         <div className="pt-12 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-text-muted text-sm font-medium">
-            © 2026 Fundación Corteza Terrestre. Armenia, Quindío.
-          </p>
+          <div className="flex flex-col items-center md:items-start gap-2">
+            <p className="text-text-muted text-sm font-medium">
+              © 2026 Fundación Corteza Terrestre. Armenia, Quindío.
+            </p>
+            <Link to="/politica-privacidad" className="text-sm text-text-muted hover:text-primary transition-colors">
+              Política de Privacidad y Tratamiento de Datos
+            </Link>
+          </div>
           <div className="text-sm text-text-muted font-medium flex flex-col items-center md:items-end gap-1">
             <span>Hecho por los estudiantes de Ingeniería de sistemas y computación de la Uniquindio</span>
             <a
