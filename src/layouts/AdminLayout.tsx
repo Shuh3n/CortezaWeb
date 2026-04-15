@@ -1,6 +1,6 @@
-﻿import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Download, FolderCog, ImagePlus, Info, LayoutDashboard, LogOut, Menu, X } from 'lucide-react';
+import { ChevronLeft, Download, ImagePlus, Info, LayoutDashboard, LogOut, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useAdminPwa } from '../hooks/useAdminPwa';
@@ -8,21 +8,65 @@ import { useAdminPwa } from '../hooks/useAdminPwa';
 const navigation = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/admin/galeria', label: 'Galería', icon: ImagePlus },
-  { to: '/admin/gestion', label: 'Gestión', icon: FolderCog },
 ];
 
 export default function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isHoveringSidebar, setIsHoveringSidebar] = useState(false);
-  const [showIosInstallGuide, setShowIosInstallGuide] = useState(false);
+  const [isHoverExpanded, setIsHoverExpanded] = useState(false);
+  const [showInstallGuide, setShowInstallGuide] = useState(false);
+  const hoverExpandTimeoutRef = useRef<number | null>(null);
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const { canInstall, canInstallPrompt, canShowIosGuide, isStandalone, installApp } = useAdminPwa(location.pathname.startsWith('/admin'));
+  const { canInstallPrompt, canShowIosGuide, isStandalone, installApp } = useAdminPwa(location.pathname.startsWith('/admin'));
 
   const adminName = useMemo(() => user?.email ?? 'Administrador', [user?.email]);
-  const showExpandedDesktop = !isCollapsed || isHoveringSidebar;
+  const showExpandedDesktop = !isCollapsed || isHoverExpanded;
+
+  // Auto-show iOS guide on first admin visit (no install button on iOS).
+  useEffect(() => {
+    if (!canShowIosGuide) return;
+    const shown = localStorage.getItem('corteza-ios-install-shown');
+    if (!shown) {
+      const timer = window.setTimeout(() => {
+        setShowInstallGuide(true);
+        localStorage.setItem('corteza-ios-install-shown', '1');
+      }, 2000);
+      return () => window.clearTimeout(timer);
+    }
+  }, [canShowIosGuide]);
+
+  useEffect(() => {
+    return () => {
+      if (hoverExpandTimeoutRef.current !== null) {
+        window.clearTimeout(hoverExpandTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  function handleSidebarMouseEnter() {
+    if (!isCollapsed) {
+      return;
+    }
+
+    if (hoverExpandTimeoutRef.current !== null) {
+      window.clearTimeout(hoverExpandTimeoutRef.current);
+    }
+
+    hoverExpandTimeoutRef.current = window.setTimeout(() => {
+      setIsHoverExpanded(true);
+    }, 850);
+  }
+
+  function handleSidebarMouseLeave() {
+    if (hoverExpandTimeoutRef.current !== null) {
+      window.clearTimeout(hoverExpandTimeoutRef.current);
+      hoverExpandTimeoutRef.current = null;
+    }
+
+    setIsHoverExpanded(false);
+  }
 
   async function handleSignOut() {
     try {
@@ -34,8 +78,8 @@ export default function AdminLayout() {
   }
 
   async function handleInstall() {
-    if (!canInstallPrompt && canShowIosGuide) {
-      setShowIosInstallGuide(true);
+    if (!canInstallPrompt) {
+      setShowInstallGuide(true);
       return;
     }
 
@@ -46,23 +90,24 @@ export default function AdminLayout() {
     }
   }
 
-  const installLabel = canInstallPrompt ? 'Descargar app' : 'Instalar en iPhone';
-  const installTitle = canInstallPrompt
-    ? 'Instalar el panel en este dispositivo'
-    : 'Ver pasos para instalar el panel en iPhone';
+  // Button visible only when native install prompt is available (Android / PC).
+  // iOS users see the guide modal automatically — no button needed.
+  const showInstallButton = canInstallPrompt;
+  const installLabel = 'Instalar app';
+  const installTitle = 'Instalar el panel en este dispositivo';
 
   return (
     <div className="min-h-screen bg-neutral-soft text-text-main">
       <div className="flex min-h-screen">
         <aside
-          onMouseEnter={() => setIsHoveringSidebar(true)}
-          onMouseLeave={() => setIsHoveringSidebar(false)}
+          onMouseEnter={handleSidebarMouseEnter}
+          onMouseLeave={handleSidebarMouseLeave}
           className={`fixed inset-y-0 left-0 z-40 border-r border-primary/10 bg-primary text-white shadow-2xl transition-all duration-300 ${
             isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
           } ${showExpandedDesktop ? 'w-72' : 'w-24'} lg:translate-x-0`}
         >
           <div className="flex h-full flex-col">
-            <div className={`flex border-b border-white/10 px-4 py-6 ${showExpandedDesktop ? 'items-center justify-between' : 'justify-center'}`}>
+            <div className="flex items-center justify-between border-b border-white/10 px-4 py-6">
               {showExpandedDesktop ? (
                 <div>
                   <p className="text-sm uppercase tracking-[0.3em] text-white/70">Panel</p>
@@ -75,7 +120,10 @@ export default function AdminLayout() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={() => setIsCollapsed((current) => !current)}
+                  onClick={() => {
+                    setIsHoverExpanded(false);
+                    setIsCollapsed((current) => !current);
+                  }}
                   className="hidden cursor-pointer rounded-full bg-white/10 p-2 text-white transition hover:bg-white/20 lg:inline-flex"
                   aria-label="Colapsar panel lateral"
                 >
@@ -120,7 +168,7 @@ export default function AdminLayout() {
             </nav>
 
             <div className="space-y-3 border-t border-white/10 p-3">
-              {canInstall ? (
+              {showInstallButton ? (
                 <button
                   type="button"
                   onClick={handleInstall}
@@ -157,7 +205,7 @@ export default function AdminLayout() {
               </div>
 
               <div className="flex items-center gap-3">
-                {canInstall ? (
+                {showInstallButton ? (
                   <button
                     type="button"
                     onClick={handleInstall}
@@ -192,7 +240,7 @@ export default function AdminLayout() {
       </div>
 
       <AnimatePresence>
-        {showIosInstallGuide ? (
+        {showInstallGuide ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 px-4">
             <motion.div
               initial={{ opacity: 0, y: 20, scale: 0.98 }}
@@ -206,27 +254,45 @@ export default function AdminLayout() {
                   <Info className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-black text-text-h">Instalar en iPhone</h3>
-                  <p className="mt-1 text-sm text-text-muted">Safari no muestra botón automático. Hazlo manualmente en 3 pasos:</p>
+                  <h3 className="text-xl font-black text-text-h">Instalar aplicación</h3>
+                  <p className="mt-1 text-sm text-text-muted">
+                    {canShowIosGuide
+                      ? 'Safari no muestra botón automático. Hazlo manualmente en 3 pasos:'
+                      : 'Si el navegador no mostró el prompt, puedes instalarla manualmente en PC desde el menú del navegador.'}
+                  </p>
                 </div>
               </div>
 
-              <ol className="mt-5 space-y-3 text-sm text-text-main">
-                <li className="rounded-2xl bg-neutral-soft px-4 py-3">
-                  1. Tocá el botón <span className="font-semibold">Compartir</span> en Safari.
-                </li>
-                <li className="rounded-2xl bg-neutral-soft px-4 py-3">
-                  2. Elegí <span className="font-semibold">Agregar a pantalla de inicio</span>.
-                </li>
-                <li className="rounded-2xl bg-neutral-soft px-4 py-3">
-                  3. Confirmá con <span className="font-semibold">Agregar</span> y abrí el panel desde el ícono.
-                </li>
-              </ol>
+              {canShowIosGuide ? (
+                <ol className="mt-5 space-y-3 text-sm text-text-main">
+                  <li className="rounded-2xl bg-neutral-soft px-4 py-3">
+                    1. Tocá el botón <span className="font-semibold">Compartir</span> en Safari.
+                  </li>
+                  <li className="rounded-2xl bg-neutral-soft px-4 py-3">
+                    2. Elegí <span className="font-semibold">Agregar a pantalla de inicio</span>.
+                  </li>
+                  <li className="rounded-2xl bg-neutral-soft px-4 py-3">
+                    3. Confirmá con <span className="font-semibold">Agregar</span> y abrí el panel desde el ícono.
+                  </li>
+                </ol>
+              ) : (
+                <ol className="mt-5 space-y-3 text-sm text-text-main">
+                  <li className="rounded-2xl bg-neutral-soft px-4 py-3">
+                    1. Abrí el menú del navegador (Chrome/Edge: <span className="font-semibold">⋮</span>).
+                  </li>
+                  <li className="rounded-2xl bg-neutral-soft px-4 py-3">
+                    2. Seleccioná <span className="font-semibold">Instalar app</span> o <span className="font-semibold">Agregar a escritorio</span>.
+                  </li>
+                  <li className="rounded-2xl bg-neutral-soft px-4 py-3">
+                    3. Confirmá instalación y abrí Corteza desde el acceso directo.
+                  </li>
+                </ol>
+              )}
 
               <div className="mt-6 flex justify-end">
                 <button
                   type="button"
-                  onClick={() => setShowIosInstallGuide(false)}
+                  onClick={() => setShowInstallGuide(false)}
                   className="rounded-xl bg-primary px-4 py-2 font-semibold text-white transition hover:opacity-90"
                 >
                   Entendido

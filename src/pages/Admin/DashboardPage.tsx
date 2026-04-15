@@ -69,7 +69,7 @@ export default function AdminDashboardPage() {
           { label: 'Fotos publicadas', value: isLoading ? '...' : String(summary.total), icon: ImageIcon, tone: 'bg-primary/10 text-primary' },
           { label: 'Categorías activas', value: isLoading ? '...' : String(topCategories.length), icon: FolderKanban, tone: 'bg-secondary/10 text-secondary' },
           { label: 'Última carga', value: summary.latest?.nombre ?? 'Sin datos', icon: Sparkles, tone: 'bg-accent/15 text-secondary' },
-          { label: 'Módulos', value: 'Dashboard + Gestión + Galería', icon: LayoutDashboard, tone: 'bg-slate-900/5 text-slate-700' },
+          { label: 'Módulos', value: 'Dashboard + Galería', icon: LayoutDashboard, tone: 'bg-slate-900/5 text-slate-700' },
         ].map((card, index) => {
           const Icon = card.icon;
           return (

@@ -1,13 +1,15 @@
-﻿{
-  "name": "Panel administrativo Corteza Terrestre",
+{
+  "id": "/admin",
+  "name": "Panel Admin · Corteza Terrestre",
   "short_name": "Corteza Admin",
-  "description": "Panel administrativo para gestionar galería y contenido.",
+  "description": "Panel administrativo para gestionar galería y contenido de Fundación Corteza Terrestre.",
   "start_url": "/admin/dashboard",
-  "scope": "/admin/",
+  "scope": "/admin",
   "display": "standalone",
-  "orientation": "portrait-primary",
+  "orientation": "any",
   "background_color": "#fdfaf6",
   "theme_color": "#2d5a27",
+  "categories": ["productivity", "utilities"],
   "icons": [
     { "src": "/icons/icon-72x72.png", "sizes": "72x72", "type": "image/png" },
     { "src": "/icons/icon-96x96.png", "sizes": "96x96", "type": "image/png" },
@@ -24,3 +26,4 @@
     { "src": "/icons/icon-512x512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ]
 }
+

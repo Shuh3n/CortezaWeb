@@ -1,102 +1,121 @@
-﻿import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
-import { CalendarDays, ImageUp, Tag, Type } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { uploadPhotos } from '../../lib/adminApi';
-import { listGalleryCategories } from '../../lib/gallery';
+import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { CalendarDays, ImageUp, PencilLine, PlusCircle, Search, Tag, Trash2, Type } from 'lucide-react';
+import { deletePhoto, listAdminCategories, listAdminImages, updatePhoto, uploadPhotos } from '../../lib/adminApi';
 import type { GalleryCategory, GalleryImage } from '../../types/gallery';
+
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : 'No se pudo completar la operacion.';
+}
 
 function today() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function getErrorMessage(error: unknown) {
-  return error instanceof Error ? error.message : 'No se pudo completar la operación.';
-}
-
 export default function AdminGalleryManagerPage() {
-  const [nombre, setNombre] = useState('');
-  const [categoriaId, setCategoriaId] = useState<number | null>(null);
-  const [fecha, setFecha] = useState(today());
-  const [files, setFiles] = useState<File[]>([]);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [recentUploads, setRecentUploads] = useState<GalleryImage[]>([]);
   const [categories, setCategories] = useState<GalleryCategory[]>([]);
+  const [images, setImages] = useState<GalleryImage[]>([]);
+  const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [searchName, setSearchName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [editingImage, setEditingImage] = useState<GalleryImage | null>(null);
+  const [editingNombre, setEditingNombre] = useState('');
+  const [editingFecha, setEditingFecha] = useState(today());
+  const [editingCategoriaId, setEditingCategoriaId] = useState<number | null>(null);
+  const [pendingDeleteImage, setPendingDeleteImage] = useState<GalleryImage | null>(null);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [uploadNombre, setUploadNombre] = useState('');
+  const [uploadCategoriaId, setUploadCategoriaId] = useState<number | null>(null);
+  const [uploadFecha, setUploadFecha] = useState(today());
+  const [uploadFiles, setUploadFiles] = useState<File[]>([]);
+  const [uploadPreview, setUploadPreview] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  async function refreshImages() {
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    try {
+      const result = await listAdminImages({
+        categoriaId: categoryFilter === 'all' ? null : Number(categoryFilter),
+        nombre: searchName,
+        includeDeleted: false,
+      });
+      setImages(result);
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   useEffect(() => {
     let ignore = false;
 
-    async function loadCategories() {
+    async function loadInitialData() {
       try {
-        const data = await listGalleryCategories();
-        if (!ignore) {
-          setCategories(data);
-          setCategoriaId((current) => current ?? data[0]?.id ?? null);
+        const [loadedCategories, loadedImages] = await Promise.all([
+          listAdminCategories({ includeInactive: false, includeDeleted: false }),
+          listAdminImages({ includeDeleted: false }),
+        ]);
+
+        if (ignore) {
+          return;
         }
+
+        setCategories(loadedCategories);
+        setImages(loadedImages);
+        setUploadCategoriaId(loadedCategories[0]?.id ?? null);
       } catch (error) {
-        console.error('No se pudieron cargar las categorías.', error);
+        if (!ignore) {
+          setErrorMessage(getErrorMessage(error));
+        }
       }
     }
 
-    void loadCategories();
+    void loadInitialData();
+
     return () => {
       ignore = true;
     };
   }, []);
 
-  const selectedCategory = useMemo(() => categories.find((category) => category.id === categoriaId) ?? null, [categories, categoriaId]);
-  const recentImages = useMemo(() => recentUploads.slice(0, 5), [recentUploads]);
+  const totalShown = useMemo(() => images.length, [images]);
 
-  function handleFilesChange(event: ChangeEvent<HTMLInputElement>) {
-    const selectedFiles = Array.from(event.target.files ?? []);
-    setFiles(selectedFiles);
+  function handleOpenEdit(image: GalleryImage) {
+    setEditingImage(image);
+    setEditingNombre(image.nombre ?? '');
+    setEditingFecha(image.fecha || today());
+    setEditingCategoriaId(image.categoria_id);
     setErrorMessage(null);
-    setSuccessMessage(null);
-
-    if (preview) {
-      URL.revokeObjectURL(preview);
-    }
-
-    setPreview(selectedFiles[0] ? URL.createObjectURL(selectedFiles[0]) : null);
+    setFeedback(null);
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (!selectedCategory) {
-      setErrorMessage('Seleccione una categoría antes de publicar.');
-      return;
-    }
-
-    if (files.length === 0) {
-      setErrorMessage('Seleccione al menos una imagen para publicar.');
+  async function handleSaveEdit() {
+    if (!editingImage || !editingCategoriaId) {
+      setErrorMessage('Debe seleccionar una categoria para actualizar la imagen.');
       return;
     }
 
     try {
       setIsSubmitting(true);
       setErrorMessage(null);
-      setSuccessMessage(null);
+      setFeedback(null);
 
-      const createdImages = (await uploadPhotos({ categoriaId: selectedCategory.id, fecha, nombre, files })) as GalleryImage[];
+      const updated = (await updatePhoto({
+        id: editingImage.id,
+        categoriaId: editingCategoriaId,
+        fecha: editingFecha,
+        nombre: editingNombre,
+      })) as GalleryImage;
 
-      setRecentUploads((current) => [...createdImages, ...current]);
-      setNombre('');
-      setFecha(today());
-      setFiles([]);
-      setSuccessMessage(`Se publicaron ${createdImages.length} imagen(es) correctamente.`);
-
-      if (preview) {
-        URL.revokeObjectURL(preview);
-      }
-
-      setPreview(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
+      setImages((current) => current.map((image) => (image.id === updated.id ? updated : image)));
+      setEditingImage(null);
+      setFeedback('La imagen se actualizo correctamente.');
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
     } finally {
@@ -104,105 +123,486 @@ export default function AdminGalleryManagerPage() {
     }
   }
 
+  async function handleConfirmDelete() {
+    if (!pendingDeleteImage) {
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setErrorMessage(null);
+      setFeedback(null);
+      await deletePhoto(pendingDeleteImage.id);
+      setImages((current) => current.filter((image) => image.id !== pendingDeleteImage.id));
+      setPendingDeleteImage(null);
+      setFeedback('La imagen se elimino correctamente.');
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  async function handleSubmitFilters(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await refreshImages();
+  }
+
+  function handleUploadFilesChange(event: ChangeEvent<HTMLInputElement>) {
+    const selectedFiles = Array.from(event.target.files ?? []);
+    setUploadFiles(selectedFiles);
+
+    if (uploadPreview) {
+      URL.revokeObjectURL(uploadPreview);
+    }
+
+    setUploadPreview(selectedFiles[0] ? URL.createObjectURL(selectedFiles[0]) : null);
+  }
+
+  function closeUploadModal() {
+    setIsUploadModalOpen(false);
+    setUploadNombre('');
+    setUploadFecha(today());
+    setUploadFiles([]);
+    setUploadProgress(0);
+
+    if (uploadPreview) {
+      URL.revokeObjectURL(uploadPreview);
+      setUploadPreview(null);
+    }
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  }
+
+  async function handleUploadSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!uploadCategoriaId) {
+      setErrorMessage('Seleccione una categoria para subir las imagenes.');
+      return;
+    }
+
+    if (uploadFiles.length === 0) {
+      setErrorMessage('Seleccione al menos una imagen para subir.');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setErrorMessage(null);
+      setFeedback(null);
+      setUploadProgress(0);
+
+      const created = (await uploadPhotos({
+        categoriaId: uploadCategoriaId,
+        fecha: uploadFecha,
+        nombre: uploadNombre,
+        files: uploadFiles,
+        onProgress: (progress) => setUploadProgress(progress),
+      })) as GalleryImage[];
+
+      setFeedback(`Se subieron ${created.length} imagen(es) correctamente.`);
+      closeUploadModal();
+      await refreshImages();
+    } catch (error) {
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsSubmitting(false);
+      setUploadProgress(0);
+    }
+  }
+
   return (
-    <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: 'easeOut' }} className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+    <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: 'easeOut' }} className="space-y-6">
       <section className="rounded-[32px] bg-white p-6 shadow-lg shadow-primary/5 sm:p-8">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/60">Galería</p>
-            <h1 className="mt-2 text-3xl font-black text-text-h">Cargue una o varias fotos caninas</h1>
-            <p className="mt-3 max-w-2xl text-text-muted">El nombre es opcional. Si lo deja vacío, cada foto usa su nombre de archivo. La categoría sí es obligatoria.</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/60">Gestor de imagenes</p>
+            <h1 className="mt-2 text-3xl font-black text-text-h">Administra fotos de la galeria</h1>
+            <p className="mt-3 text-text-muted">Filtra por categoria, busca por nombre, edita datos o elimina con soft delete.</p>
           </div>
 
           <div className="rounded-3xl bg-primary/5 px-5 py-4">
-            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary/60">Archivos seleccionados</p>
-            <p className="mt-2 text-lg font-black text-primary">{files.length}</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary/60">Mostradas</p>
+            <p className="mt-2 text-lg font-black text-primary">{totalShown}</p>
           </div>
         </div>
 
-        <form className="mt-8 space-y-5" onSubmit={handleSubmit}>
-          <div className="grid gap-5 md:grid-cols-2">
-            <label className="block">
-              <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main"><Type className="h-4 w-4 text-primary" />Nombre opcional</span>
-              <input type="text" value={nombre} onChange={(event) => setNombre(event.target.value)} placeholder="Ej: Rescate en la jornada del domingo" className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:-translate-y-0.5 focus:border-primary" />
-            </label>
+        <form className="mt-8 grid gap-4 md:grid-cols-[1fr_1fr_auto_auto]" onSubmit={handleSubmitFilters}>
+          <label className="block">
+            <span className="mb-2 block text-sm font-bold text-text-main">Categoria</span>
+            <select
+              value={categoryFilter}
+              onChange={(event) => setCategoryFilter(event.target.value)}
+              className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
+            >
+              <option value="all">Todas</option>
+              {categories.map((category) => (
+                <option key={category.id} value={String(category.id)}>
+                  {category.nombre}
+                </option>
+              ))}
+            </select>
+          </label>
 
-            <label className="block">
-              <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main"><Tag className="h-4 w-4 text-primary" />Categoría</span>
-              <select value={categoriaId ?? ''} onChange={(event) => setCategoriaId(Number(event.target.value))} className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:-translate-y-0.5 focus:border-primary">
-                {categories.map((item) => <option key={item.id} value={item.id}>{item.nombre}</option>)}
-              </select>
-            </label>
-          </div>
+          <label className="block">
+            <span className="mb-2 block text-sm font-bold text-text-main">Buscar por nombre</span>
+            <div className="flex items-center gap-2 rounded-2xl border border-primary/10 bg-neutral-soft px-3 py-2">
+              <Search className="h-4 w-4 text-primary" />
+              <input
+                type="text"
+                value={searchName}
+                onChange={(event) => setSearchName(event.target.value)}
+                placeholder="Ej: rescate, jornada, peludo"
+                className="w-full bg-transparent py-1 outline-none"
+              />
+            </div>
+          </label>
 
-          <div className="grid gap-5 md:grid-cols-2">
-            <label className="block">
-              <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main"><CalendarDays className="h-4 w-4 text-primary" />Fecha visible</span>
-              <input type="date" value={fecha} onChange={(event) => setFecha(event.target.value)} required className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:-translate-y-0.5 focus:border-primary" />
-            </label>
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="mt-auto inline-flex h-12 cursor-pointer items-center justify-center rounded-2xl bg-primary px-5 font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+          >
+            Buscar
+          </button>
 
-            <label className="block">
-              <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main"><ImageUp className="h-4 w-4 text-primary" />Fotos</span>
-              <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleFilesChange} required className="w-full cursor-pointer rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 text-text-muted outline-none transition file:mr-4 file:cursor-pointer file:rounded-full file:border-0 file:bg-primary file:px-4 file:py-2 file:font-semibold file:text-white hover:file:opacity-90" />
-            </label>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setCategoryFilter('all');
+              setSearchName('');
+              void (async () => {
+                setIsLoading(true);
+                setErrorMessage(null);
+                try {
+                  const result = await listAdminImages({ includeDeleted: false });
+                  setImages(result);
+                } catch (error) {
+                  setErrorMessage(getErrorMessage(error));
+                } finally {
+                  setIsLoading(false);
+                }
+              })();
+            }}
+            className="mt-auto inline-flex h-12 cursor-pointer items-center justify-center rounded-2xl border border-primary/10 bg-white px-5 font-semibold text-primary transition hover:-translate-y-0.5"
+          >
+            Limpiar
+          </button>
 
-          {errorMessage ? <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{errorMessage}</div> : null}
-          {successMessage ? <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">{successMessage}</div> : null}
-
-          <motion.button whileHover={{ scale: 1.01, y: -2 }} whileTap={{ scale: 0.99 }} type="submit" disabled={isSubmitting} className="inline-flex w-full cursor-pointer items-center justify-center rounded-2xl bg-primary px-6 py-4 text-lg font-bold text-white shadow-lg shadow-primary/20 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70">{isSubmitting ? 'Publicando fotos...' : 'Publicar en galería'}</motion.button>
+          <button
+            type="button"
+            onClick={() => setIsUploadModalOpen(true)}
+            className="mt-auto inline-flex h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-secondary px-5 font-bold text-white transition hover:opacity-90"
+          >
+            <PlusCircle className="h-4 w-4" />
+            Agregar fotos
+          </button>
         </form>
+
+        {errorMessage ? <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{errorMessage}</div> : null}
+        {feedback ? <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">{feedback}</div> : null}
       </section>
 
-      <section className="space-y-6">
-        <article className="overflow-hidden rounded-[32px] bg-white shadow-lg shadow-primary/5">
-          <div className="border-b border-primary/10 px-6 py-5">
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/60">Vista previa</p>
-            <h2 className="mt-2 text-2xl font-black text-text-h">Así se verá la primera imagen</h2>
-          </div>
+      <section className="rounded-[32px] bg-white p-6 shadow-lg shadow-primary/5 sm:p-8">
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/60">Resultados</p>
+        <h2 className="mt-2 text-2xl font-black text-text-h">Imagenes cargadas</h2>
 
-          <div className="p-6">
-            {preview ? (
-              <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="overflow-hidden rounded-[28px] border border-primary/10">
-                <img src={preview} alt={nombre || 'Vista previa de la imagen'} className="h-80 w-full object-cover" />
-                <div className="space-y-3 p-5">
-                  <span className="inline-flex rounded-full bg-primary/10 px-4 py-2 text-sm font-bold text-primary">{selectedCategory?.nombre ?? 'Sin categoría'}</span>
-                  <h3 className="text-2xl font-black text-text-h">{nombre || 'Se tomará el nombre del archivo'}</h3>
-                  <p className="text-sm text-text-muted">Fecha: {fecha}</p>
-                </div>
-              </motion.div>
-            ) : (
-              <div className="flex min-h-80 items-center justify-center rounded-[28px] border border-dashed border-primary/20 bg-primary/5 p-8 text-center">
-                <div>
-                  <p className="text-xl font-bold text-primary">Seleccione fotos para ver la vista previa</p>
-                  <p className="mt-2 text-text-muted">La primera imagen seleccionada se muestra aquí como referencia.</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </article>
-
-        <article className="rounded-[32px] bg-white p-6 shadow-lg shadow-primary/5">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/60">Sesión actual</p>
-          <h2 className="mt-2 text-2xl font-black text-text-h">Últimas cargas de esta sesión</h2>
-
-          <div className="mt-6 space-y-4">
-            {recentImages.length === 0 ? (
-              <div className="rounded-3xl border border-dashed border-primary/20 bg-primary/5 px-5 py-8 text-center text-text-muted">Todavía no ha subido imágenes en esta sesión.</div>
-            ) : (
-              recentImages.map((image) => (
-                <div key={image.id} className="flex items-center gap-4 rounded-3xl border border-primary/10 p-4">
-                  <img src={image.url} alt={image.nombre} className="h-20 w-20 rounded-2xl object-cover" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-lg font-black text-text-h">{image.nombre}</p>
-                    <p className="text-sm text-text-muted">{image.categoria.nombre} • {image.fecha}</p>
+        <div className="mt-6 space-y-4">
+          {isLoading ? (
+            <div className="rounded-3xl border border-primary/10 bg-primary/5 px-5 py-8 text-center text-text-muted">Cargando imagenes...</div>
+          ) : images.length === 0 ? (
+            <div className="rounded-3xl border border-dashed border-primary/20 bg-primary/5 px-5 py-8 text-center text-text-muted">No hay imagenes para los filtros seleccionados.</div>
+          ) : (
+            images.map((image) => (
+              <div key={image.id} className="flex flex-col gap-4 rounded-3xl border border-primary/10 p-4 md:flex-row md:items-center md:justify-between">
+                <div className="flex min-w-0 items-center gap-4">
+                  <img src={image.url} alt={image.nombre ?? 'Imagen de galeria'} className="h-20 w-20 rounded-2xl object-cover" />
+                  <div className="min-w-0">
+                    <p className="truncate text-xl font-black text-text-h">{image.nombre ?? 'Sin nombre'}</p>
+                    <p className="mt-1 text-sm text-text-muted">{image.categoria?.nombre ?? 'Sin categoria'} • {image.fecha}</p>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
-        </article>
+
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleOpenEdit(image)}
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary shadow-sm transition hover:-translate-y-0.5"
+                  >
+                    <PencilLine className="h-4 w-4" />
+                    Editar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPendingDeleteImage(image)}
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 font-semibold text-red-700 transition hover:-translate-y-0.5"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Eliminar
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </section>
+
+      <AnimatePresence>
+        {isUploadModalOpen ? (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={closeUploadModal}
+              className="fixed inset-0 z-[100] bg-primary/20 backdrop-blur-sm"
+            />
+
+            <div className="pointer-events-none fixed inset-0 z-[101] flex items-center justify-center px-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 16 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 16 }}
+                className="pointer-events-auto w-full max-w-2xl rounded-[32px] bg-white p-6 shadow-2xl sm:p-8"
+              >
+                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary/60">Agregar fotos</p>
+                <h3 className="mt-2 text-2xl font-black text-text-h">Subir imagenes a la galeria</h3>
+
+                <form className="mt-6 space-y-4" onSubmit={handleUploadSubmit}>
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <label className="block">
+                      <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main"><Type className="h-4 w-4 text-primary" />Nombre opcional</span>
+                      <input
+                        type="text"
+                        value={uploadNombre}
+                        onChange={(event) => setUploadNombre(event.target.value)}
+                        placeholder="Ej: Jornada del sabado"
+                        className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
+                      />
+                    </label>
+
+                    <label className="block">
+                      <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main"><Tag className="h-4 w-4 text-primary" />Categoria</span>
+                      <select
+                        value={uploadCategoriaId ?? ''}
+                        onChange={(event) => setUploadCategoriaId(Number(event.target.value))}
+                        className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
+                      >
+                        {categories.map((category) => (
+                          <option key={category.id} value={category.id}>
+                            {category.nombre}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </div>
+
+                  <div className="grid gap-4 md:grid-cols-2">
+                    <label className="block">
+                      <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main"><CalendarDays className="h-4 w-4 text-primary" />Fecha visible</span>
+                      <input
+                        type="date"
+                        value={uploadFecha}
+                        onChange={(event) => setUploadFecha(event.target.value)}
+                        required
+                        className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
+                      />
+                    </label>
+
+                    <label className="block">
+                      <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main"><ImageUp className="h-4 w-4 text-primary" />Fotos</span>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleUploadFilesChange}
+                        required
+                        className="w-full cursor-pointer rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 text-text-muted outline-none transition file:mr-4 file:cursor-pointer file:rounded-full file:border-0 file:bg-primary file:px-4 file:py-2 file:font-semibold file:text-white hover:file:opacity-90"
+                      />
+                    </label>
+                  </div>
+
+                  {uploadPreview ? (
+                    <div className="overflow-hidden rounded-2xl border border-primary/10">
+                      <img src={uploadPreview} alt="Vista previa de carga" className="h-56 w-full object-cover" />
+                    </div>
+                  ) : null}
+
+                  {isSubmitting ? (
+                    <div className="rounded-2xl border border-primary/10 bg-primary/5 px-4 py-4">
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="text-sm font-semibold text-primary">Subiendo imagenes...</span>
+                        <span className="text-sm font-black text-primary">{uploadProgress}%</span>
+                      </div>
+                      <div className="h-3 w-full overflow-hidden rounded-full bg-white">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${uploadProgress}%` }}
+                          transition={{ duration: 0.25, ease: 'easeOut' }}
+                          className="h-full rounded-full bg-primary"
+                        />
+                      </div>
+                    </div>
+                  ) : null}
+
+                  <div className="mt-4 flex flex-wrap justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={closeUploadModal}
+                      className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-primary px-4 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                    >
+                      Publicar en galeria
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            </div>
+          </>
+        ) : null}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {editingImage ? (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setEditingImage(null)}
+              className="fixed inset-0 z-[100] bg-primary/20 backdrop-blur-sm"
+            />
+
+            <div className="pointer-events-none fixed inset-0 z-[101] flex items-center justify-center px-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 16 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 16 }}
+                className="pointer-events-auto w-full max-w-xl rounded-[32px] bg-white p-6 shadow-2xl sm:p-8"
+              >
+                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary/60">Editar imagen</p>
+                <h3 className="mt-2 text-2xl font-black text-text-h">Actualiza la informacion</h3>
+
+                <div className="mt-6 space-y-4">
+                  <label className="block">
+                    <span className="mb-2 block text-sm font-bold text-text-main">Nombre</span>
+                    <input
+                      type="text"
+                      value={editingNombre}
+                      onChange={(event) => setEditingNombre(event.target.value)}
+                      className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
+                    />
+                  </label>
+
+                  <label className="block">
+                    <span className="mb-2 block text-sm font-bold text-text-main">Fecha visible</span>
+                    <input
+                      type="date"
+                      value={editingFecha}
+                      onChange={(event) => setEditingFecha(event.target.value)}
+                      className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
+                    />
+                  </label>
+
+                  <label className="block">
+                    <span className="mb-2 block text-sm font-bold text-text-main">Categoria</span>
+                    <select
+                      value={editingCategoriaId ?? ''}
+                      onChange={(event) => setEditingCategoriaId(Number(event.target.value))}
+                      className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
+                    >
+                      {categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.nombre}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+
+                <div className="mt-6 flex flex-wrap justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setEditingImage(null)}
+                    className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => void handleSaveEdit()}
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-primary px-4 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    Guardar cambios
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          </>
+        ) : null}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {pendingDeleteImage ? (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setPendingDeleteImage(null)}
+              className="fixed inset-0 z-[100] bg-primary/20 backdrop-blur-sm"
+            />
+
+            <div className="pointer-events-none fixed inset-0 z-[101] flex items-center justify-center px-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 16 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 16 }}
+                className="pointer-events-auto w-full max-w-xl rounded-[32px] bg-white p-6 shadow-2xl sm:p-8"
+              >
+                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-red-600">Confirmacion</p>
+                <h3 className="mt-2 text-2xl font-black text-text-h">Estas seguro de eliminar esta imagen?</h3>
+                <p className="mt-3 text-text-muted">Esta accion aplica soft delete y la imagen dejara de verse en la galeria publica.</p>
+
+                <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3">
+                  <p className="text-sm font-semibold text-red-800">Imagen seleccionada</p>
+                  <p className="mt-1 text-lg font-black text-red-700">{pendingDeleteImage.nombre || 'Sin nombre'}</p>
+                </div>
+
+                <div className="mt-6 flex flex-wrap justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setPendingDeleteImage(null)}
+                    className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isSubmitting}
+                    onClick={() => void handleConfirmDelete()}
+                    className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 font-semibold text-red-700 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Si, eliminar
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          </>
+        ) : null}
+      </AnimatePresence>
     </motion.div>
   );
 }

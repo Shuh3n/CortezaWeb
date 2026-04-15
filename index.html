@@ -1,17 +1,65 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Fundación Corteza Terrestre: rescate, adopción, voluntariado y bienestar animal en Colombia."
+    />
     <meta name="theme-color" content="#2d5a27" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Corteza" />
+    <link rel="canonical" href="https://corteza-web.vercel.app/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Fundación Corteza Terrestre" />
+    <meta property="og:locale" content="es_CO" />
+    <meta property="og:url" content="https://corteza-web.vercel.app/" />
+    <meta property="og:title" content="Fundación Corteza Terrestre" />
+    <meta
+      property="og:description"
+      content="Conoce nuestra labor de rescate, adopción, voluntariado y apoyo al bienestar animal."
+    />
+    <meta property="og:image" content="https://corteza-web.vercel.app/og-image.jpg" />
+    <meta property="og:image:secure_url" content="https://corteza-web.vercel.app/og-image.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1900" />
+    <meta property="og:image:height" content="626" />
+    <meta property="og:image:alt" content="Fundación Corteza Terrestre - Bienestar animal" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Fundación Corteza Terrestre" />
+    <meta
+      name="twitter:description"
+      content="Conoce nuestra labor de rescate, adopción, voluntariado y apoyo al bienestar animal."
+    />
+    <meta name="twitter:image" content="https://corteza-web.vercel.app/og-image.jpg" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="shortcut icon" href="/favicon.ico" />
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="48x48" href="/icons/favicon-48x48.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180x180.png" />
+    <link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167x167.png" />
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png" />
+    <link rel="apple-touch-icon" sizes="120x120" href="/icons/icon-128x128.png" />
+    <script>
+      // Add the admin manifest BEFORE Chrome fetches it, only on /admin routes.
+      (function () {
+        if (window.location.pathname.startsWith('/admin')) {
+          var link = document.querySelector('link[rel="manifest"]');
+          if (!link) {
+            link = document.createElement('link');
+            link.setAttribute('rel', 'manifest');
+            document.head.appendChild(link);
+          }
+          link.setAttribute('href', '/admin-manifest.webmanifest');
+        }
+      })();
+    </script>
     <title>Fundación Corteza Terrestre</title>
   </head>
   <body>

@@ -12,6 +12,21 @@ Este documento contiene la memoria técnica y de diseño del proyecto CortezaWeb
 2. **Navegación Inteligente**: El `Navbar` rastrea la ruta activa mediante `useLocation` de `react-router-dom` y aplica indicadores visuales dinámicos.
 3. **Sección Salvatón**: Diseñada con alto contraste (`brightness-75 contrast-125`) y degradados oscuros para maximizar la legibilidad del mensaje de campaña.
 
+## Orden Oficial del Navbar
+- Secuencia definida para coherencia de prioridad y similitud temática:
+1. Inicio
+2. Nosotros
+3. Salvatón
+4. Voluntario
+5. Tienda
+6. Galería
+7. Contacto
+- Criterio:
+Primero identidad institucional y causa principal.
+Luego participación/apoyo (voluntariado y tienda).
+Después evidencia social (galería).
+Finalmente canal de cierre (contacto).
+
 ## Convenciones de Desarrollo
 - **Framework**: React 19 + TypeScript + Vite.
 - **Estilos**: Tailwind CSS 4.
@@ -19,4 +34,4 @@ Este documento contiene la memoria técnica y de diseño del proyecto CortezaWeb
 - **Despliegue**: Optimizado para Vercel (ver `vercel.json` para manejo de rutas SPA).
 
 ---
-*Ultima actualización: 8 de Abril, 2026 - Sesión de Estandarización Visual.*
+*Ultima actualización: 8 de Abril, 2026 - Orden armónico del navbar y criterios de navegación.*

@@ -26,7 +26,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (error) {
-        console.error('No se pudo recuperar la sesión actual.', error);
+        console.error('No se pudo recuperar la sesion actual.', error);
       }
 
       setSession(data.session);
