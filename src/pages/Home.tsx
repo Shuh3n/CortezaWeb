@@ -4,6 +4,7 @@ import Hero from '../components/Hero';
 import Stats from '../components/Stats';
 import WorkAxes from '../components/WorkAxes';
 import Adoption from '../components/Adoption';
+import GallerySection from '../components/GallerySection';
 import Contact from '../components/Contact';
 
 const Home = () => {
@@ -26,6 +27,7 @@ const Home = () => {
       <Hero />
       <Stats />
       <WorkAxes />
+      <GallerySection />
       <Adoption />
       <Contact />
     </>

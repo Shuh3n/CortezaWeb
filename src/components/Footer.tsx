@@ -1,4 +1,3 @@
-import { Heart, Instagram, Facebook, Mail } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
@@ -24,7 +23,11 @@ const Footer = () => {
                 rel="noopener noreferrer"
                 className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group"
               >
-                <Instagram size={22} className="group-hover:scale-110 transition-transform" />
+                <img
+                    src="/icons/instagram.svg"
+                    alt="Instagram"
+                    className="w-5 h-5 group-hover:brightness-0 group-hover:invert transition-all"
+                />
               </a>
               <a
                 href="https://www.facebook.com/cortezaterrestre/"
@@ -32,13 +35,21 @@ const Footer = () => {
                 rel="noopener noreferrer"
                 className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group"
               >
-                <Facebook size={22} className="group-hover:scale-110 transition-transform" />
+                <img
+                    src="/icons/facebook.svg"
+                    alt="Facebook"
+                    className="w-5 h-5 group-hover:brightness-0 group-hover:invert transition-all"
+                />
               </a>
               <a
                 href="mailto:fundacioncortezaterrestre@gmail.com"
                 className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group"
               >
-                <Mail size={22} className="group-hover:scale-110 transition-transform" />
+                <img
+                    src="/icons/mail.svg"
+                    alt="Mail"
+                    className="w-5 h-5 group-hover:brightness-0 group-hover:invert transition-all"
+                />
               </a>
             </div>
           </div>
@@ -51,6 +62,7 @@ const Footer = () => {
               <li><Link to="/tienda" className="hover:text-primary transition-colors">Tienda Salvatore</Link></li>
               <li><Link to="/nosotros" className="hover:text-primary transition-colors">Nosotros</Link></li>
               <li><Link to="/contacto" className="hover:text-primary transition-colors">Contacto</Link></li>
+              <li><Link to="/dian" className="hover:text-primary transition-colors">Permanencia DIAN</Link></li>
             </ul>
           </div>
 
@@ -68,8 +80,8 @@ const Footer = () => {
           <p className="text-text-muted text-sm font-medium">
             © 2026 Fundación Corteza Terrestre. Armenia, Quindío.
           </p>
-          <div className="flex items-center gap-2 text-sm text-text-muted font-medium">
-            Hecho con <Heart size={14} className="text-red-500 fill-red-500" /> por los animales.
+          <div className="text-sm text-text-muted font-medium">
+            Hecho por los estudiantes de Ingeniería de sistemas y computación de la Uniquindio
           </div>
         </div>
       </div>
