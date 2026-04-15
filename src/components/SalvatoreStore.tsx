@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Coffee,
@@ -11,12 +11,28 @@ import {
   CheckCircle2,
   Info,
   BadgePercent,
-  X
+  X,
+  Loader2,
+  AlertCircle
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
+interface Product {
+  id: string;
+  name: string;
+  spec: string;
+  detail: string;
+  price: string;
+  image: string;
+  category: string;
+  stock: number;
+}
+
 const getSupabaseImageUrl = (imagePath: string) => {
   if (!imagePath) return '';
+  // Si la imagen ya es una URL completa, retornarla
+  if (imagePath.startsWith('http')) return imagePath;
+
   const fileName = imagePath.split('/').pop() || '';
 
   const { data } = supabase.storage
@@ -27,8 +43,10 @@ const getSupabaseImageUrl = (imagePath: string) => {
 };
 
 const SalvatoreStore = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('mugs');
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const categories = [
     { id: 'mugs', name: 'Mugs', icon: Coffee },
@@ -37,45 +55,39 @@ const SalvatoreStore = () => {
     { id: 'tipis', name: 'Tipis', icon: Home },
   ];
 
-  const products = {
-    mugs: [
-      { name: 'Mug Cerámica Blanco', spec: '9.5cm alto x 19cm ancho', detail: 'Ideal para tus mañanas. Solo disponible en color blanco.', price: 'Consultar', image: '/images/mug-ceramica-blanco.jpg' },
-      { name: 'Mug Cerámica Neón', spec: '9.5cm alto x 19cm ancho', detail: 'Colores vibrantes: fucsia, naranja, dorado, plateado y azul.', price: 'Consultar', image: '/images/mug-neon.jpg' },
-      { name: 'Mug Apilable', spec: '4.5cm alto x 17cm ancho', detail: 'Práctico y elegante. Solo disponible en color blanco.', price: 'Consultar', image: '/images/mug-apilable-x4.jpg' },
-      { name: 'Mug con Plato y Cuchara', spec: '5.2cm alto x 25.4cm ancho', detail: 'Set completo premium. Solo disponible en color blanco.', price: 'Consultar', image: '/images/mug-plato-cuchara.jpg' },
-      { name: 'Mug Estampado Interno', spec: '9.5cm alto x 19cm ancho', detail: 'Diseño interior de fábrica, exterior personalizado.', price: 'Consultar', image: '/images/mug-estampado-interno.jpg' },
-      { name: 'Mug Tapa y Pitillo', spec: '14cm alto x 21cm ancho', detail: 'Transparente. Solo disponible en color blanco.', price: 'Consultar', image: '/images/mug-tapa-pitillo.jpg' },
-      { name: 'Mug Pareja Corazón', spec: '9.5cm alto x 19cm ancho', detail: 'Mug encajable con oreja de corazón roja.', price: 'Consultar', image: '/images/mug-pareja-oreja-roja.jpg' },
-    ],
-    termos: [
-      { name: 'Caramañola Blanca Llavero (400ml)', spec: '14cm alto x 21cm ancho', detail: 'Aluminio, ideal para bebidas frías.', price: 'Consultar', image: '/images/caramanola-400ml.jpg' },
-      { name: 'Caramañola Blanca Llavero (600ml)', spec: '18.5cm alto x 23cm ancho', detail: 'Aluminio premium con mayor capacidad.', price: 'Consultar', image: '/images/caramanola-600ml.jpg' },
-      { name: 'Termo Carro Plateado', spec: '15cm alto x 25.1cm ancho', detail: 'Mantiene bebidas calientes por 1 hora (11 oz).', price: 'Consultar', image: '/images/termo-carro-plateado.jpg' },
-    ],
-    camisetas: [
-      { name: 'Camiseta Premium Salvatore', spec: '100% Poliéster con tacto algodón', detail: 'Cuello V, manga corta. Consultar guía de tallas.', price: 'Consultar', image: '/images/camiseta-cuello-v.jpg' },
-    ],
-    tipis: [
-      { name: 'Teepee Salvatore Noche Minimalista', spec: 'Tamaño S (90cm)', detail: 'Elegante color negro sólido con pompones en contraste para un toque de distinción.', price: 'Consultar', image: '/images/teepee-mascota-01.jpg' },
-      { name: 'Teepee Salvatore Azul Horizonte', spec: 'Tamaño M (1mt)', detail: 'Tono azul vibrante con detalles rayados que evocan un estilo fresco y moderno.', price: 'Consultar', image: '/images/teepee-mascota-02.jpg' },
-      { name: 'Teepee Salvatore El Rincón del Glotón', spec: 'Tamaño L (1.10mt)', detail: 'Homenaje a los regalones con letrero "Always Hungry" y divertidos estampados de comida.', price: 'Consultar', image: '/images/teepee-mascota-03.jpg' },
-      { name: 'Teepee Salvatore Sueño Estelar', spec: 'Edición Especial', detail: 'Patrón de estrellas blancas sobre un fondo verde salvia relajante y sofisticado.', price: 'Consultar', image: '/images/teepee-mascota-04.jpg' },
-      { name: 'Teepee Salvatore Refugio Pinky', spec: 'Tamaño S (90cm)', detail: 'Diseño tierno y sencillo en rosa con detalles blancos para el descanso perfecto.', price: 'Consultar', image: '/images/teepee-mascota-05.jpg' },
-      { name: 'Teepee Salvatore Palacio de Algodón', spec: 'Tamaño M (1mt)', detail: 'Festón de pompones rosas que brindan un aire muy acogedor y detallado.', price: 'Consultar', image: '/images/teepee-mascota-06.jpg' },
-      { name: 'Teepee Salvatore Pequeño Capitán', spec: 'Tamaño L (1.10mt)', detail: 'Inspiración náutica con estampados de anclas y timones para los amantes del mar.', price: 'Consultar', image: '/images/teepee-mascota-07.jpg' },
-      { name: 'Teepee Salvatore Puntos Galácticos', spec: 'Tamaño M (1mt)', detail: 'Color violeta con puntos blancos pequeños que simulan un cielo estrellado infinito.', price: 'Consultar', image: '/images/teepee-mascota-08.jpg' },
-      { name: 'Teepee Salvatore Nube de Lunares', spec: 'Tamaño S (90cm)', detail: 'Combinación de azul cielo con puntos grandes, creando un ambiente relajante.', price: 'Consultar', image: '/images/teepee-mascota-09.jpg' },
-      { name: 'Teepee Salvatore Bruma Azulada', spec: 'Tamaño M (1mt)', detail: 'Contraste moderno entre estructura gris y puntos azules de alta definición.', price: 'Consultar', image: '/images/teepee-mascota-10.jpg' },
-      { name: 'Teepee Salvatore Nevado de Cereza', spec: 'Tamaño L (1.10mt)', detail: 'Base blanca pura resaltada con pompones rojos vibrantes que capturan la mirada.', price: 'Consultar', image: '/images/teepee-mascota-11.jpg' },
-      { name: 'Teepee Salvatore Refugio Monocromo', spec: 'Tamaño S (90cm)', detail: 'Diseño sobrio en tonos tierra y crema, ideal para integrarse en espacios modernos.', price: 'Consultar', image: '/images/teepee-mascota-12.jpg' },
-      { name: 'Teepee Salvatore Oasis de Menta', spec: 'Tamaño M (1mt)', detail: 'Tono verde agua con pompones arena que evocan una profunda sensación de calma.', price: 'Consultar', image: '/images/teepee-mascota-13.jpg' },
-      { name: 'Teepee Salvatore Menú Azulado', spec: 'Tamaño L (1.10mt)', detail: 'Versión en azul del diseño "Always Hungry" con divertidos iconos de snacks.', price: 'Consultar', image: '/images/teepee-mascota-14.jpg' },
-      { name: 'Teepee Salvatore Pasión Carmesí', spec: 'Edición Especial', detail: 'Un rojo intenso y audaz balanceado con delicados pompones blancos.', price: 'Consultar', image: '/images/teepee-mascota-15.jpg' },
-      { name: 'Teepee Salvatore Almirante Nocturno', spec: 'Tamaño L (1.10mt)', detail: 'Diseño náutico clásico sobre un fondo azul oscuro profundo y muy elegante.', price: 'Consultar', image: '/images/teepee-mascota-16.jpg' },
-      { name: 'Teepee Salvatore Constelación Rosa', spec: 'Tamaño S (90cm)', detail: 'Un cielo estrellado en tono rosa chicle para un rincón alegre y soñador.', price: 'Consultar', image: '/images/teepee-mascota-17.jpg' },
-      { name: 'Teepee Salvatore Travesía Rosa', spec: 'Tamaño M (1mt)', detail: 'Combinación de temática marinera con fondo fucsia para un toque divertido y único.', price: 'Consultar', image: '/images/teepee-mascota-18.jpg' },
-    ]
-  };
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('products')
+          .select('*')
+          .order('name', { ascending: true });
+
+        if (error) throw error;
+        setProducts(data || []);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  const groupedProducts = useMemo(() => {
+    return products.reduce((acc, product) => {
+      const cat = product.category || 'mugs';
+      if (!acc[cat]) acc[cat] = [];
+      acc[cat].push(product);
+      return acc;
+    }, {} as Record<string, Product[]>);
+  }, [products]);
+
+  const activeProducts = useMemo(() => {
+    return groupedProducts[activeTab] || [];
+  }, [groupedProducts, activeTab]);
 
   return (
     <section id="tienda" className="py-24 bg-neutral-soft overflow-hidden">
@@ -141,65 +153,99 @@ const SalvatoreStore = () => {
         </div>
 
         {/* Product Grid */}
-        <div className="min-h-[600px]">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.4 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-            >
-              {products[activeTab as keyof typeof products].map((product, idx) => (
-                <motion.div
-                  key={`${activeTab}-${idx}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.05 }}
-                  onClick={() => setSelectedProduct({ ...product, id: `${activeTab}-${idx}` })}
-                  className="bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-xl shadow-slate-200/50 group hover:border-primary/20 transition-all cursor-pointer flex flex-col h-full"
-                >
-                  <div className="aspect-[4/3] bg-neutral-soft relative overflow-hidden shrink-0">
-                    {product.image ? (
-                      <img
-                        src={getSupabaseImageUrl(product.image)}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 flex items-center justify-center text-primary/10">
-                        {activeTab === 'mugs' && <Coffee size={80} strokeWidth={1} />}
-                        {activeTab === 'termos' && <Thermometer size={80} strokeWidth={1} />}
-                        {activeTab === 'camisetas' && <Shirt size={80} strokeWidth={1} />}
-                        {activeTab === 'tipis' && <Home size={80} strokeWidth={1} />}
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="absolute top-4 right-4 bg-accent/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
-                      <BadgePercent size={14} /> Producto Social
-                    </div>
-                  </div>
+        <div className="min-h-[600px] relative">
+          {isLoading ? (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 py-20">
+              <Loader2 className="w-12 h-12 text-primary animate-spin" />
+              <p className="text-text-muted font-bold tracking-widest uppercase text-sm">Cargando catálogo...</p>
+            </div>
+          ) : (
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.4 }}
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+              >
+                {activeProducts.length > 0 ? (
+                  activeProducts.map((product, idx) => (
+                    <motion.div
+                      key={product.id || idx}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: idx * 0.05 }}
+                      onClick={() => setSelectedProduct(product)}
+                      className={`bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-xl shadow-slate-200/50 group hover:border-primary/20 transition-all cursor-pointer flex flex-col h-full relative ${product.stock === 0 ? 'grayscale-[0.5]' : ''}`}
+                    >
+                      <div className="aspect-[4/3] bg-neutral-soft relative overflow-hidden shrink-0">
+                        {product.image ? (
+                          <img
+                            src={getSupabaseImageUrl(product.image)}
+                            alt={product.name}
+                            className={`w-full h-full object-cover transition-transform duration-700 ${product.stock > 0 ? 'group-hover:scale-110' : ''}`}
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center text-primary/10">
+                            {activeTab === 'mugs' && <Coffee size={80} strokeWidth={1} />}
+                            {activeTab === 'termos' && <Thermometer size={80} strokeWidth={1} />}
+                            {activeTab === 'camisetas' && <Shirt size={80} strokeWidth={1} />}
+                            {activeTab === 'tipis' && <Home size={80} strokeWidth={1} />}
+                          </div>
+                        )}
 
-                  <div className="p-8 flex flex-col flex-1">
-                    <h3 className="text-xl font-bold text-text-h mb-2 group-hover:text-primary transition-colors">
-                      {product.name}
-                    </h3>
-                    <p className="text-sm text-primary/80 font-semibold mb-4 flex items-center gap-2">
-                      <ShoppingCart size={14} /> {product.spec}
-                    </p>
-                    <p className="text-text-muted text-sm leading-relaxed mb-8 line-clamp-2">
-                      {product.detail}
-                    </p>
-                    <button className="w-full mt-auto bg-neutral-soft text-primary hover:bg-primary hover:text-white py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 border border-primary/10">
-                      Ver detalle <Send size={18} />
-                    </button>
+                        {/* Stock Status Badge */}
+                        <div className="absolute bottom-4 left-4 z-10">
+                          {product.stock > 0 ? (
+                            <span className="bg-white/90 backdrop-blur-md text-primary text-[10px] font-black uppercase px-3 py-1.5 rounded-full shadow-sm flex items-center gap-2">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                              {product.stock} disponibles
+                            </span>
+                          ) : (
+                            <span className="bg-red-500 text-white text-[10px] font-black uppercase px-3 py-1.5 rounded-full shadow-lg flex items-center gap-2">
+                              <AlertCircle size={12} /> Agotado
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="absolute top-4 right-4 bg-accent/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
+                          <BadgePercent size={14} /> Producto Social
+                        </div>
+                      </div>
+
+                      <div className="p-8 flex flex-col flex-1">
+                        <h3 className="text-xl font-bold text-text-h mb-2 group-hover:text-primary transition-colors">
+                          {product.name}
+                        </h3>
+                        <p className="text-sm text-primary/80 font-semibold mb-4 flex items-center gap-2">
+                          <ShoppingCart size={14} /> {product.spec}
+                        </p>
+                        <p className="text-text-muted text-sm leading-relaxed mb-8 line-clamp-2">
+                          {product.detail}
+                        </p>
+                        <button
+                          disabled={product.stock === 0}
+                          className={`w-full mt-auto py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 border ${product.stock > 0
+                            ? 'bg-neutral-soft text-primary hover:bg-primary hover:text-white border-primary/10'
+                            : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
+                            }`}
+                        >
+                          {product.stock > 0 ? 'Ver detalle' : 'Sin Stock'} <Send size={18} />
+                        </button>
+                      </div>
+                    </motion.div>
+                  ))
+                ) : (
+                  <div className="col-span-full py-20 text-center">
+                    <p className="text-text-muted font-medium italic">Próximamente estaremos agregando nuevos productos a esta categoría.</p>
                   </div>
-                </motion.div>
-              ))}
-            </motion.div>
-          </AnimatePresence>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          )}
         </div>
 
         {/* Product Detail Modal */}
@@ -244,10 +290,16 @@ const SalvatoreStore = () => {
                     {selectedProduct.name}
                   </h3>
 
-                  <div className="flex gap-4 mb-8">
-                    <div className="bg-primary/5 border border-primary/10 rounded-[24px] p-5 flex-1">
+                  <div className="flex flex-wrap gap-4 mb-8">
+                    <div className="bg-primary/5 border border-primary/10 rounded-[24px] p-5 flex-1 min-w-[150px]">
                       <p className="text-[10px] text-primary font-bold uppercase tracking-widest mb-1 opacity-70">Especificaciones</p>
                       <p className="text-text-h font-bold text-lg">{selectedProduct.spec}</p>
+                    </div>
+                    <div className={`rounded-[24px] p-5 flex-1 min-w-[150px] border ${selectedProduct.stock > 0 ? 'bg-emerald-50 border-emerald-100' : 'bg-red-50 border-red-100'}`}>
+                      <p className={`text-[10px] font-bold uppercase tracking-widest mb-1 opacity-70 ${selectedProduct.stock > 0 ? 'text-emerald-700' : 'text-red-700'}`}>Disponibilidad</p>
+                      <p className={`font-bold text-lg ${selectedProduct.stock > 0 ? 'text-emerald-900' : 'text-red-900'}`}>
+                        {selectedProduct.stock > 0 ? `${selectedProduct.stock} unidades` : 'Agotado'}
+                      </p>
                     </div>
                   </div>
 
@@ -264,8 +316,18 @@ const SalvatoreStore = () => {
                   </div>
 
                   <div className="space-y-4">
-                    <button className="w-full bg-primary text-white py-5 rounded-[24px] font-bold text-lg shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 transition-all flex items-center justify-center gap-3">
-                      Pedir por WhatsApp <MessageCircle size={22} />
+                    <button
+                      disabled={selectedProduct.stock === 0}
+                      onClick={() => {
+                        const message = encodeURIComponent(`¡Hola! Me interesa el producto: ${selectedProduct.name}`);
+                        window.open(`https://wa.me/573148114884?text=${message}`, '_blank');
+                      }}
+                      className={`w-full py-5 rounded-[24px] font-bold text-lg transition-all flex items-center justify-center gap-3 shadow-xl ${selectedProduct.stock > 0
+                        ? 'bg-primary text-white shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1'
+                        : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                        }`}
+                    >
+                      {selectedProduct.stock > 0 ? 'Pedir por WhatsApp' : 'Producto Agotado'} <MessageCircle size={22} />
                     </button>
                     <p className="text-center text-xs text-text-muted font-medium opacity-60">
                       Disponibilidad inmediata para envíos nacionales
