@@ -88,7 +88,7 @@ export default function PublicGalleryPage() {
 
   return (
     <div className="bg-neutral-soft px-4 pb-20 pt-32">
-      <div className="mx-auto max-w-7xl space-y-10">
+      <div className="mx-auto max-w-[70%] space-y-10">
         <motion.section initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="rounded-[32px] bg-[linear-gradient(135deg,_rgba(45,90,39,1),_rgba(139,69,19,0.95))] px-6 py-10 text-white shadow-2xl shadow-primary/20 sm:px-8">
           <p className="text-sm font-semibold uppercase tracking-[0.35em] text-white/70">Galería</p>
           <h1 className="mt-3 text-4xl font-black md:text-5xl">Explora cada historia por categoría</h1>
@@ -97,39 +97,43 @@ export default function PublicGalleryPage() {
 
         {errorMessage ? <div className="rounded-3xl border border-red-200 bg-red-50 px-5 py-4 text-red-700">{errorMessage}</div> : null}
 
-        <section>
-          <div className="mb-6 flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/60">Categorías</p>
-              <h2 className="mt-2 text-3xl font-black text-text-h">Explora la galería</h2>
+        {!slug ? (
+          <section>
+            <div className="mb-6 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/60">Categorías</p>
+                <h2 className="mt-2 text-3xl font-black text-text-h">Explora la galería</h2>
+              </div>
+              <div className="rounded-3xl bg-white px-5 py-4 shadow-lg shadow-primary/5">
+                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary/60">Total</p>
+                <p className="mt-2 text-lg font-black text-primary">{summary.length}</p>
+              </div>
             </div>
-            <div className="rounded-3xl bg-white px-5 py-4 shadow-lg shadow-primary/5">
-              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary/60">Total</p>
-              <p className="mt-2 text-lg font-black text-primary">{summary.length}</p>
-            </div>
-          </div>
 
-          {isLoading ? (
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">{Array.from({ length: 4 }).map((_, index) => <div key={index} className="h-72 animate-pulse rounded-[32px] bg-white shadow-lg shadow-primary/5" />)}</div>
-          ) : (
-            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-              {summary.map((item, index) => (
-                <motion.article key={item.category.id} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05, duration: 0.35, ease: 'easeOut' }} className="overflow-hidden rounded-[32px] bg-white shadow-lg shadow-primary/5 transition hover:-translate-y-1">
-                  <div className="relative h-52 w-full overflow-hidden bg-primary/10">
-                    {item.cover ? <img src={item.cover} alt={item.category.nombre} className="h-full w-full object-cover transition duration-500 hover:scale-105" /> : <div className="flex h-full items-center justify-center text-primary"><Images className="h-10 w-10" /></div>}
-                  </div>
-                  <div className="space-y-4 p-6">
-                    <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary/60">{item.total} foto(s)</p>
-                      <h3 className="mt-2 text-2xl font-black text-text-h">{item.category.nombre}</h3>
-                    </div>
-                    <Link to={`/galeria/${item.category.slug}`} className="inline-flex cursor-pointer items-center gap-2 font-bold text-primary transition hover:gap-3">Ver categoría<ArrowRight className="h-4 w-4" /></Link>
-                  </div>
-                </motion.article>
-              ))}
-            </div>
-          )}
-        </section>
+            {isLoading ? (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">{Array.from({ length: 4 }).map((_, index) => <div key={index} className="h-72 animate-pulse rounded-[32px] bg-white shadow-lg shadow-primary/5" />)}</div>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {summary.map((item, index) => (
+                  <motion.article key={item.category.id} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05, duration: 0.35, ease: 'easeOut' }} className="overflow-hidden rounded-[32px] bg-white shadow-lg shadow-primary/5 transition hover:-translate-y-1">
+                    <Link to={`/galeria/${item.category.slug}`} className="block">
+                      <div className="relative h-52 w-full overflow-hidden bg-primary/10">
+                        {item.cover ? <img src={item.cover} alt={item.category.nombre} className="h-full w-full object-cover transition duration-500 hover:scale-105" /> : <div className="flex h-full items-center justify-center text-primary"><Images className="h-10 w-10" /></div>}
+                      </div>
+                      <div className="space-y-4 p-6 text-center">
+                        <div>
+                          <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary/60">{item.total} foto(s)</p>
+                          <h3 className="mt-2 text-2xl font-black text-text-h">{item.category.nombre}</h3>
+                        </div>
+                        <span className="inline-flex cursor-pointer items-center gap-2 font-bold text-primary transition hover:gap-3">Ver categoría<ArrowRight className="h-4 w-4" /></span>
+                      </div>
+                    </Link>
+                  </motion.article>
+                ))}
+              </div>
+            )}
+          </section>
+        ) : null}
 
         {slug && currentCategory ? (
           <section className="space-y-6">
@@ -139,22 +143,29 @@ export default function PublicGalleryPage() {
                 <h2 className="mt-2 text-3xl font-black text-text-h">{currentCategory.category.nombre}</h2>
                 <p className="mt-2 text-sm text-text-muted">Mostrando {paginatedImages.length} de {images.length} foto(s).</p>
               </div>
-              <Link to="/galeria" className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary shadow-sm transition hover:-translate-y-0.5"><ArrowLeft className="h-4 w-4" />Ver todas las categorías</Link>
+              <Link to="/galeria" className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary shadow-sm transition hover:-translate-y-0.5"><ArrowLeft className="h-4 w-4" />Regresar a categorías</Link>
             </div>
 
-            {images.length === 0 ? (
+            {images.length === 0 && !isLoading ? (
               <div className="rounded-3xl border border-dashed border-primary/20 bg-white px-5 py-8 text-center text-text-muted">Todavía no hay fotos en esta categoría.</div>
             ) : (
               <>
-                <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                   {paginatedImages.map((image, index) => (
-                    <motion.button key={image.id} type="button" initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.04, duration: 0.35, ease: 'easeOut' }} onClick={() => setSelectedImage(image)} className="cursor-pointer overflow-hidden rounded-[32px] bg-white text-left shadow-xl shadow-primary/8 transition hover:-translate-y-1">
-                      <img src={image.url} alt={image.nombre} className="h-80 w-full object-cover transition duration-500 hover:scale-105" />
-                      <div className="space-y-3 p-6">
-                        <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary/60">{formatGalleryDate(image.fecha)}</p>
-                        <h3 className="text-2xl font-black text-text-h">{image.nombre}</h3>
-                        <p className="text-sm text-text-muted">Haz clic para ampliar</p>
-                      </div>
+                    <motion.button
+                      key={image.id}
+                      type="button"
+                      initial={{ opacity: 0, y: 22 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.04, duration: 0.35, ease: 'easeOut' }}
+                      onClick={() => setSelectedImage(image)}
+                      className="group aspect-square cursor-pointer overflow-hidden rounded-[32px] bg-white shadow-xl shadow-primary/8 transition hover:-translate-y-1"
+                    >
+                      <img
+                        src={image.url}
+                        alt="Galería"
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                      />
                     </motion.button>
                   ))}
                 </div>

@@ -28,7 +28,9 @@ export default function AdminGalleryManagerPage() {
   const [editingFecha, setEditingFecha] = useState(today());
   const [editingCategoriaId, setEditingCategoriaId] = useState<number | null>(null);
   const [pendingDeleteImage, setPendingDeleteImage] = useState<GalleryImage | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const IMAGES_PER_PAGE = 50;
   const [uploadNombre, setUploadNombre] = useState('');
   const [uploadCategoriaId, setUploadCategoriaId] = useState<number | null>(null);
   const [uploadFecha, setUploadFecha] = useState(today());
@@ -48,6 +50,7 @@ export default function AdminGalleryManagerPage() {
         includeDeleted: false,
       });
       setImages(result);
+      setCurrentPage(1);
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
     } finally {
@@ -101,7 +104,12 @@ export default function AdminGalleryManagerPage() {
     };
   }, [categoryFilter, searchName]);
 
-  const totalShown = useMemo(() => images.length, [images]);
+  const totalShown = images.length;
+  const totalPages = Math.max(1, Math.ceil(images.length / IMAGES_PER_PAGE));
+  const paginatedImages = useMemo(() => {
+    const start = (currentPage - 1) * IMAGES_PER_PAGE;
+    return images.slice(start, start + IMAGES_PER_PAGE);
+  }, [currentPage, images]);
 
   function handleOpenEdit(image: GalleryImage) {
     setEditingImage(image);
@@ -282,6 +290,17 @@ export default function AdminGalleryManagerPage() {
 
       <section className="rounded-[32px] bg-white p-6 shadow-lg shadow-primary/5 sm:p-8">
 
+        <div className="mt-8 flex flex-col gap-4">
+          <button
+            type="button"
+            onClick={() => setIsUploadModalOpen(true)}
+            className="inline-flex h-16 w-full cursor-pointer items-center justify-center gap-3 rounded-2xl bg-secondary px-8 text-lg font-black text-white transition hover:opacity-90 shadow-lg shadow-secondary/20"
+          >
+            <PlusCircle className="h-6 w-6" />
+            Agregar nuevas fotos
+          </button>
+        </div>
+
         <form className="mt-8 grid gap-4 md:grid-cols-[1fr_1fr_auto_auto]" onSubmit={handleSubmitFilters}>
           <label className="block relative">
             <span className="mb-2 block text-xs font-black uppercase tracking-widest text-primary/50">Categoría</span>
@@ -338,8 +357,12 @@ export default function AdminGalleryManagerPage() {
       <section className="rounded-[32px] bg-white p-6 shadow-lg shadow-primary/5 sm:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/60">Resultados</p>
         <h2 className="mt-2 text-2xl font-black text-text-h">Imágenes Cargadas</h2>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <h2 className="mt-2 text-2xl font-black text-text-h">Imagenes cargadas</h2>
+          <p className="text-sm text-text-muted">Pagina {currentPage} de {totalPages}</p>
+        </div>
 
-        <div className="mt-6 space-y-4">
+        <div className="mt-6">
           {isLoading ? (
             <div className="rounded-3xl border border-primary/10 bg-primary/5 px-5 py-8 text-center text-text-muted">Cargando imagenes...</div>
           ) : images.length === 0 ? (
@@ -364,9 +387,41 @@ export default function AdminGalleryManagerPage() {
                       <span className="text-[10px] font-bold text-text-muted/60 uppercase tracking-wider">
                         {image.fecha}
                       </span>
+            <>
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {paginatedImages.map((image) => (
+                  <div key={image.id} className="group overflow-hidden rounded-[32px] border border-primary/10 bg-white transition hover:shadow-xl hover:shadow-primary/5">
+                    <div className="relative aspect-square overflow-hidden bg-neutral-100">
+                      <img src={image.url} alt={image.nombre ?? 'Imagen de galeria'} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                    </div>
+                    <div className="space-y-3 p-5">
+                      <div className="min-w-0">
+                        <p className="truncate text-lg font-black text-text-h">{image.nombre ?? 'Sin nombre'}</p>
+                        <p className="mt-1 truncate text-sm text-text-muted">{image.categoria?.nombre ?? 'Sin categoria'}</p>
+                        <p className="text-xs text-primary/60 font-semibold uppercase tracking-wider">{image.fecha}</p>
+                      </div>
+
+                      <div className="flex gap-2 pt-2">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenEdit(image)}
+                          className="flex-1 inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-primary/10 bg-white py-2.5 text-sm font-bold text-primary transition hover:bg-primary/5"
+                        >
+                          <PencilLine className="h-4 w-4" />
+                          Editar
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPendingDeleteImage(image)}
+                          className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-red-100 bg-red-50 p-2.5 text-red-600 transition hover:bg-red-100"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
+                ))}
+              </div>
 
                 <div className="flex gap-2">
                   <button
@@ -374,7 +429,41 @@ export default function AdminGalleryManagerPage() {
                     className="p-3 rounded-2xl text-primary bg-white border border-primary/10 shadow-sm hover:scale-110 transition-all font-black"
                   >
                     <PencilLine size={18} />
+              {totalPages > 1 && (
+                <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                    disabled={currentPage === 1}
+                    className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Anterior
                   </button>
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: totalPages }).map((_, index) => {
+                      const page = index + 1;
+                      if (totalPages > 7) {
+                        if (page !== 1 && page !== totalPages && Math.abs(page - currentPage) > 2) {
+                          if (Math.abs(page - currentPage) === 3) return <span key={page} className="px-1 text-primary/40">...</span>;
+                          return null;
+                        }
+                      }
+                      return (
+                        <button
+                          key={page}
+                          type="button"
+                          onClick={() => setCurrentPage(page)}
+                          className={`h-11 w-11 cursor-pointer rounded-2xl font-bold transition ${
+                            page === currentPage
+                              ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                              : 'bg-white text-primary shadow-sm hover:-translate-y-0.5'
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      );
+                    })}
+                  </div>
                   <button
                     onClick={() => setPendingDeleteImage(image)}
                     className="p-3 rounded-2xl text-red-500 bg-white border border-primary/10 shadow-sm hover:scale-110 transition-all font-black"
@@ -384,6 +473,16 @@ export default function AdminGalleryManagerPage() {
                 </div>
               </motion.div>
             ))
+                    type="button"
+                    onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                    disabled={currentPage === totalPages}
+                    className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Siguiente
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>

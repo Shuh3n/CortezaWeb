@@ -8,6 +8,7 @@ import Salvaton from './pages/Salvaton';
 import PublicGalleryPage from './pages/Gallery';
 import StorePage from './pages/StorePage';
 import DianPage from './pages/Dian';
+import PrivacyPolicy from './pages/PrivacyPolicy';
 import { ModalProvider } from './context/ModalContext';
 import { AuthProvider } from './context/AuthContext';
 import PublicLayout from './layouts/PublicLayout';
@@ -49,6 +50,7 @@ function App() {
               <Route path="/salvaton" element={<Salvaton />} />
               <Route path="/tienda" element={<StorePage />} />
               <Route path="/dian" element={<DianPage />} />
+              <Route path="/politica-privacidad" element={<PrivacyPolicy />} />
             </Route>
 
             <Route path="/admin" element={<AdminLoginPage />} />
