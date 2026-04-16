@@ -19,6 +19,7 @@ import AdminDashboardPage from './pages/Admin/DashboardPage';
 import AdminGalleryPage from './pages/Admin/GalleryPage';
 import AdminGalleryCategoriesPage from './pages/Admin/GalleryCategoriesPage';
 import AdminGalleryUploadsPage from './pages/Admin/GalleryUploadsPage';
+import AdminProductManagerPage from './pages/Admin/ProductManagerPage';
 import Pets from "./pages/Pets";
 
 function ScrollToTop() {
@@ -64,6 +65,7 @@ function App() {
             >
               <Route path="dashboard" element={<AdminDashboardPage />} />
               <Route path="galeria" element={<AdminGalleryPage />} />
+              <Route path="tienda" element={<AdminProductManagerPage />} />
               <Route path="galeria/categorias" element={<AdminGalleryCategoriesPage />} />
               <Route path="galeria/cargas" element={<AdminGalleryUploadsPage />} />
               <Route path="gestion" element={<Navigate to="/admin/galeria/categorias" replace />} />

@@ -13,33 +13,30 @@ import {
   BadgePercent,
   X,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-
-interface Product {
-  id: string;
-  name: string;
-  spec: string;
-  detail: string;
-  price: string;
-  image: string;
-  category: string;
-  stock: number;
-}
+import type { Product } from '../types/product';
+import { PRODUCTS_BUCKET } from '../constants/products';
 
 const getSupabaseImageUrl = (imagePath: string) => {
   if (!imagePath) return '';
-  // Si la imagen ya es una URL completa, retornarla
   if (imagePath.startsWith('http')) return imagePath;
 
-  const fileName = imagePath.split('/').pop() || '';
-
   const { data } = supabase.storage
-    .from('tienda-salvatore')
-    .getPublicUrl(fileName);
+    .from(PRODUCTS_BUCKET)
+    .getPublicUrl(imagePath);
 
   return data.publicUrl;
+};
+
+const getVisiblePages = (current: number, total: number) => {
+  if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1);
+  if (current <= 3) return [1, 2, 3, 4, '...', total];
+  if (current >= total - 2) return [1, '...', total - 3, total - 2, total - 1, total];
+  return [1, '...', current - 1, current, current + 1, '...', total];
 };
 
 const SalvatoreStore = () => {
@@ -47,6 +44,8 @@ const SalvatoreStore = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('mugs');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 3;
 
   const categories = [
     { id: 'mugs', name: 'Mugs', icon: Coffee },
@@ -74,6 +73,34 @@ const SalvatoreStore = () => {
     };
 
     fetchProducts();
+
+    // Sincronización en tiempo real
+    const channel = supabase
+      .channel('store-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', table: 'products', schema: 'public' },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            const newProduct = payload.new as Product;
+            setProducts(prev => [...prev, newProduct].sort((a, b) => a.name.localeCompare(b.name)));
+          } else if (payload.eventType === 'UPDATE') {
+            const updatedProduct = payload.new as Product;
+            setProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p)
+              .sort((a, b) => a.name.localeCompare(b.name)));
+            
+            // Sincronizar el producto seleccionado si está abierto en el modal
+            setSelectedProduct(prev => prev?.id === updatedProduct.id ? updatedProduct : prev);
+          } else if (payload.eventType === 'DELETE') {
+            setProducts(prev => prev.filter(p => p.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const groupedProducts = useMemo(() => {
@@ -88,6 +115,13 @@ const SalvatoreStore = () => {
   const activeProducts = useMemo(() => {
     return groupedProducts[activeTab] || [];
   }, [groupedProducts, activeTab]);
+
+  const totalPages = Math.ceil(activeProducts.length / ITEMS_PER_PAGE);
+
+  const paginatedProducts = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return activeProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [activeProducts, currentPage]);
 
   return (
     <section id="tienda" className="py-24 bg-neutral-soft overflow-hidden">
@@ -138,7 +172,10 @@ const SalvatoreStore = () => {
           {categories.map((cat) => (
             <motion.button
               key={cat.id}
-              onClick={() => setActiveTab(cat.id)}
+              onClick={() => {
+                setActiveTab(cat.id);
+                setCurrentPage(1);
+              }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-bold transition-all duration-300 shadow-lg ${activeTab === cat.id
@@ -169,8 +206,8 @@ const SalvatoreStore = () => {
                 transition={{ duration: 0.4 }}
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
               >
-                {activeProducts.length > 0 ? (
-                  activeProducts.map((product, idx) => (
+                {paginatedProducts.length > 0 ? (
+                  paginatedProducts.map((product, idx) => (
                     <motion.div
                       key={product.id || idx}
                       initial={{ opacity: 0, y: 20 }}
@@ -217,9 +254,14 @@ const SalvatoreStore = () => {
                       </div>
 
                       <div className="p-8 flex flex-col flex-1">
-                        <h3 className="text-xl font-bold text-text-h mb-2 group-hover:text-primary transition-colors">
-                          {product.name}
-                        </h3>
+                        <div className="flex justify-between items-start mb-2 gap-4">
+                          <h3 className="text-xl font-bold text-text-h group-hover:text-primary transition-colors">
+                            {product.name}
+                          </h3>
+                          <span className="text-xl font-black text-primary whitespace-nowrap">
+                            {product.price?.toString().startsWith('$') ? product.price : `$${product.price}`}
+                          </span>
+                        </div>
                         <p className="text-sm text-primary/80 font-semibold mb-4 flex items-center gap-2">
                           <ShoppingCart size={14} /> {product.spec}
                         </p>
@@ -245,6 +287,49 @@ const SalvatoreStore = () => {
                 )}
               </motion.div>
             </AnimatePresence>
+          )}
+
+          {/* Pagination Controls */}
+          {!isLoading && totalPages > 1 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex justify-center items-center gap-2 mt-12"
+            >
+              <button
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="p-3 rounded-2xl bg-white border border-slate-200 text-text-h disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-soft hover:border-primary/20 transition-all shadow-sm"
+              >
+                <ChevronLeft size={20} />
+              </button>
+
+              <div className="flex gap-2">
+                {getVisiblePages(currentPage, totalPages).map((page, i) => (
+                  <button
+                    key={i}
+                    onClick={() => typeof page === 'number' ? setCurrentPage(page) : undefined}
+                    disabled={page === '...'}
+                    className={`w-12 h-12 rounded-2xl font-bold transition-all shadow-sm ${page === '...'
+                      ? 'bg-transparent text-text-muted border-none cursor-default shadow-none w-8'
+                      : currentPage === page
+                        ? 'bg-primary text-white shadow-primary/20 ring-4 ring-primary/10'
+                        : 'bg-white text-text-muted border border-slate-200 hover:bg-neutral-soft hover:border-primary/20'
+                      }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="p-3 rounded-2xl bg-white border border-slate-200 text-text-h disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-soft hover:border-primary/20 transition-all shadow-sm"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </motion.div>
           )}
         </div>
 
@@ -286,9 +371,16 @@ const SalvatoreStore = () => {
                 </div>
 
                 <div className="md:w-[55%] p-8 md:p-14 overflow-y-auto">
-                  <h3 className="text-3xl md:text-5xl font-bold text-text-h mb-6 leading-tight">
-                    {selectedProduct.name}
-                  </h3>
+                  <div className="flex justify-between items-start gap-4 mb-6">
+                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold text-text-h leading-tight">
+                      {selectedProduct.name}
+                    </h3>
+                    <div className="bg-primary/10 px-4 py-2 rounded-2xl shrink-0 border border-primary/20">
+                      <span className="text-2xl md:text-3xl font-black text-primary">
+                        {selectedProduct.price?.toString().startsWith('$') ? selectedProduct.price : `$${selectedProduct.price}`}
+                      </span>
+                    </div>
+                  </div>
 
                   <div className="flex flex-wrap gap-4 mb-8">
                     <div className="bg-primary/5 border border-primary/10 rounded-[24px] p-5 flex-1 min-w-[150px]">

@@ -1,36 +1,58 @@
-﻿import { useEffect, useMemo, useState } from 'react';
-import { FolderKanban, ImageIcon, LayoutDashboard, Sparkles } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { FolderKanban, ImageIcon, Package, ShoppingBag, AlertTriangle, ImagePlus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { supabase } from '../../lib/supabase';
 import { listGalleryImages, summarizeGalleryImages } from '../../lib/gallery';
 import type { GalleryImage } from '../../types/gallery';
 
 export default function AdminDashboardPage() {
   const [images, setImages] = useState<GalleryImage[]>([]);
+  const [productCount, setProductCount] = useState(0);
+  const [lowStockCount, setLowStockCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let ignore = false;
 
     async function loadDashboard() {
+      if (ignore) return;
+      setIsLoading(true);
+      console.log('🔄 Iniciando carga de Dashboard...');
+
+      // 1. Cargar Imágenes de Galería
       try {
-        setIsLoading(true);
-        const data = await listGalleryImages();
+        const galleryData = await listGalleryImages();
+        if (!ignore) {
+          console.log('✅ Galería cargada:', galleryData.length, 'fotos');
+          setImages(galleryData);
+        }
+      } catch (err) {
+        console.error('❌ Error en métricas de galería:', err);
+      }
+
+      // 2. Cargar Métricas de Tienda (Individual para que no se bloqueen)
+      try {
+        const { count: total, error: err1 } = await supabase.from('products').select('id', { count: 'exact', head: true });
+        const { count: low, error: err2 } = await supabase.from('products').select('id', { count: 'exact', head: true }).lte('stock', 5);
+
+        if (err1) console.error('❌ Error Supabase (Total Productos):', err1);
+        if (err2) console.error('❌ Error Supabase (Stock Bajo):', err2);
 
         if (!ignore) {
-          setImages(data);
-          setErrorMessage(null);
+          setProductCount(total || 0);
+          setLowStockCount(low || 0);
+          console.log('✅ Tienda cargada:', { total, low });
         }
-      } catch (error) {
-        console.error('No se pudo cargar el dashboard.', error);
+      } catch (err) {
+        console.error('❌ Error en métricas de tienda:', err);
+      }
 
-        if (!ignore) {
-          setErrorMessage('No pudimos cargar las métricas del panel.');
-        }
-      } finally {
-        if (!ignore) {
-          setIsLoading(false);
-        }
+      if (!ignore) {
+        setIsLoading(false);
+        setErrorMessage(null);
       }
     }
 
@@ -46,18 +68,30 @@ export default function AdminDashboardPage() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: 'easeOut' }} className="space-y-8">
-      <section className="relative overflow-hidden rounded-[32px] bg-[linear-gradient(135deg,_rgba(45,90,39,1),_rgba(139,69,19,0.95))] px-6 py-8 text-white shadow-2xl shadow-primary/20 sm:px-8">
+      <section className="relative overflow-hidden rounded-[32px] bg-[linear-gradient(135deg,_#2d5a27_0%,_#8b4513_100%)] px-6 py-10 text-white shadow-2xl shadow-primary/20 sm:px-10">
         <motion.div animate={{ scale: [1, 1.06, 1], opacity: [0.18, 0.28, 0.18] }} transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }} className="absolute -right-24 -top-24 h-56 w-56 rounded-full bg-white/15 blur-3xl" />
-        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.35em] text-white/70">Dashboard</p>
-            <h1 className="mt-3 text-4xl font-black">Bienvenido al panel administrativo</h1>
-            <p className="mt-4 max-w-2xl text-lg text-white/85">Gestiona galerías, categorías y contenido desde un panel pensado para moverse rápido y claro.</p>
+        <div className="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex-1">
+            <p className="text-sm font-semibold uppercase tracking-[0.35em] text-white/70">Panel General</p>
+            <h1 className="mt-3 text-4xl font-black md:text-5xl">Bienvenido de nuevo</h1>
+            <p className="mt-4 max-w-2xl text-lg text-white/85">Control total de tu ecosistema: desde la galería de fotos hasta el inventario de la tienda.</p>
           </div>
 
-          <div className="rounded-[28px] bg-white/10 px-6 py-5 backdrop-blur">
-            <p className="text-sm uppercase tracking-[0.3em] text-white/70">Estado</p>
-            <p className="mt-2 text-3xl font-black">{isLoading ? 'Cargando...' : `${summary.total} fotos`}</p>
+          <div className="flex gap-4">
+            <button
+              onClick={() => navigate('/admin/galeria')}
+              className="h-14 px-8 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 font-black text-sm uppercase tracking-widest hover:bg-white/20 transition-all flex items-center gap-3"
+            >
+              Galería
+              <ImagePlus size={18} />
+            </button>
+            <button
+              onClick={() => navigate('/admin/tienda')}
+              className="h-14 px-8 rounded-2xl bg-white shadow-xl shadow-black/20 font-black text-sm uppercase tracking-widest text-primary hover:scale-[1.03] transition-all flex items-center gap-3"
+            >
+              Tienda
+              <ShoppingBag size={18} />
+            </button>
           </div>
         </div>
       </section>
@@ -66,10 +100,10 @@ export default function AdminDashboardPage() {
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {[
-          { label: 'Fotos publicadas', value: isLoading ? '...' : String(summary.total), icon: ImageIcon, tone: 'bg-primary/10 text-primary' },
-          { label: 'Categorías activas', value: isLoading ? '...' : String(topCategories.length), icon: FolderKanban, tone: 'bg-secondary/10 text-secondary' },
-          { label: 'Última carga', value: summary.latest?.nombre ?? 'Sin datos', icon: Sparkles, tone: 'bg-accent/15 text-secondary' },
-          { label: 'Módulos', value: 'Dashboard + Galería', icon: LayoutDashboard, tone: 'bg-slate-900/5 text-slate-700' },
+          { label: 'Fotos Publicadas', value: isLoading ? '...' : String(summary.total), icon: ImageIcon, tone: 'bg-primary/10 text-primary' },
+          { label: 'Productos Tienda', value: isLoading ? '...' : String(productCount), icon: Package, tone: 'bg-secondary/10 text-secondary' },
+          { label: 'Stock Bajo', value: isLoading ? '...' : String(lowStockCount), icon: AlertTriangle, tone: lowStockCount > 0 ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-emerald-100 text-emerald-600' },
+          { label: 'Categorías Galería', value: isLoading ? '...' : String(topCategories.length), icon: FolderKanban, tone: 'bg-slate-900/5 text-slate-700' },
         ].map((card, index) => {
           const Icon = card.icon;
           return (
