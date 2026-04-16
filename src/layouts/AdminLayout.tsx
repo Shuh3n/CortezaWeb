@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ChevronLeft, Download, ImagePlus, Info, LayoutDashboard, LogOut, Menu, X } from 'lucide-react';
+import { ChevronLeft, Download, ImagePlus, Info, LayoutDashboard, LogOut, Menu, ShoppingBag, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useAdminPwa } from '../hooks/useAdminPwa';
 
 const navigation = [
   { to: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/admin/tienda', label: 'Tienda', icon: ShoppingBag },
   { to: '/admin/galeria', label: 'Galería', icon: ImagePlus },
 ];
 

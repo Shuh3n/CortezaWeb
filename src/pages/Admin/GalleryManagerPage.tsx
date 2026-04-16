@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent, type FormEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { CalendarDays, ImageUp, PencilLine, PlusCircle, Search, Tag, Trash2, Type } from 'lucide-react';
+import { CalendarDays, ImageUp, PencilLine, PlusCircle, Search, Tag, Trash2, Type, CheckCircle2, AlertCircle, Filter } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 import { deletePhoto, listAdminCategories, listAdminImages, updatePhoto, uploadPhotos } from '../../lib/adminApi';
 import type { GalleryCategory, GalleryImage } from '../../types/gallery';
+import { X } from 'lucide-react';
 
 function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'No se pudo completar la operacion.';
@@ -19,7 +21,7 @@ export default function AdminGalleryManagerPage() {
   const [searchName, setSearchName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error', msg: string } | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [editingImage, setEditingImage] = useState<GalleryImage | null>(null);
   const [editingNombre, setEditingNombre] = useState('');
@@ -63,26 +65,41 @@ export default function AdminGalleryManagerPage() {
           listAdminImages({ includeDeleted: false }),
         ]);
 
-        if (ignore) {
-          return;
-        }
+        if (ignore) return;
 
         setCategories(loadedCategories);
         setImages(loadedImages);
         setUploadCategoriaId(loadedCategories[0]?.id ?? null);
       } catch (error) {
-        if (!ignore) {
-          setErrorMessage(getErrorMessage(error));
-        }
+        if (!ignore) setErrorMessage(getErrorMessage(error));
       }
     }
 
     void loadInitialData();
 
+    // Sincronización en tiempo real para imágenes
+    const channel = supabase
+      .channel('gallery-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', table: 'imagenes', schema: 'public' },
+        async () => {
+          // Re-fetch images to ensure full relation data is loaded
+          const result = await listAdminImages({
+            categoriaId: categoryFilter === 'all' ? null : Number(categoryFilter),
+            nombre: searchName,
+            includeDeleted: false,
+          });
+          if (!ignore) setImages(result);
+        }
+      )
+      .subscribe();
+
     return () => {
       ignore = true;
+      supabase.removeChannel(channel);
     };
-  }, []);
+  }, [categoryFilter, searchName]);
 
   const totalShown = useMemo(() => images.length, [images]);
 
@@ -115,7 +132,7 @@ export default function AdminGalleryManagerPage() {
 
       setImages((current) => current.map((image) => (image.id === updated.id ? updated : image)));
       setEditingImage(null);
-      setFeedback('La imagen se actualizo correctamente.');
+      setFeedback({ type: 'success', msg: 'La imagen se actualizó correctamente.' });
     } catch (error) {
       setErrorMessage(getErrorMessage(error));
     } finally {
@@ -135,9 +152,9 @@ export default function AdminGalleryManagerPage() {
       await deletePhoto(pendingDeleteImage.id);
       setImages((current) => current.filter((image) => image.id !== pendingDeleteImage.id));
       setPendingDeleteImage(null);
-      setFeedback('La imagen se elimino correctamente.');
+      setFeedback({ type: 'success', msg: 'La imagen se eliminó correctamente.' });
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      setFeedback({ type: 'error', msg: getErrorMessage(error) });
     } finally {
       setIsSubmitting(false);
     }
@@ -203,11 +220,11 @@ export default function AdminGalleryManagerPage() {
         onProgress: (progress) => setUploadProgress(progress),
       })) as GalleryImage[];
 
-      setFeedback(`Se subieron ${created.length} imagen(es) correctamente.`);
+      setFeedback({ type: 'success', msg: `Se subieron ${created.length} imagen(es) correctamente.` });
       closeUploadModal();
       await refreshImages();
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      setFeedback({ type: 'error', msg: getErrorMessage(error) });
     } finally {
       setIsSubmitting(false);
       setUploadProgress(0);
@@ -215,48 +232,86 @@ export default function AdminGalleryManagerPage() {
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: 'easeOut' }} className="space-y-6">
-      <section className="rounded-[32px] bg-white p-6 shadow-lg shadow-primary/5 sm:p-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/60">Gestor de imagenes</p>
-            <h1 className="mt-2 text-3xl font-black text-text-h">Administra fotos de la galeria</h1>
-            <p className="mt-3 text-text-muted">Filtra por categoria, busca por nombre, edita datos o elimina con soft delete.</p>
+    <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: 'easeOut' }} className="space-y-8">
+      {/* Floating Notifications */}
+      <AnimatePresence>
+        {feedback && (
+          <motion.div
+            initial={{ opacity: 0, x: 20, scale: 0.9 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 20, scale: 0.9, transition: { duration: 0.2 } }}
+            className={`fixed top-6 right-6 z-[200] flex items-center gap-4 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-md ${feedback.type === 'success'
+              ? 'bg-emerald-50/90 border-emerald-100 text-emerald-800'
+              : 'bg-red-50/90 border-red-100 text-red-800'
+              }`}
+          >
+            <div className={`p-2 rounded-xl ${feedback.type === 'success' ? 'bg-emerald-100' : 'bg-red-100'}`}>
+              {feedback.type === 'success' ? <CheckCircle2 size={24} /> : <AlertCircle size={24} />}
+            </div>
+            <div className="flex flex-col">
+              <p className="font-black text-sm uppercase tracking-widest leading-none mb-1">
+                {feedback.type === 'success' ? 'Éxito' : 'Error'}
+              </p>
+              <p className="text-sm font-bold opacity-80">{feedback.msg}</p>
+            </div>
+            <button
+              onClick={() => setFeedback(null)}
+              className="ml-4 opacity-40 hover:opacity-100 transition-opacity"
+            >
+              <X size={20} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <section className="relative overflow-hidden rounded-[32px] bg-[linear-gradient(135deg,_#2d5a27_0%,_#8b4513_100%)] px-6 py-10 text-white shadow-2xl shadow-primary/20 sm:px-10">
+        <motion.div animate={{ scale: [1, 1.06, 1], opacity: [0.18, 0.28, 0.18] }} transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }} className="absolute -right-24 -top-24 h-56 w-56 rounded-full bg-white/15 blur-3xl" />
+        <div className="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex-1">
+            <p className="text-sm font-semibold uppercase tracking-[0.35em] text-white/70">Módulo de Galería</p>
+            <h1 className="mt-3 text-4xl font-black md:text-5xl">Gestión de Imágenes</h1>
+            <p className="mt-4 max-w-2xl text-lg text-white/85">Controla visualmente el contenido de la Fundación. Sube, edita y organiza tus fotos en un solo lugar.</p>
           </div>
 
-          <div className="rounded-3xl bg-primary/5 px-5 py-4">
-            <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary/60">Mostradas</p>
-            <p className="mt-2 text-lg font-black text-primary">{totalShown}</p>
+          <div className="rounded-[28px] bg-white/10 px-8 py-6 backdrop-blur-md border border-white/10 text-center min-w-[160px]">
+            <p className="text-[11px] font-black uppercase tracking-[0.3em] text-white/60">Total Fotos</p>
+            <p className="mt-2 text-4xl font-black">{totalShown}</p>
           </div>
         </div>
+      </section>
+
+      <section className="rounded-[32px] bg-white p-6 shadow-lg shadow-primary/5 sm:p-8">
 
         <form className="mt-8 grid gap-4 md:grid-cols-[1fr_1fr_auto_auto]" onSubmit={handleSubmitFilters}>
-          <label className="block">
-            <span className="mb-2 block text-sm font-bold text-text-main">Categoria</span>
-            <select
-              value={categoryFilter}
-              onChange={(event) => setCategoryFilter(event.target.value)}
-              className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
-            >
-              <option value="all">Todas</option>
-              {categories.map((category) => (
-                <option key={category.id} value={String(category.id)}>
-                  {category.nombre}
-                </option>
-              ))}
-            </select>
+          <label className="block relative">
+            <span className="mb-2 block text-xs font-black uppercase tracking-widest text-primary/50">Categoría</span>
+            <div className="relative">
+              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary/30 pointer-events-none" />
+              <select
+                value={categoryFilter}
+                onChange={(event) => setCategoryFilter(event.target.value)}
+                className="w-full h-12 pl-12 pr-4 rounded-2xl border border-primary/10 bg-neutral-soft/50 text-sm font-bold text-text-h outline-none transition focus:border-primary focus:bg-white appearance-none cursor-pointer"
+              >
+                <option value="all">Todas las categorías</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={String(category.id)}>
+                    {category.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-sm font-bold text-text-main">Buscar por nombre</span>
-            <div className="flex items-center gap-2 rounded-2xl border border-primary/10 bg-neutral-soft px-3 py-2">
-              <Search className="h-4 w-4 text-primary" />
+            <span className="mb-2 block text-xs font-black uppercase tracking-widest text-primary/50">Nombre</span>
+            <div className="flex h-12 items-center gap-3 rounded-2xl border border-primary/10 bg-neutral-soft/50 px-4 focus-within:border-primary focus-within:bg-white transition-all">
+              <Search className="h-5 w-5 text-primary/30" />
               <input
                 type="text"
                 value={searchName}
                 onChange={(event) => setSearchName(event.target.value)}
-                placeholder="Ej: rescate, jornada, peludo"
-                className="w-full bg-transparent py-1 outline-none"
+                placeholder="Buscar por nombre..."
+                className="w-full bg-transparent text-sm font-bold text-text-h outline-none placeholder:text-text-muted/30"
               />
             </div>
           </label>
@@ -264,51 +319,25 @@ export default function AdminGalleryManagerPage() {
           <button
             type="submit"
             disabled={isLoading}
-            className="mt-auto inline-flex h-12 cursor-pointer items-center justify-center rounded-2xl bg-primary px-5 font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+            className="inline-flex h-12 items-center justify-center rounded-2xl bg-primary px-8 font-black text-[11px] uppercase tracking-widest text-white shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100"
           >
-            Buscar
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setCategoryFilter('all');
-              setSearchName('');
-              void (async () => {
-                setIsLoading(true);
-                setErrorMessage(null);
-                try {
-                  const result = await listAdminImages({ includeDeleted: false });
-                  setImages(result);
-                } catch (error) {
-                  setErrorMessage(getErrorMessage(error));
-                } finally {
-                  setIsLoading(false);
-                }
-              })();
-            }}
-            className="mt-auto inline-flex h-12 cursor-pointer items-center justify-center rounded-2xl border border-primary/10 bg-white px-5 font-semibold text-primary transition hover:-translate-y-0.5"
-          >
-            Limpiar
+            Filtrar
           </button>
 
           <button
             type="button"
             onClick={() => setIsUploadModalOpen(true)}
-            className="mt-auto inline-flex h-12 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-secondary px-5 font-bold text-white transition hover:opacity-90"
+            className="inline-flex h-12 items-center justify-center gap-3 rounded-2xl bg-white border border-primary/10 px-8 font-black text-[11px] uppercase tracking-widest text-primary shadow-sm hover:bg-neutral-soft transition-all active:scale-95"
           >
-            <PlusCircle className="h-4 w-4" />
-            Agregar fotos
+            <PlusCircle className="h-5 w-5" />
+            Subir Fotos
           </button>
         </form>
-
-        {errorMessage ? <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{errorMessage}</div> : null}
-        {feedback ? <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">{feedback}</div> : null}
       </section>
 
       <section className="rounded-[32px] bg-white p-6 shadow-lg shadow-primary/5 sm:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/60">Resultados</p>
-        <h2 className="mt-2 text-2xl font-black text-text-h">Imagenes cargadas</h2>
+        <h2 className="mt-2 text-2xl font-black text-text-h">Imágenes Cargadas</h2>
 
         <div className="mt-6 space-y-4">
           {isLoading ? (
@@ -317,34 +346,43 @@ export default function AdminGalleryManagerPage() {
             <div className="rounded-3xl border border-dashed border-primary/20 bg-primary/5 px-5 py-8 text-center text-text-muted">No hay imagenes para los filtros seleccionados.</div>
           ) : (
             images.map((image) => (
-              <div key={image.id} className="flex flex-col gap-4 rounded-3xl border border-primary/10 p-4 md:flex-row md:items-center md:justify-between">
-                <div className="flex min-w-0 items-center gap-4">
-                  <img src={image.url} alt={image.nombre ?? 'Imagen de galeria'} className="h-20 w-20 rounded-2xl object-cover" />
+              <motion.div
+                key={image.id}
+                layout
+                className="flex flex-col gap-5 rounded-[28px] bg-white p-5 shadow-sm border border-primary/5 hover:shadow-xl hover:shadow-primary/5 transition-all md:flex-row md:items-center md:justify-between group"
+              >
+                <div className="flex min-w-0 items-center gap-5">
+                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-primary/5">
+                    <img src={image.url} alt={image.nombre ?? 'Imagen de galeria'} className="h-full w-full object-cover transition-transform group-hover:scale-110" />
+                  </div>
                   <div className="min-w-0">
-                    <p className="truncate text-xl font-black text-text-h">{image.nombre ?? 'Sin nombre'}</p>
-                    <p className="mt-1 text-sm text-text-muted">{image.categoria?.nombre ?? 'Sin categoria'} • {image.fecha}</p>
+                    <p className="truncate text-xl font-black text-text-h">{image.nombre || 'Sin nombre'}</p>
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="px-2.5 py-1 rounded-lg bg-neutral-soft text-[10px] font-black uppercase tracking-widest text-text-muted border border-primary/5">
+                        {image.categoria?.nombre || 'General'}
+                      </span>
+                      <span className="text-[10px] font-bold text-text-muted/60 uppercase tracking-wider">
+                        {image.fecha}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-3">
+                <div className="flex gap-2">
                   <button
-                    type="button"
                     onClick={() => handleOpenEdit(image)}
-                    className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary shadow-sm transition hover:-translate-y-0.5"
+                    className="p-3 rounded-2xl text-primary bg-white border border-primary/10 shadow-sm hover:scale-110 transition-all font-black"
                   >
-                    <PencilLine className="h-4 w-4" />
-                    Editar
+                    <PencilLine size={18} />
                   </button>
                   <button
-                    type="button"
                     onClick={() => setPendingDeleteImage(image)}
-                    className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 font-semibold text-red-700 transition hover:-translate-y-0.5"
+                    className="p-3 rounded-2xl text-red-500 bg-white border border-primary/10 shadow-sm hover:scale-110 transition-all font-black"
                   >
-                    <Trash2 className="h-4 w-4" />
-                    Eliminar
+                    <Trash2 size={18} />
                   </button>
                 </div>
-              </div>
+              </motion.div>
             ))
           )}
         </div>
