@@ -88,6 +88,9 @@ const SalvatoreStore = () => {
             const updatedProduct = payload.new as Product;
             setProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p)
               .sort((a, b) => a.name.localeCompare(b.name)));
+            
+            // Sincronizar el producto seleccionado si está abierto en el modal
+            setSelectedProduct(prev => prev?.id === updatedProduct.id ? updatedProduct : prev);
           } else if (payload.eventType === 'DELETE') {
             setProducts(prev => prev.filter(p => p.id !== payload.old.id));
           }
