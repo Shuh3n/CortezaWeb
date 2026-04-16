@@ -10,9 +10,10 @@ const Navbar = () => {
   const location = useLocation();
   const isHome = location.pathname === '/';
 
+
   const navItems = [
     { label: 'Inicio', path: '/' },
-    { label: 'Adoptar y Apadrinar', path:'/adoptar'},
+    { label: 'Adoptar y Apadrinar', path: '/adoptar' },
     { label: 'Nosotros', path: '/nosotros' },
     { label: 'Salvatón', path: '/salvaton' },
     { label: 'Voluntario', path: '/voluntario' },
@@ -28,7 +29,7 @@ const Navbar = () => {
     if (path === '/') {
       return currentPath === '/' && !currentHash;
     }
-    
+
     if (path.includes('#')) {
       const [p, h] = path.split('#');
       return currentPath === p && currentHash === `#${h}`;
@@ -43,7 +44,7 @@ const Navbar = () => {
 
   const handleNavClick = (path: string) => {
     setIsOpen(false);
-    
+
     // Si el path tiene un hash (ej: /#adopcion)
     if (path.includes('#')) {
       const [p, h] = path.split('#');
