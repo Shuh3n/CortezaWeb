@@ -109,12 +109,15 @@ export default function AdminLayout() {
           <div className="flex h-full flex-col">
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-6">
               {showExpandedDesktop ? (
-                <div>
-                  <p className="text-sm uppercase tracking-[0.3em] text-white/70">Panel</p>
-                  <h1 className="text-2xl font-black">Corteza</h1>
+                <div className="flex items-center gap-3">
+                  <img src="/logo.png" alt="Corteza" className="h-10 w-10 rounded-xl bg-white/10 p-1" />
+                  <div>
+                    <p className="text-sm uppercase tracking-[0.3em] text-white/70">Panel</p>
+                    <h1 className="text-2xl font-black">Corteza</h1>
+                  </div>
                 </div>
               ) : (
-                <img src="/icons/favicon-48x48.png" alt="Corteza" className="h-10 w-10 rounded-2xl bg-white/10 p-2" />
+                <img src="/logo.png" alt="Corteza" className="h-10 w-10 rounded-2xl bg-white/10 p-1" />
               )}
 
               <div className="flex items-center gap-2">

@@ -1,6 +1,6 @@
 ﻿import { useState, type FormEvent } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { LockKeyhole, Mail, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, LockKeyhole, Mail, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 
@@ -15,6 +15,7 @@ function getErrorMessage(error: unknown) {
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { user, isLoading, signIn } = useAuth();
@@ -98,13 +99,28 @@ export default function AdminLoginPage() {
                 <span className="mb-2 block text-sm font-bold text-text-main">Contraseña</span>
                 <div className="flex items-center gap-3 rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 shadow-sm transition focus-within:-translate-y-0.5 focus-within:border-primary">
                   <LockKeyhole className="h-5 w-5 text-primary" />
-                  <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} required autoComplete="current-password" placeholder="••••••••" className="w-full bg-transparent text-base outline-none" />
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                    required
+                    autoComplete="current-password"
+                    placeholder="••••••••"
+                    className="w-full bg-transparent text-base outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="text-primary/60 transition hover:text-primary"
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
                 </div>
               </label>
 
               {errorMessage ? <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">{errorMessage}</motion.div> : null}
 
-              <motion.button whileHover={{ scale: 1.01, y: -2 }} whileTap={{ scale: 0.99 }} type="submit" disabled={isSubmitting} className="w-full rounded-2xl bg-primary px-6 py-4 text-lg font-bold text-white shadow-lg shadow-primary/20 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70">{isSubmitting ? 'Validando acceso...' : 'Entrar'}</motion.button>
+              <motion.button whileHover={{ scale: 1.01, y: -2 }} whileTap={{ scale: 0.99 }} type="submit" disabled={isSubmitting} className="w-full cursor-pointer rounded-2xl bg-primary px-6 py-4 text-lg font-bold text-white shadow-lg shadow-primary/20 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70">{isSubmitting ? 'Validando acceso...' : 'Entrar'}</motion.button>
             </form>
           </div>
         </section>
