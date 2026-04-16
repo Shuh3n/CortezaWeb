@@ -1,5 +1,6 @@
 ﻿import { useEffect, useMemo, useState } from 'react';
-import { ImageIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { ArrowRight, ImageIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { listGalleryImages } from '../lib/gallery';
 import type { GalleryImage } from '../types/gallery';
@@ -54,7 +55,7 @@ export default function GallerySection() {
 
   return (
     <section className="bg-neutral-soft px-4 py-20">
-      <div className="mx-auto w-full max-w-7xl">
+      <div className="mx-auto w-full max-w-[70%]">
         <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.55, ease: 'easeOut' }} className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-bold text-primary"><ImageIcon className="h-4 w-4" />Galería canina</span>
@@ -75,17 +76,30 @@ export default function GallerySection() {
         ) : featuredImages.length === 0 ? (
           <div className="rounded-[32px] border border-dashed border-primary/20 bg-white p-10 text-center"><p className="text-xl font-bold text-primary">Todavía no hay fotos cargadas.</p><p className="mt-2 text-text-muted">En cuanto el administrador publique imágenes, esta sección se actualizará automáticamente.</p></div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {featuredImages.map((image, index) => (
-              <motion.article key={image.id} initial={{ opacity: 0, y: 28 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.25 }} transition={{ duration: 0.45, delay: index * 0.06, ease: 'easeOut' }} className="overflow-hidden rounded-[32px] bg-white shadow-xl shadow-primary/8 transition hover:-translate-y-1">
-                <img src={image.url} alt={image.nombre} className="h-72 w-full object-cover" />
-                <div className="space-y-4 p-6">
-                  <div className="flex items-center justify-between gap-3"><span className="rounded-full bg-primary/10 px-4 py-2 text-sm font-bold text-primary">{image.categoria.nombre}</span><span className="text-sm font-medium text-text-muted">{formatGalleryDate(image.fecha)}</span></div>
-                  <h3 className="text-2xl font-black text-text-h">{image.nombre}</h3>
-                </div>
-              </motion.article>
-            ))}
-          </div>
+          <>
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+              {featuredImages.map((image, index) => (
+                <motion.article
+                  key={image.id}
+                  initial={{ opacity: 0, y: 28 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.25 }}
+                  transition={{ duration: 0.45, delay: index * 0.06, ease: 'easeOut' }}
+                  className="aspect-square overflow-hidden rounded-[32px] bg-white shadow-xl shadow-primary/8 transition hover:-translate-y-1"
+                >
+                  <img
+                    src={image.url}
+                    alt="Galería"
+                    className="h-full w-full object-cover transition duration-500 hover:scale-110"
+                  />
+                </motion.article>
+              ))}
+            </div>
+
+            <div className="mt-12 text-center">
+              <Link to="/galeria" className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-primary px-8 py-4 font-bold text-white shadow-lg shadow-primary/25 transition hover:scale-105 hover:bg-primary/90">Ver galería completa <ArrowRight className="h-5 w-5" /></Link>
+            </div>
+          </>
         )}
       </div>
     </section>
