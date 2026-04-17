@@ -71,7 +71,7 @@ const Footer = () => {
             <ul className="space-y-4 text-text-muted font-medium">
               <li><Link to="/salvaton" className="hover:text-primary transition-colors">Salvatón Animal</Link></li>
               <li><Link to="/voluntario" className="hover:text-primary transition-colors">Ser Voluntario</Link></li>
-              <li><Link to="/contacto" className="hover:text-primary transition-colors">Apadrinar</Link></li>
+              <li><Link to="/adoptar" className="hover:text-primary transition-colors">Apadrinar</Link></li>
             </ul>
           </div>
         </div>

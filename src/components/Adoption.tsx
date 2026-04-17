@@ -58,16 +58,10 @@ const Adoption = () => {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => window.location.href = "/adoptar"}
                 className="bg-primary text-white px-10 py-5 rounded-2xl font-bold text-xl hover:shadow-2xl hover:shadow-primary/20 transition-all shadow-lg"
               >
                 Ver Animales para Adopción
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="bg-white text-primary border-2 border-primary px-10 py-5 rounded-2xl font-bold text-xl hover:bg-primary/5 transition-all"
-              >
-                Formulario de Solicitud
               </motion.button>
             </div>
           </div>
