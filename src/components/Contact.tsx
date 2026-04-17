@@ -24,8 +24,8 @@ const Contact = () => {
   ];
 
   return (
-    <section id="contacto" className="py-24 bg-neutral-soft overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="contacto" className="py-24 bg-neutral-soft overflow-hidden px-4">
+      <div className="w-full lg:w-[85%] xl:w-[70%] mx-auto">
         <div className="grid lg:grid-cols-2 gap-16 items-start">
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -63,35 +63,6 @@ const Contact = () => {
                 </motion.div>
               ))}
             </div>
-
-            {/* Social Media Links */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.4 }}
-              className="mt-12 flex items-center gap-6"
-            >
-              <p className="text-text-muted font-bold text-sm uppercase tracking-widest">Síguenos:</p>
-              <div className="flex gap-4">
-                <a
-                  href="https://www.instagram.com/corteza_terrestre/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all shadow-sm group"
-                >
-                  <Globe size={24} className="group-hover:scale-110 transition-transform" />
-                </a>
-                <a
-                  href="https://www.facebook.com/cortezaterrestre/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all shadow-sm group"
-                >
-                  <MessageCircle size={24} className="group-hover:scale-110 transition-transform" />
-                </a>
-              </div>
-            </motion.div>
           </motion.div>
 
           <motion.div
@@ -99,12 +70,17 @@ const Contact = () => {
             whileInView={{ opacity: 1, scale: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="w-full h-full min-h-[400px] bg-slate-200 rounded-[48px] overflow-hidden shadow-inner border-8 border-white flex items-center justify-center"
+            className="w-full h-full min-h-[400px] rounded-[48px] overflow-hidden shadow-2xl border-8 border-white group relative"
           >
-            <div className="text-center p-8">
-              <Mail size={48} className="mx-auto mb-4 text-primary opacity-20" />
-              <h3 className="text-2xl font-bold text-text-h mb-2">Fundación Corteza Terrestre</h3>
-              <p className="text-text-muted font-medium italic">"Luchamos por los que no tienen voz"</p>
+            <img 
+              src="/images/cuidado-gatos.jpg" 
+              alt="Hablemos" 
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-primary/60 via-transparent to-transparent opacity-60" />
+            <div className="absolute bottom-10 left-10 right-10 z-10">
+              <h3 className="text-2xl font-bold text-white mb-2">Fundación Corteza Terrestre</h3>
+              <p className="text-white/90 font-medium italic">"Luchamos por los que no tienen voz"</p>
             </div>
           </motion.div>
         </div>

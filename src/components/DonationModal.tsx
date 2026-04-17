@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, ShieldCheck, Landmark } from 'lucide-react';
+import { X, Heart, ShieldCheck, Copy, Check } from 'lucide-react';
+import { useState } from 'react';
 
 interface DonationModalProps {
   isOpen: boolean;
@@ -7,6 +8,14 @@ interface DonationModalProps {
 }
 
 const DonationModal = ({ isOpen, onClose }: DonationModalProps) => {
+  const [copiedAccount, setCopiedAccount] = useState<string | null>(null);
+
+  const handleCopy = (text: string, id: string) => {
+    void navigator.clipboard.writeText(text);
+    setCopiedAccount(id);
+    setTimeout(() => setCopiedAccount(null), 2000);
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -17,11 +26,11 @@ const DonationModal = ({ isOpen, onClose }: DonationModalProps) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-primary/20 backdrop-blur-sm z-[100]"
+            className="fixed inset-0 bg-primary/40 backdrop-blur-sm z-[100] cursor-pointer"
           />
           
           {/* Modal Container */}
-          <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-[101] px-4">
+          <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-[110] px-4">
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -30,10 +39,14 @@ const DonationModal = ({ isOpen, onClose }: DonationModalProps) => {
             >
               {/* Close Button */}
               <button 
-                onClick={onClose}
-                className="absolute top-6 right-6 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors text-primary z-10"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClose();
+                }}
+                className="absolute top-6 right-6 p-3 bg-white/90 rounded-full shadow-lg hover:bg-white transition-all text-primary z-[120] hover:scale-110 active:scale-95 cursor-pointer border border-primary/10"
+                aria-label="Cerrar modal"
               >
-                <X size={24} />
+                <X size={24} strokeWidth={3} />
               </button>
 
               {/* Header */}
@@ -45,43 +58,59 @@ const DonationModal = ({ isOpen, onClose }: DonationModalProps) => {
                   <span className="inline-block px-4 py-1 rounded-full bg-white/20 text-xs font-bold tracking-widest uppercase mb-4">
                     Tu apoyo salva vidas
                   </span>
-                  <h3 className="text-3xl font-black italic">¿Deseas Donar?</h3>
+                  <h3 className="text-3xl font-black italic">¿DÓNDE DONAR?</h3>
                 </div>
               </div>
 
               {/* Content */}
-              <div className="p-10 space-y-8">
-                <div className="flex items-center gap-6 p-6 bg-neutral-soft rounded-3xl border border-primary/5">
-                  <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center flex-shrink-0">
-                    <Landmark className="text-primary" size={24} />
+              <div className="p-8 space-y-6">
+                <div className="p-6 bg-neutral-soft rounded-3xl border border-primary/5 space-y-4 text-center">
+                  <div className="space-y-1">
+                    <h4 className="font-black text-text-h uppercase text-xs tracking-wider">A nombre de:</h4>
+                    <p className="text-primary font-bold text-lg">Fundación Corteza Terrestre</p>
+                    <p className="text-text-muted font-bold text-sm uppercase tracking-widest">NIT: 900.126.931</p>
                   </div>
-                  <div>
-                    <h4 className="font-black text-text-h uppercase text-xs tracking-wider mb-1">Fundación Corteza Terrestre</h4>
-                    <p className="text-primary font-bold text-sm mb-2">NIT. 900.563.303-3</p>
-                    <h4 className="font-black text-text-h uppercase text-xs tracking-wider mb-1">Cuenta de Ahorros Bancolombia</h4>
-                    <p className="text-xl font-bold text-primary"># 06871131154</p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+                    <div className="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center group relative">
+                      <h4 className="font-black text-text-h uppercase text-[10px] tracking-wider mb-1">Bancolombia</h4>
+                      <p className="text-xs font-bold text-text-muted mb-1">Ahorros</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-primary font-bold">31900001585</p>
+                        <button 
+                          onClick={() => handleCopy('31900001585', 'bancolombia')}
+                          className="p-1.5 hover:bg-primary/5 rounded-lg transition-colors text-primary/60 hover:text-primary"
+                          title="Copiar cuenta"
+                        >
+                          {copiedAccount === 'bancolombia' ? <Check size={14} /> : <Copy size={14} />}
+                        </button>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-white rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center group relative">
+                      <h4 className="font-black text-text-h uppercase text-[10px] tracking-wider mb-1">Davivienda</h4>
+                      <p className="text-xs font-bold text-text-muted mb-1">Ahorros</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-primary font-bold">108900693624</p>
+                        <button 
+                          onClick={() => handleCopy('108900693624', 'davivienda')}
+                          className="p-1.5 hover:bg-primary/5 rounded-lg transition-colors text-primary/60 hover:text-primary"
+                          title="Copiar cuenta"
+                        >
+                          {copiedAccount === 'davivienda' ? <Check size={14} /> : <Copy size={14} />}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="text-center space-y-4">
-                  <div className="relative inline-block group">
-                    <div className="absolute inset-0 bg-primary/10 rounded-3xl blur-xl group-hover:bg-primary/20 transition-all" />
-                    <img 
-                      src="/images/QR-BANCOLOMBIA.jpg" 
-                      alt="QR Bancolombia" 
-                      className="relative w-48 h-48 mx-auto rounded-2xl border-2 border-primary/10 bg-white"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=DonacionCortezaTerrestre';
-                      }}
-                    />
-                  </div>
-                  <p className="text-sm text-text-muted font-medium px-8 leading-relaxed">
-                    Escanea este código desde tu App Bancolombia para realizar tu aporte directamente a la fundación.
+                <div className="p-6 bg-primary/5 rounded-[24px] border border-primary/10 text-center">
+                  <p className="text-sm text-primary font-bold leading-relaxed italic">
+                    "Solicita tu certificado de donación y obten beneficios tributarios del 25%."
                   </p>
                 </div>
 
-                <div className="pt-4 flex justify-center items-center gap-2 text-primary/60 font-bold text-xs uppercase tracking-widest">
-                  <ShieldCheck size={16} />
+                <div className="pt-2 flex justify-center items-center gap-2 text-primary/40 font-bold text-[10px] uppercase tracking-widest">
+                  <ShieldCheck size={14} />
                   Transacción protegida y segura
                 </div>
               </div>

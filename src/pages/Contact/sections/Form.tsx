@@ -224,7 +224,11 @@ const ContactForm = () => {
                   rel="noopener noreferrer"
                   className="w-14 h-14 rounded-2xl bg-neutral-soft flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group shadow-sm border border-slate-100"
                 >
-                  <Globe size={24} className="group-hover:scale-110 transition-transform" />
+                  <img
+                      src="/icons/instagram.svg"
+                      alt="Instagram"
+                      className="w-6 h-6 group-hover:brightness-0 group-hover:invert transition-all group-hover:scale-110"
+                  />
                 </a>
                 <a
                   href="https://www.facebook.com/cortezaterrestre/"
@@ -232,7 +236,11 @@ const ContactForm = () => {
                   rel="noopener noreferrer"
                   className="w-14 h-14 rounded-2xl bg-neutral-soft flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group shadow-sm border border-slate-100"
                 >
-                  <MessageCircle size={24} className="group-hover:scale-110 transition-transform" />
+                  <img
+                      src="/icons/facebook.svg"
+                      alt="Facebook"
+                      className="w-6 h-6 group-hover:brightness-0 group-hover:invert transition-all group-hover:scale-110"
+                  />
                 </a>
               </div>
             </motion.div>
