@@ -31,7 +31,7 @@ const DonationModal = ({ isOpen, onClose }: DonationModalProps) => {
               {/* Close Button */}
               <button 
                 onClick={onClose}
-                className="absolute top-6 right-6 p-2 hover:bg-neutral-soft rounded-full transition-colors text-text-muted hover:text-primary z-10"
+                className="absolute top-6 right-6 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors text-primary z-10"
               >
                 <X size={24} />
               </button>
