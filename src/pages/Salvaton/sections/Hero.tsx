@@ -1,13 +1,16 @@
 import { motion } from 'framer-motion';
+import { useModal } from '../../../context/ModalContext';
 
 const SalvatonHero = () => {
+  const { openDonationModal } = useModal();
+
   return (
     <section className="relative pt-40 pb-20 px-4 overflow-hidden bg-primary text-white">
       {/* Basic Background Image - No Fixed Effect */}
       <div className="absolute inset-0 z-0">
-        <img 
-          src="/images/baner-salvaton.jpg" 
-          alt="" 
+        <img
+          src="/images/baner-salvaton.jpg"
+          alt=""
           className="w-full h-full object-cover brightness-75 contrast-125"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/40 to-transparent" />
@@ -39,7 +42,8 @@ const SalvatonHero = () => {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="bg-accent text-white px-10 py-5 rounded-2xl font-bold text-xl shadow-xl shadow-accent/20 hover:shadow-accent/40 transition-all"
+              onClick={openDonationModal}
+              className="bg-accent text-white px-10 py-5 rounded-2xl font-bold text-xl shadow-xl shadow-accent/20 hover:shadow-accent/40 transition-all cursor-pointer"
             >
               Quiero Donar
             </motion.button>
@@ -49,5 +53,4 @@ const SalvatonHero = () => {
     </section>
   );
 };
-
 export default SalvatonHero;

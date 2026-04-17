@@ -8,14 +8,12 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { openDonationModal } = useModal();
   const location = useLocation();
-  const isHome = location.pathname === '/';
-
 
   const navItems = [
     { label: 'Inicio', path: '/' },
-    { label: 'Adoptar y Apadrinar', path: '/adoptar' },
     { label: 'Nosotros', path: '/nosotros' },
     { label: 'Salvatón', path: '/salvaton' },
+    { label: 'Adoptar y Apadrinar', path: '/adoptar' },
     { label: 'Voluntario', path: '/voluntario' },
     { label: 'Tienda', path: '/tienda' },
     { label: 'Galería', path: '/galeria' },

@@ -22,7 +22,6 @@ export default function AdminGalleryManagerPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error', msg: string } | null>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [editingImage, setEditingImage] = useState<GalleryImage | null>(null);
   const [editingNombre, setEditingNombre] = useState('');
   const [editingFecha, setEditingFecha] = useState(today());
@@ -41,7 +40,6 @@ export default function AdminGalleryManagerPage() {
 
   async function refreshImages() {
     setIsLoading(true);
-    setErrorMessage(null);
 
     try {
       const result = await listAdminImages({
@@ -52,7 +50,7 @@ export default function AdminGalleryManagerPage() {
       setImages(result);
       setCurrentPage(1);
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      setFeedback({ type: 'error', msg: getErrorMessage(error) });
     } finally {
       setIsLoading(false);
     }
@@ -74,9 +72,8 @@ export default function AdminGalleryManagerPage() {
         setImages(loadedImages);
         setUploadCategoriaId(loadedCategories[0]?.id ?? null);
       } catch (error) {
-        if (!ignore) setErrorMessage(getErrorMessage(error));
-      }
-    }
+        if (!ignore) setFeedback({ type: 'error', msg: getErrorMessage(error) });
+      }    }
 
     void loadInitialData();
 
@@ -116,19 +113,17 @@ export default function AdminGalleryManagerPage() {
     setEditingNombre(image.nombre ?? '');
     setEditingFecha(image.fecha || today());
     setEditingCategoriaId(image.categoria_id);
-    setErrorMessage(null);
     setFeedback(null);
   }
 
   async function handleSaveEdit() {
     if (!editingImage || !editingCategoriaId) {
-      setErrorMessage('Debe seleccionar una categoria para actualizar la imagen.');
+      setFeedback({ type: 'error', msg: 'Debe seleccionar una categoria para actualizar la imagen.' });
       return;
     }
 
     try {
       setIsSubmitting(true);
-      setErrorMessage(null);
       setFeedback(null);
 
       const updated = (await updatePhoto({
@@ -142,7 +137,7 @@ export default function AdminGalleryManagerPage() {
       setEditingImage(null);
       setFeedback({ type: 'success', msg: 'La imagen se actualizó correctamente.' });
     } catch (error) {
-      setErrorMessage(getErrorMessage(error));
+      setFeedback({ type: 'error', msg: getErrorMessage(error) });
     } finally {
       setIsSubmitting(false);
     }
@@ -155,7 +150,6 @@ export default function AdminGalleryManagerPage() {
 
     try {
       setIsSubmitting(true);
-      setErrorMessage(null);
       setFeedback(null);
       await deletePhoto(pendingDeleteImage.id);
       setImages((current) => current.filter((image) => image.id !== pendingDeleteImage.id));
@@ -205,18 +199,17 @@ export default function AdminGalleryManagerPage() {
     event.preventDefault();
 
     if (!uploadCategoriaId) {
-      setErrorMessage('Seleccione una categoria para subir las imagenes.');
+      setFeedback({ type: 'error', msg: 'Seleccione una categoria para subir las imagenes.' });
       return;
     }
 
     if (uploadFiles.length === 0) {
-      setErrorMessage('Seleccione al menos una imagen para subir.');
+      setFeedback({ type: 'error', msg: 'Seleccione al menos una imagen para subir.' });
       return;
     }
 
     try {
       setIsSubmitting(true);
-      setErrorMessage(null);
       setFeedback(null);
       setUploadProgress(0);
 
@@ -342,62 +335,33 @@ export default function AdminGalleryManagerPage() {
           >
             Filtrar
           </button>
-
-          <button
-            type="button"
-            onClick={() => setIsUploadModalOpen(true)}
-            className="inline-flex h-12 items-center justify-center gap-3 rounded-2xl bg-white border border-primary/10 px-8 font-black text-[11px] uppercase tracking-widest text-primary shadow-sm hover:bg-neutral-soft transition-all active:scale-95"
-          >
-            <PlusCircle className="h-5 w-5" />
-            Subir Fotos
-          </button>
         </form>
       </section>
 
       <section className="rounded-[32px] bg-white p-6 shadow-lg shadow-primary/5 sm:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/60">Resultados</p>
-        <h2 className="mt-2 text-2xl font-black text-text-h">Imágenes Cargadas</h2>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="mt-2 text-2xl font-black text-text-h">Imagenes cargadas</h2>
-          <p className="text-sm text-text-muted">Pagina {currentPage} de {totalPages}</p>
+          <h2 className="mt-2 text-2xl font-black text-text-h">Imágenes Cargadas</h2>
+          <p className="text-sm text-text-muted">Página {currentPage} de {totalPages}</p>
         </div>
 
         <div className="mt-6">
           {isLoading ? (
-            <div className="rounded-3xl border border-primary/10 bg-primary/5 px-5 py-8 text-center text-text-muted">Cargando imagenes...</div>
+            <div className="rounded-3xl border border-primary/10 bg-primary/5 px-5 py-8 text-center text-text-muted">Cargando imágenes...</div>
           ) : images.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-primary/20 bg-primary/5 px-5 py-8 text-center text-text-muted">No hay imagenes para los filtros seleccionados.</div>
+            <div className="rounded-3xl border border-dashed border-primary/20 bg-primary/5 px-5 py-8 text-center text-text-muted">No hay imágenes para los filtros seleccionados.</div>
           ) : (
-            images.map((image) => (
-              <motion.div
-                key={image.id}
-                layout
-                className="flex flex-col gap-5 rounded-[28px] bg-white p-5 shadow-sm border border-primary/5 hover:shadow-xl hover:shadow-primary/5 transition-all md:flex-row md:items-center md:justify-between group"
-              >
-                <div className="flex min-w-0 items-center gap-5">
-                  <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-primary/5">
-                    <img src={image.url} alt={image.nombre ?? 'Imagen de galeria'} className="h-full w-full object-cover transition-transform group-hover:scale-110" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate text-xl font-black text-text-h">{image.nombre || 'Sin nombre'}</p>
-                    <div className="mt-1 flex items-center gap-2">
-                      <span className="px-2.5 py-1 rounded-lg bg-neutral-soft text-[10px] font-black uppercase tracking-widest text-text-muted border border-primary/5">
-                        {image.categoria?.nombre || 'General'}
-                      </span>
-                      <span className="text-[10px] font-bold text-text-muted/60 uppercase tracking-wider">
-                        {image.fecha}
-                      </span>
             <>
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {paginatedImages.map((image) => (
                   <div key={image.id} className="group overflow-hidden rounded-[32px] border border-primary/10 bg-white transition hover:shadow-xl hover:shadow-primary/5">
                     <div className="relative aspect-square overflow-hidden bg-neutral-100">
-                      <img src={image.url} alt={image.nombre ?? 'Imagen de galeria'} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
+                      <img src={image.url} alt={image.nombre ?? 'Imagen de galería'} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
                     </div>
                     <div className="space-y-3 p-5">
                       <div className="min-w-0">
                         <p className="truncate text-lg font-black text-text-h">{image.nombre ?? 'Sin nombre'}</p>
-                        <p className="mt-1 truncate text-sm text-text-muted">{image.categoria?.nombre ?? 'Sin categoria'}</p>
+                        <p className="mt-1 truncate text-sm text-text-muted">{image.categoria?.nombre ?? 'Sin categoría'}</p>
                         <p className="text-xs text-primary/60 font-semibold uppercase tracking-wider">{image.fecha}</p>
                       </div>
 
@@ -423,12 +387,6 @@ export default function AdminGalleryManagerPage() {
                 ))}
               </div>
 
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleOpenEdit(image)}
-                    className="p-3 rounded-2xl text-primary bg-white border border-primary/10 shadow-sm hover:scale-110 transition-all font-black"
-                  >
-                    <PencilLine size={18} />
               {totalPages > 1 && (
                 <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
                   <button
@@ -465,14 +423,6 @@ export default function AdminGalleryManagerPage() {
                     })}
                   </div>
                   <button
-                    onClick={() => setPendingDeleteImage(image)}
-                    className="p-3 rounded-2xl text-red-500 bg-white border border-primary/10 shadow-sm hover:scale-110 transition-all font-black"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              </motion.div>
-            ))
                     type="button"
                     onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
                     disabled={currentPage === totalPages}

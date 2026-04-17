@@ -5,15 +5,6 @@ import { motion } from 'framer-motion';
 import { listGalleryImages } from '../lib/gallery';
 import type { GalleryImage } from '../types/gallery';
 
-function formatGalleryDate(date: string) {
-  return new Intl.DateTimeFormat('es-CO', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    timeZone: 'UTC',
-  }).format(new Date(`${date}T00:00:00.000Z`));
-}
-
 export default function GallerySection() {
   const [images, setImages] = useState<GalleryImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);

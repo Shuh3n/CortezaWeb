@@ -5,7 +5,6 @@ import {
   Search,
   PencilLine,
   Trash2,
-  Tag,
   ImagePlus,
   Loader2,
   X,
