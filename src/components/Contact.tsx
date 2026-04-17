@@ -1,4 +1,4 @@
-import { Mail, Phone, Clock, Globe, MessageCircle } from 'lucide-react';
+import { Mail, Phone, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Contact = () => {
