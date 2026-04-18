@@ -6,40 +6,31 @@ import ActionModal from './sections/ActionModal';
 import CtaBanner from './sections/CtaBanner';
 import type { Pet, Species } from './types';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 
-/** Mapea un peludo de la Edge Function al tipo Pet que usa la UI */
 function mapPeludoToPet(p: {
     id: number;
     nombre: string;
     sexo: 'macho' | 'hembra';
-    edad: number;           // en meses
+    edad: number;
     caracteristicas: string;
     especie: string;
     peso: number | null;
+    esterilizado: boolean;
+    vacunado: boolean;
+    desparasitado: boolean;
     imagenes?: { id: number; url: string }[];
 }): Pet {
     const especieLower = p.especie.toLowerCase();
     const species: Pet['species'] =
-        especieLower.includes('perro') || especieLower.includes('dog')
-            ? 'dog'
-            : especieLower.includes('gato') || especieLower.includes('cat')
-                ? 'cat'
+        especieLower.includes('perro') || especieLower.includes('dog') ? 'dog'
+            : especieLower.includes('gato') || especieLower.includes('cat') ? 'cat'
                 : 'other';
 
     const age_years = Math.floor(p.edad / 12);
     const age_months = p.edad % 12;
-
     const size: Pet['size'] =
-        p.peso == null
-            ? 'medium'
-            : p.peso < 10
-                ? 'small'
-                : p.peso < 25
-                    ? 'medium'
-                    : 'large';
+        p.peso == null ? 'medium' : p.peso < 10 ? 'small' : p.peso < 25 ? 'medium' : 'large';
 
     return {
         id: String(p.id),
@@ -55,10 +46,12 @@ function mapPeludoToPet(p: {
         sound_url: null,
         is_available: true,
         is_urgent: false,
+        esterilizado: p.esterilizado,
+        vacunado: p.vacunado,
+        desparasitado: p.desparasitado,
+        peso_kg: p.peso,
     };
 }
-
-// ─── Component ────────────────────────────────────────────────────────────────
 
 const Pets = () => {
     const [pets, setPets] = useState<Pet[]>([]);
@@ -76,16 +69,11 @@ const Pets = () => {
                 if (species !== 'all') params.set('especie', species === 'dog' ? 'perro' : 'gato');
                 if (search.trim()) params.set('search', search.trim());
 
-                const res = await fetch(
-                    `${SUPABASE_URL}/functions/v1/get-peludos?${params.toString()}`
-                );
-                const json = await res.json() as { data?: unknown[]; error?: string };
+                const res = await fetch(`${SUPABASE_URL}/functions/v1/get-peludos?${params.toString()}`);
+                const json = (await res.json()) as { data?: unknown[]; error?: string };
                 if (!res.ok) throw new Error(json.error ?? 'Error al cargar peludos.');
 
-                const mapped = (json.data ?? []).map((p) =>
-                    mapPeludoToPet(p as Parameters<typeof mapPeludoToPet>[0])
-                );
-                setPets(mapped);
+                setPets((json.data ?? []).map((p) => mapPeludoToPet(p as Parameters<typeof mapPeludoToPet>[0])));
             } catch (err) {
                 console.error('Error cargando peludos:', err);
                 setPets([]);
@@ -93,7 +81,6 @@ const Pets = () => {
                 setLoading(false);
             }
         }
-
         void fetchPeludos();
     }, [species, search]);
 
@@ -105,53 +92,26 @@ const Pets = () => {
         return matchSearch && matchSpecies;
     });
 
-    const handleAdopt = (pet: Pet) => {
-        setSelectedPet(pet);
-        setActionType('adopt');
-    };
-
-    const handleSponsor = (pet: Pet) => {
-        setSelectedPet(pet);
-        setActionType('sponsor');
-    };
-
-    const clearFilters = () => {
-        setSearch('');
-        setSpecies('all');
-    };
-
     return (
         <main className="min-h-screen bg-neutral-soft">
             <Hero
-                search={search}
-                setSearch={setSearch}
-                species={species}
-                setSpecies={setSpecies}
-                total={filtered.length}
-                loading={loading}
+                search={search} setSearch={setSearch}
+                species={species} setSpecies={setSpecies}
+                total={filtered.length} loading={loading}
             />
-
             <Commitments />
-
             <section className="py-16 px-4">
                 <div className="w-[70%] mx-auto">
                     <PetGrid
-                        pets={filtered}
-                        loading={loading}
-                        onAdopt={handleAdopt}
-                        onSponsor={handleSponsor}
-                        onClearFilters={clearFilters}
+                        pets={filtered} loading={loading}
+                        onAdopt={(pet) => { setSelectedPet(pet); setActionType('adopt'); }}
+                        onSponsor={(pet) => { setSelectedPet(pet); setActionType('sponsor'); }}
+                        onClearFilters={() => { setSearch(''); setSpecies('all'); }}
                     />
                 </div>
             </section>
-
             <CtaBanner />
-
-            <ActionModal
-                pet={selectedPet}
-                type={actionType}
-                onClose={() => setSelectedPet(null)}
-            />
+            <ActionModal pet={selectedPet} type={actionType} onClose={() => setSelectedPet(null)} />
         </main>
     );
 };

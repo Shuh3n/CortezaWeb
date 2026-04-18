@@ -14,4 +14,9 @@ export interface Pet {
     sound_url: string | null;
     is_available: boolean;
     is_urgent: boolean;
+    // Campos de salud
+    esterilizado: boolean;
+    vacunado: boolean;
+    desparasitado: boolean;
+    peso_kg: number | null;
 }
