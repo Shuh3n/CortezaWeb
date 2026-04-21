@@ -2,9 +2,11 @@ import { ShoppingBag, Heart, HandHelping } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useModal } from '../context/ModalContext';
+import { useTranslation } from 'react-i18next';
 
 const Hero = () => {
   const { openDonationModal } = useModal();
+  const { t } = useTranslation();
   
   return (
     <section id="inicio" className="relative min-h-[550px] flex items-center overflow-hidden bg-neutral-soft py-10 pt-32">
@@ -42,16 +44,17 @@ const Hero = () => {
                 transition={{ delay: 0.2 }}
                 className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-6 tracking-wide"
               >
-                FUNDADA EN 2007 • ARMENIA, QUINDÍO
+                {t('hero.etiqueta')}
               </motion.span>
               <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-text-h leading-[1.1] mb-6">
-                Refugio animal en Armenia: <br />
+                {t('hero.titulo_inicio')} <br />
                 <span className="text-primary underline decoration-accent/30 decoration-8 underline-offset-8 italic">
-                  Luchamos
-                </span> por los que no tienen voz
+                  {t('hero.titulo_destacado')}
+                </span>{' '}
+                {t('hero.titulo_fin')}
               </h1>
               <p className="text-lg sm:text-xl md:text-2xl text-text-muted mb-8 leading-relaxed max-w-2xl mx-auto lg:mx-0 font-medium">
-                "Luchamos por la libertad, respeto y justicia para todos los animales, sin excepción de especies."
+                {t('hero.descripcion')}
               </p>
 
               <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
@@ -62,7 +65,7 @@ const Hero = () => {
                     className="w-full flex items-center justify-center gap-2 bg-primary text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-primary/20 group transition-shadow hover:shadow-primary/40"
                   >
                     <ShoppingBag className="w-5 h-5 transition-transform group-hover:scale-110" />
-                    Compra Nuestros Productos
+                    {t('hero.botones.comprar')}
                   </motion.button>
                 </Link>
 
@@ -72,7 +75,7 @@ const Hero = () => {
                   className="flex items-center justify-center gap-2 bg-secondary text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-secondary/20 group transition-shadow hover:shadow-secondary/40"
                 >
                   <Heart className="w-5 h-5 transition-transform group-hover:scale-110" />
-                  Apadrina un Animal
+                  {t('hero.botones.apadrinar')}
                 </motion.button>
 
                 <motion.button
@@ -82,7 +85,7 @@ const Hero = () => {
                   className="flex items-center justify-center gap-2 bg-accent text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-accent/20 group transition-shadow hover:shadow-accent/40"
                 >
                   <HandHelping className="w-5 h-5 transition-transform group-hover:scale-110" />
-                  Donar
+                  {t('hero.botones.donar')}
                 </motion.button>
               </div>
             </motion.div>
@@ -102,8 +105,8 @@ const Hero = () => {
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent" />
                 <div className="absolute bottom-8 left-8 right-8 p-6 bg-white/90 backdrop-blur-md rounded-3xl shadow-xl">
-                  <p className="text-primary font-bold text-lg mb-1">Max está buscando un hogar</p>
-                  <p className="text-text-muted text-sm font-medium">Recuperado de abandono en Armenia</p>
+                  <p className="text-primary font-bold text-lg mb-1">{t('hero.tarjeta.titulo')}</p>
+                  <p className="text-text-muted text-sm font-medium">{t('hero.tarjeta.subtitulo')}</p>
                 </div>
               </div>
               {/* Floating elements */}

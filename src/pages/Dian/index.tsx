@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import {
     FileText,
     FileBarChart,
@@ -10,21 +11,22 @@ import {
     AlertTriangle
 } from 'lucide-react';
 
-const dianDocuments = [
-    { title: 'Informe de gestión', icon: FileBarChart, url: 'https://kxuppzqnlmprozyprjuz.supabase.co/storage/v1/object/public/documentos-dian/informe-gestion.pdf' },
-    { title: 'Estados Financieros', icon: Landmark, url: 'https://kxuppzqnlmprozyprjuz.supabase.co/storage/v1/object/public/documentos-dian/estados-financieros.pdf' },
-    { title: 'Requisitos permanencia ESAL', icon: ShieldCheck, url: 'https://kxuppzqnlmprozyprjuz.supabase.co/storage/v1/object/public/documentos-dian/requisitos-esal.pdf' },
-    { title: 'Acta de constitución', icon: FileSignature, url: 'https://kxuppzqnlmprozyprjuz.supabase.co/storage/v1/object/public/documentos-dian/acta-constitucion.pdf' },
-    { title: 'Certificado de existencia y representación', icon: FileText, url: 'https://kxuppzqnlmprozyprjuz.supabase.co/storage/v1/object/public/documentos-dian/certificado-existencia.pdf' },
-    { title: 'Acta de asamblea', icon: Users, url: 'https://kxuppzqnlmprozyprjuz.supabase.co/storage/v1/object/public/documentos-dian/acta-asamblea.pdf' },
-    { title: 'Estatutos', icon: Scale, url: 'https://kxuppzqnlmprozyprjuz.supabase.co/storage/v1/object/public/documentos-dian/estatutos.pdf' },
-    { title: 'Responsabilidad penal', icon: AlertTriangle, url: 'https://kxuppzqnlmprozyprjuz.supabase.co/storage/v1/object/public/documentos-dian/responsabilidad-penal.pdf' },
+const dianDocumentsBase = [
+    { icon: FileBarChart, url: 'https://kxuppzqnlmprozyprjuz.supabase.co/storage/v1/object/public/documentos-dian/informe-gestion.pdf' },
+    { icon: Landmark, url: 'https://kxuppzqnlmprozyprjuz.supabase.co/storage/v1/object/public/documentos-dian/estados-financieros.pdf' },
+    { icon: ShieldCheck, url: 'https://kxuppzqnlmprozyprjuz.supabase.co/storage/v1/object/public/documentos-dian/requisitos-esal.pdf' },
+    { icon: FileSignature, url: 'https://kxuppzqnlmprozyprjuz.supabase.co/storage/v1/object/public/documentos-dian/acta-constitucion.pdf' },
+    { icon: FileText, url: 'https://kxuppzqnlmprozyprjuz.supabase.co/storage/v1/object/public/documentos-dian/certificado-existencia.pdf' },
+    { icon: Users, url: 'https://kxuppzqnlmprozyprjuz.supabase.co/storage/v1/object/public/documentos-dian/acta-asamblea.pdf' },
+    { icon: Scale, url: 'https://kxuppzqnlmprozyprjuz.supabase.co/storage/v1/object/public/documentos-dian/estatutos.pdf' },
+    { icon: AlertTriangle, url: 'https://kxuppzqnlmprozyprjuz.supabase.co/storage/v1/object/public/documentos-dian/responsabilidad-penal.pdf' },
 ];
 
 export default function DianPage() {
+    const { t } = useTranslation();
+
     return (
         <div className="min-h-screen bg-slate-50 pt-40 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-            {/* Fondo decorativo sin usar fixed para evitar bugs de zoom */}
             <div className="absolute top-0 left-0 w-full h-96 bg-primary/5 -skew-y-6 transform origin-top-left -z-10" />
 
             <div className="max-w-7xl mx-auto">
@@ -34,20 +36,20 @@ export default function DianPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
                     >
-            <span className="text-sm font-bold tracking-[0.3em] uppercase text-primary/70 block mb-3">
-              Transparencia Legal
-            </span>
+                        <span className="text-sm font-bold tracking-[0.3em] uppercase text-primary/70 block mb-3">
+                            {t('dian.etiqueta')}
+                        </span>
                         <h1 className="text-4xl md:text-5xl font-black text-text-h mb-6 tracking-tight">
-                            Permanencia DIAN
+                            {t('dian.titulo')}
                         </h1>
                         <p className="text-lg text-text-muted max-w-2xl mx-auto leading-relaxed">
-                            Consulta nuestra documentación reglamentaria y jurídica, demostrando nuestro compromiso con la transparencia institucional.
+                            {t('dian.descripcion')}
                         </p>
                     </motion.div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {dianDocuments.map((doc, idx) => {
+                    {dianDocumentsBase.map((doc, idx) => {
                         const Icon = doc.icon;
                         return (
                             <motion.a
@@ -64,11 +66,11 @@ export default function DianPage() {
                                     <Icon size={28} strokeWidth={1.5} />
                                 </div>
                                 <h3 className="text-center font-bold text-text-main leading-tight mb-3">
-                                    {doc.title}
+                                    {t(`dian.documentos.${idx}.titulo`)}
                                 </h3>
                                 <span className="mt-auto text-sm font-semibold text-primary/70 group-hover:text-primary transition-colors flex items-center gap-1">
-                  Ver documento
-                </span>
+                                    {t('dian.ver_documento')}
+                                </span>
                             </motion.a>
                         );
                     })}

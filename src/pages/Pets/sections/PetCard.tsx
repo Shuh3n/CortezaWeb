@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Heart } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { Pet } from '../types';
-
-// ─── Sound Button ──────────────────────────────────────────────────────────────
 
 const SoundButton = ({ soundUrl }: { soundUrl: string | null }) => {
     const [playing, setPlaying] = useState(false);
     const audioRef = useRef<HTMLAudioElement | null>(null);
+    const { t } = useTranslation();
 
     useEffect(() => () => { audioRef.current?.pause(); }, []);
 
@@ -33,7 +33,7 @@ const SoundButton = ({ soundUrl }: { soundUrl: string | null }) => {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             disabled={!soundUrl}
-            title={soundUrl ? (playing ? 'Detener sonido' : 'Escuchar sonido') : 'Sin sonido disponible'}
+            title={soundUrl ? (playing ? t('mascotas.tarjeta.sonido_detener') : t('mascotas.tarjeta.sonido_escuchar')) : t('mascotas.tarjeta.sonido_no_disponible')}
             className={`w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-md
         ${soundUrl
                 ? 'bg-white hover:bg-primary hover:text-white text-primary cursor-pointer'
@@ -42,14 +42,12 @@ const SoundButton = ({ soundUrl }: { soundUrl: string | null }) => {
         >
             <img
                 src="/icons/sound_button.svg"
-                alt={playing ? 'Detener' : 'Escuchar sonido'}
+                alt={playing ? t('mascotas.tarjeta.sonido_detener') : t('mascotas.tarjeta.sonido_escuchar')}
                 className="w-5 h-5"
             />
         </motion.button>
     );
 };
-
-// ─── Species Icon ──────────────────────────────────────────────────────────────
 
 const speciesIcon: Record<Pet['species'], string> = {
     dog:   '/icons/dog_icon.svg',
@@ -57,35 +55,36 @@ const speciesIcon: Record<Pet['species'], string> = {
     other: '/icons/paw_prints.svg',
 };
 
-// ─── Pet Card ──────────────────────────────────────────────────────────────────
-
 interface PetCardProps {
     pet: Pet;
     onAdopt: (pet: Pet) => void;
     onSponsor: (pet: Pet) => void;
 }
 
-const sizeLabel: Record<Pet['size'], string> = {
-    small: 'Pequeño',
-    medium: 'Mediano',
-    large: 'Grande',
-};
-
-const genderLabel: Record<Pet['gender'], string> = {
-    male: '♂ Macho',
-    female: '♀ Hembra',
-};
-
-const formatAge = (years: number, months: number): string => {
-    if (years > 0 && months > 0)
-        return `${years} año${years > 1 ? 's' : ''} y ${months} mes${months > 1 ? 'es' : ''}`;
-    if (years > 0)
-        return `${years} año${years > 1 ? 's' : ''}`;
-    return `${months} mes${months > 1 ? 'es' : ''}`;
-};
-
 const PetCard = ({ pet, onAdopt, onSponsor }: PetCardProps) => {
     const [imgError, setImgError] = useState(false);
+    const { t } = useTranslation();
+
+    const sizeLabel: Record<Pet['size'], string> = {
+        small: t('mascotas.tarjeta.pequeno'),
+        medium: t('mascotas.tarjeta.mediano'),
+        large: t('mascotas.tarjeta.grande'),
+    };
+
+    const genderLabel: Record<Pet['gender'], string> = {
+        male: t('mascotas.tarjeta.macho'),
+        female: t('mascotas.tarjeta.hembra'),
+    };
+
+    const formatAge = (years: number, months: number): string => {
+        const strYears = years === 1 ? t('mascotas.tarjeta.anos') : t('mascotas.tarjeta.anos_pl');
+        const strMonths = months === 1 ? t('mascotas.tarjeta.meses') : t('mascotas.tarjeta.meses_pl');
+        const and = t('mascotas.tarjeta.y');
+
+        if (years > 0 && months > 0) return `${years} ${strYears} ${and} ${months} ${strMonths}`;
+        if (years > 0) return `${years} ${strYears}`;
+        return `${months} ${strMonths}`;
+    };
 
     return (
         <motion.div
@@ -97,7 +96,6 @@ const PetCard = ({ pet, onAdopt, onSponsor }: PetCardProps) => {
             transition={{ duration: 0.4 }}
             className="bg-white rounded-[32px] overflow-hidden shadow-sm hover:shadow-xl transition-all border border-slate-100 group flex flex-col"
         >
-            {/* ── Image ── */}
             <div className="relative overflow-hidden h-60 bg-primary/5">
                 {!imgError && pet.image_url ? (
                     <img
@@ -116,11 +114,10 @@ const PetCard = ({ pet, onAdopt, onSponsor }: PetCardProps) => {
                     </div>
                 )}
 
-                {/* Badges */}
                 <div className="absolute top-4 left-4 flex gap-2 flex-wrap">
                     {pet.is_urgent && (
                         <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow">
-                            ⚡ Urgente
+                            {t('mascotas.tarjeta.urgente')}
                         </span>
                     )}
                     <span className="bg-white/90 backdrop-blur-sm text-primary text-xs font-bold px-3 py-1 rounded-full shadow">
@@ -128,16 +125,13 @@ const PetCard = ({ pet, onAdopt, onSponsor }: PetCardProps) => {
                     </span>
                 </div>
 
-                {/* Sound button */}
                 <div className="absolute top-4 right-4">
                     <SoundButton soundUrl={pet.sound_url} />
                 </div>
 
-                {/* Bottom fade */}
                 <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent" />
             </div>
 
-            {/* ── Content ── */}
             <div className="p-6 flex flex-col flex-1">
                 <div className="flex items-start justify-between mb-1">
                     <h3 className="text-2xl font-black text-text-h">{pet.name}</h3>
@@ -163,7 +157,6 @@ const PetCard = ({ pet, onAdopt, onSponsor }: PetCardProps) => {
                     {pet.description}
                 </p>
 
-                {/* ── Buttons ── */}
                 <div className="flex gap-3 mt-auto">
                     <motion.button
                         whileHover={{ scale: 1.03 }}
@@ -171,7 +164,7 @@ const PetCard = ({ pet, onAdopt, onSponsor }: PetCardProps) => {
                         onClick={() => onAdopt(pet)}
                         className="flex-1 bg-primary text-white py-3 rounded-2xl font-bold text-sm hover:shadow-lg hover:shadow-primary/20 transition-all"
                     >
-                        Adoptar
+                        {t('mascotas.tarjeta.btn_adoptar')}
                     </motion.button>
                     <motion.button
                         whileHover={{ scale: 1.03 }}
@@ -180,7 +173,7 @@ const PetCard = ({ pet, onAdopt, onSponsor }: PetCardProps) => {
                         className="flex-1 bg-white text-primary border-2 border-primary py-3 rounded-2xl font-bold text-sm hover:bg-primary/5 transition-all flex items-center justify-center gap-1.5"
                     >
                         <Heart size={14} />
-                        Apadrinar
+                        {t('mascotas.tarjeta.btn_apadrinar')}
                     </motion.button>
                 </div>
             </div>

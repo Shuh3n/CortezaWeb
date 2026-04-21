@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Search, SlidersHorizontal } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { Species } from '../types';
 
 interface HeroProps {
@@ -12,18 +13,18 @@ interface HeroProps {
     loading: boolean;
 }
 
-const speciesFilters: { value: Species; label: string; icon: string }[] = [
-    { value: 'all',   label: 'Todos',  icon: 'icons/paw_prints.svg' },
-    { value: 'dog',   label: 'Perros', icon: 'icons/dog_icon.svg' },
-    { value: 'cat',   label: 'Gatos',  icon: 'icons/cat_icon.svg' }
-];
-
 const Hero = ({ search, setSearch, species, setSpecies, total, loading }: HeroProps) => {
     const [showFilters, setShowFilters] = useState(false);
+    const { t } = useTranslation();
+
+    const speciesFilters: { value: Species; label: string; icon: string }[] = [
+        { value: 'all',   label: t('mascotas.filtros.todos'),  icon: 'icons/paw_prints.svg' },
+        { value: 'dog',   label: t('mascotas.filtros.perros'), icon: 'icons/dog_icon.svg' },
+        { value: 'cat',   label: t('mascotas.filtros.gatos'),  icon: 'icons/cat_icon.svg' }
+    ];
 
     return (
         <>
-            {/* ── Banner ── */}
             <section className="relative pt-32 pb-20 overflow-hidden px-4">
                 <div className="absolute inset-0 z-0">
                     <img src="/images/bg-counter.jpg" alt="" className="w-full h-full object-cover" />
@@ -36,19 +37,18 @@ const Hero = ({ search, setSearch, species, setSpecies, total, loading }: HeroPr
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8 }}
                     >
-            <span className="inline-block px-5 py-2 rounded-full bg-white/20 text-white text-xs font-bold tracking-widest uppercase mb-6">
-              Fundación Corteza Terrestre
-            </span>
+                        <span className="inline-block px-5 py-2 rounded-full bg-white/20 text-white text-xs font-bold tracking-widest uppercase mb-6">
+                            {t('mascotas.hero.etiqueta')}
+                        </span>
                         <h1 className="text-5xl md:text-6xl font-black text-white mb-6 leading-tight">
-                            Encuentra a tu<br />
-                            <span className="italic">compañero de vida</span>
+                            {t('mascotas.hero.titulo_1')}<br />
+                            <span className="italic">{t('mascotas.hero.titulo_2')}</span>
                         </h1>
                         <p className="text-xl text-white/80 max-w-2xl mx-auto leading-relaxed font-medium">
-                            Estos animales esperan una segunda oportunidad. Adoptar salva dos vidas: la de ellos y la tuya.
+                            {t('mascotas.hero.descripcion')}
                         </p>
                     </motion.div>
 
-                    {/* Search bar */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -59,7 +59,7 @@ const Hero = ({ search, setSearch, species, setSpecies, total, loading }: HeroPr
                             <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
                             <input
                                 type="text"
-                                placeholder="Buscar por nombre o raza..."
+                                placeholder={t('mascotas.hero.buscar_placeholder')}
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 className="w-full pl-11 pr-4 py-4 rounded-2xl border-0 bg-white/95 text-text-h placeholder:text-text-muted font-medium focus:outline-none focus:ring-2 focus:ring-white/50 shadow-lg"
@@ -76,19 +76,18 @@ const Hero = ({ search, setSearch, species, setSpecies, total, loading }: HeroPr
                             }`}
                         >
                             <SlidersHorizontal size={18} />
-                            <span className="hidden sm:inline">Filtros</span>
+                            <span className="hidden sm:inline">{t('mascotas.hero.filtros')}</span>
                         </motion.button>
                     </motion.div>
                 </div>
             </section>
 
-            {/* ── Sticky filters bar ── */}
             <div className="bg-white border-b border-slate-100 sticky top-20 z-40 shadow-sm">
                 <div className="w-[70%] mx-auto px-4 py-4">
                     <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-xs font-bold text-text-muted uppercase tracking-wider">
-              Especie:
-            </span>
+                        <span className="text-xs font-bold text-text-muted uppercase tracking-wider">
+                            {t('mascotas.hero.especie')}
+                        </span>
                         {speciesFilters.map((f) => (
                             <motion.button
                                 key={f.value}
@@ -113,12 +112,13 @@ const Hero = ({ search, setSearch, species, setSpecies, total, loading }: HeroPr
 
                         <div className="ml-auto text-sm font-medium text-text-muted">
                             {loading ? (
-                                <span className="animate-pulse">Cargando...</span>
+                                <span className="animate-pulse">{t('mascotas.hero.cargando')}</span>
                             ) : (
                                 <span>
-                  <span className="font-black text-primary">{total}</span>{' '}
-                                    animal{total !== 1 ? 'es' : ''} disponible{total !== 1 ? 's' : ''}
-                </span>
+                                    <span className="font-black text-primary">{total}</span>{' '}
+                                    {total !== 1 ? t('mascotas.hero.animales') : t('mascotas.hero.animal')} {' '}
+                                    {total !== 1 ? t('mascotas.hero.disponibles') : t('mascotas.hero.disponible')}
+                                </span>
                             )}
                         </div>
                     </div>

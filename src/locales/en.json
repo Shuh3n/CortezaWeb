@@ -1,0 +1,692 @@
+{
+  "navbar": {
+    "fundacion": "Foundation",
+    "menu": {
+      "inicio": "Home",
+      "nosotros": "About Us",
+      "salvaton": "Salvaton",
+      "adoptar": "Adopt & Sponsor",
+      "voluntario": "Volunteer",
+      "tienda": "Store",
+      "galeria": "Gallery",
+      "contacto": "Contact"
+    },
+    "donar": "Donate",
+    "donar_ahora": "Donate Now"
+  },
+  "hero": {
+    "etiqueta": "FOUNDED IN 2007 • ARMENIA, QUINDÍO",
+    "titulo_inicio": "Animal shelter in Armenia:",
+    "titulo_destacado": "We fight",
+    "titulo_fin": "for those who have no voice",
+    "descripcion": "\"We fight for freedom, respect and justice for all animals, without exception of species.\"",
+    "botones": {
+      "comprar": "Buy Our Products",
+      "apadrinar": "Sponsor an Animal",
+      "donar": "Donate"
+    },
+    "tarjeta": {
+      "titulo": "Max is looking for a home",
+      "subtitulo": "Recovered from abandonment in Armenia"
+    }
+  },
+  "adopcion": {
+    "titulo": "Adopt a love for life",
+    "descripcion": "There are many reasons to adopt an animal, but the best of all is that you will save a life and in return you will have their unconditional and unparalleled love.",
+    "boton": "View Animals for Adoption"
+  },
+  "contacto_seccion": {
+    "titulo": "Let's Talk",
+    "descripcion": "Do you have questions or want to sponsor one of our rescued animals? Get in touch with us. We are here to listen.",
+    "info": {
+      "correo": "Email",
+      "telefono": "Phone",
+      "horario_etiqueta": "Hours",
+      "horario_valor": "Mon - Fri: 8am - 12pm / 2pm - 6pm"
+    },
+    "tarjeta": {
+      "titulo": "Corteza Terrestre Foundation",
+      "frase": "\"We fight for those who have no voice\""
+    }
+  },
+  "donacion_modal": {
+    "cerrar": "Close modal",
+    "apoyo": "Your support saves lives",
+    "donde": "WHERE TO DONATE?",
+    "a_nombre_de": "In the name of:",
+    "fundacion": "Corteza Terrestre Foundation",
+    "nit": "TIN: 900.126.931",
+    "bancos": {
+      "bancolombia": "Bancolombia",
+      "davivienda": "Davivienda",
+      "ahorros": "Savings",
+      "copiar": "Copy account"
+    },
+    "certificado": "\"Request your donation certificate and obtain a 25% tax benefit.\"",
+    "protegida": "Protected and secure transaction"
+  },
+  "footer": {
+    "fundacion": "Foundation",
+    "descripcion": "Non-profit organization founded in 2007. Working tirelessly for the welfare of animals in Quindío.",
+    "navegacion": {
+      "titulo": "Navigation",
+      "inicio": "Home",
+      "adopcion": "Adoption",
+      "tienda": "Salvatore Store",
+      "nosotros": "About Us",
+      "contacto": "Contact",
+      "dian": "DIAN Permanence"
+    },
+    "involucrate": {
+      "titulo": "Get Involved",
+      "salvaton": "Animal Salvaton",
+      "voluntario": "Become a Volunteer",
+      "apadrinar": "Sponsor"
+    },
+    "copyright": "© 2026 Corteza Terrestre Foundation. Armenia, Quindío.",
+    "privacidad": "Privacy Policy and Data Processing",
+    "creditos": "Made by Systems and Computer Engineering students from Uniquindio",
+    "github": "Project on GitHub"
+  },
+  "galeria_seccion": {
+    "error_carga": "We couldn't load the gallery at this time.",
+    "etiqueta": "Canine Gallery",
+    "titulo": "Moments that tell real stories",
+    "descripcion": "Each photo shows rescues, adoptions, and foundation events. Here the gallery brings people closer to the real story of each process.",
+    "fotos_publicadas": "Published photos",
+    "vacio_titulo": "No photos uploaded yet.",
+    "vacio_descripcion": "As soon as the administrator publishes images, this section will update automatically.",
+    "boton": "View full gallery"
+  },
+  "stream": {
+    "titulo": "Live Stream",
+    "descripcion": "Join us with our furry friends in real time.",
+    "proximamente": "Coming Soon",
+    "proximamente_desc": "We will be broadcasting live soon. Check back later and stay tuned to our social media!"
+  },
+  "tienda": {
+    "titulo": "Store",
+    "descripcion": "Every product leaves a footprint of love. 100% of the profits go to transforming lives in our shelter.",
+    "categorias": {
+      "mugs": "Mugs",
+      "termos": "Thermoses",
+      "camisetas": "T-shirts",
+      "tipis": "Teepees"
+    },
+    "estados": {
+      "cargando": "Loading catalog...",
+      "disponibles": "available",
+      "agotado": "Out of Stock",
+      "unidades": "units",
+      "producto_social": "Social Product",
+      "ver_detalle": "View details",
+      "sin_stock": "Out of Stock",
+      "proximamente": "We will be adding new products to this category soon."
+    },
+    "modal": {
+      "especificaciones": "Specifications",
+      "disponibilidad": "Availability",
+      "info": "Every purchase directly helps the shelter. 100% of the profits go towards animal food and health.",
+      "btn_pedir": "Order via WhatsApp",
+      "btn_agotado": "Out of Stock",
+      "whatsapp_msg": "Hello! I am interested in the product:",
+      "envio": "Immediate availability for national shipping"
+    },
+    "tipis": {
+      "armado_titulo": "Assembly Instructions",
+      "pasos": [
+        "Take the teepee out of its protective bag and identify the poles.",
+        "Place the padded mat in its final location.",
+        "Insert the poles through the guides and open the tent over the base.",
+        "Firmly tie the upper security straps."
+      ],
+      "medidas_titulo": "Available Sizes",
+      "tallas": {
+        "s": "S (Small)",
+        "m": "M (Medium)",
+        "l": "L (Large)"
+      },
+      "altura": "Height",
+      "disclaimer": "* All our teepees are handcrafted with high-density materials for maximum durability."
+    },
+    "camisetas": {
+      "guia_titulo": "Size Guide (cm)",
+      "columnas": ["Size", "Body Length", "Body Width", "Shoulder", "Sleeve"]
+    },
+    "banner": {
+      "etiqueta": "Solidarity Initiative",
+      "titulo": "Animal Salvaton",
+      "descripcion": "Sustaining the shelter is not easy. We have veterinary debts and need constant adaptations. Can we count on you?"
+    },
+    "formulario": {
+      "titulo": "Place your Order",
+      "descripcion": "Our products are customized. Send us a message and we will contact you to coordinate designs and delivery.",
+      "nombre": "Your Name",
+      "correo": "Email Address",
+      "mensaje": "Which product are you interested in?",
+      "boton": "Send Message"
+    },
+    "sello": "100% quality materials and social impact"
+  },
+  "estadisticas": {
+    "titulo": "Our Footprint in Armenia",
+    "descripcion": "Each number represents a life that has been touched by the love and dedication of our volunteers. We work tirelessly so that these stories have a happy ending.",
+    "frase": "— \"Transforming pain into hope, one paw at a time.\"",
+    "cartas": {
+      "vidas": {
+        "numero": "60+",
+        "titulo": "Protected Lives",
+        "desc": "Animals under our constant care at the shelter."
+      },
+      "adoptados": {
+        "numero": "500+",
+        "titulo": "Adopted",
+        "desc": "Homes transformed by the love of a rescued animal."
+      },
+      "compromiso": {
+        "numero": "100%",
+        "titulo": "Love and Commitment",
+        "desc": "Our dedication is absolute to ensure that no animal suffers abandonment again."
+      }
+    }
+  },
+  "ejes_trabajo": {
+    "titulo": "What are we doing?",
+    "descripcion": "Our lines of work focus on comprehensive solutions for animal welfare in our region.",
+    "items": [
+      {
+        "titulo": "Sterilization",
+        "descripcion": "We manage and promote sterilization campaigns in different sectors to prevent uncontrolled reproduction."
+      },
+      {
+        "titulo": "Veterinary Care",
+        "descripcion": "We provide urgent treatments and surgeries for shelter animals and strays."
+      },
+      {
+        "titulo": "Good Treatment",
+        "descripcion": "We strive to make animals feel loved and protected, reducing the trauma of abandonment."
+      },
+      {
+        "titulo": "We are Spokespersons",
+        "descripcion": "We ensure compliance with Colombian legislation against animal abuse and exploitation."
+      },
+      {
+        "titulo": "Responsible Adoptions",
+        "descripcion": "We place animals in optimal homes, including sterilization and rigorous follow-up."
+      },
+      {
+        "titulo": "Volunteering",
+        "descripcion": "We join forces among volunteers, sponsors, and supporters to strengthen animal welfare."
+      }
+    ]
+  },
+  "auth": {
+    "validando": "Validating dashboard access..."
+  },
+  "about": {
+    "hero": {
+      "etiqueta": "About Us",
+      "titulo_1": "Our work for",
+      "titulo_2": "Those who have no voice",
+      "descripcion": "We fight for freedom, respect and justice for all animals, without exception of species."
+    },
+    "mission": {
+      "titulo": "We raise awareness and educate about animal abuse",
+      "p1": "The Corteza Terrestre Foundation was founded and began early in 2007. We are a non-profit organization that works voluntarily, dedicated to the defense and protection of animals. We work to raise community awareness, creating spaces for education and basic care for street animals or victims of abuse, thus promoting important changes in society.",
+      "p2": "We currently have a temporary home, where we shelter more than 60 animals between dogs and cats rescued from the streets and abandonment. We rehabilitate them and later put them up for adoption. The members of the organization are vegan or vegetarian, because we respect the freedom of all animals without exception of species.",
+      "p3_start": "Within the Corteza Terrestre foundation, we carry out activities for the economic support of the animals, such as collecting monetary funds or other physical aids, elementary for the functioning of the shelter, donated by citizens. We also sell items to reduce waste such as wooden brushes, collapsible cups, etc.; we also offer personalized gifts under our brand ",
+      "p3_link": "\"Salvatore Souvenirs\"",
+      "p3_end": " such as mugs, t-shirts, water bottles, bracelets, caps, keychains, among others; this way we aim to be self-sustainable.",
+      "logo_text": "Corteza Terrestre Foundation"
+    },
+    "stats": {
+      "items": [
+        { "label": "Dogs adopted since 2014" },
+        { "label": "Cats adopted since 2014" },
+        { "label": "Animals sponsored since 2014" }
+      ],
+      "mensaje_titulo": "To abandon an animal is to abandon a family member!",
+      "mensaje_desc": "The animals we rescue spend months in the shelter until they find a home. If you must part with them, look for a home on your own initiative."
+    },
+    "team": {
+      "titulo": "Our Team",
+      "descripcion": "Dedicated people committed to the animal cause",
+      "roles": {
+        "presidenta": "President and Founder",
+        "tesorera": "Treasurer",
+        "secretaria": "Secretary"
+      }
+    },
+    "testimonials": {
+      "titulo": "What they say about the Foundation",
+      "items": [
+        {
+          "text": "Excellent work you are doing. These people contribute to the preservation of the life of these wonderful, loving beings full of innocence.",
+          "author": "Chris Giraldo"
+        },
+        {
+          "text": "They do the most beautiful work, caring, protecting, and loving animals, especially those without a home.",
+          "author": "Claudia P. Cifuentes"
+        },
+        {
+          "text": "Their work is selfless and honest. They are truly sensitive people towards animals and fight every day for their well-being.",
+          "author": "Norma Gómez"
+        }
+      ]
+    }
+  },
+  "contacto_form": {
+    "placeholders": {
+      "nombre": "Name",
+      "email": "Email Address",
+      "asunto": "Subject",
+      "mensaje": "Write your message here"
+    },
+    "privacidad": "By submitting the form I accept the privacy terms and conditions",
+    "boton_enviar": "Send",
+    "mensaje_exito": "Thank you for contacting us, we will get in touch with you shortly.",
+    "titulo": "Contact Us",
+    "descripcion": "Write to us about our products to order them or any other concerns and we will respond as soon as possible.",
+    "info": {
+      "email": "Email",
+      "telefono": "Phone",
+      "ubicacion": "Location",
+      "direccion": "Calle 22N No. 17-15, Ozono Bldg\nArmenia, Quindío"
+    },
+    "redes": "We are also on social media:"
+  },
+  "contacto_mapa": {
+    "titulo": "Corteza Terrestre Foundation Location"
+  },
+  "dian": {
+    "etiqueta": "Legal Transparency",
+    "titulo": "DIAN Permanence",
+    "descripcion": "Consult our regulatory and legal documentation, demonstrating our commitment to institutional transparency.",
+    "ver_documento": "View document",
+    "documentos": [
+      { "titulo": "Management Report" },
+      { "titulo": "Financial Statements" },
+      { "titulo": "NPO Permanence Requirements" },
+      { "titulo": "Articles of Incorporation" },
+      { "titulo": "Certificate of Existence and Representation" },
+      { "titulo": "Assembly Minutes" },
+      { "titulo": "Bylaws" },
+      { "titulo": "Criminal Liability" }
+    ]
+  },
+  "mascotas": {
+    "hero": {
+      "etiqueta": "Corteza Terrestre Foundation",
+      "titulo_1": "Find your",
+      "titulo_2": "life companion",
+      "descripcion": "These animals are waiting for a second chance. Adopting saves two lives: theirs and yours.",
+      "buscar_placeholder": "Search by name or breed...",
+      "filtros": "Filters",
+      "especie": "Species:",
+      "cargando": "Loading...",
+      "animal": "animal",
+      "animales": "animals",
+      "disponible": "available",
+      "disponibles": "available"
+    },
+    "filtros": {
+      "todos": "All",
+      "perros": "Dogs",
+      "gatos": "Cats"
+    },
+    "tarjeta": {
+      "urgente": "⚡ Urgent",
+      "macho": "♂ Male",
+      "hembra": "♀ Female",
+      "pequeno": "Small",
+      "mediano": "Medium",
+      "grande": "Large",
+      "sonido_escuchar": "Listen to sound",
+      "sonido_detener": "Stop sound",
+      "sonido_no_disponible": "No sound available",
+      "anos": "year",
+      "anos_pl": "years",
+      "meses": "month",
+      "meses_pl": "months",
+      "y": "and",
+      "btn_adoptar": "Adopt",
+      "btn_apadrinar": "Sponsor"
+    },
+    "grid": {
+      "sin_resultados_titulo": "No results",
+      "sin_resultados_desc": "We couldn't find animals with those filters. Try another search.",
+      "btn_ver_todos": "View all"
+    },
+    "modal": {
+      "etiqueta_adoptar": "What a beautiful decision!",
+      "etiqueta_apadrinar": "Thank you for your kindness!",
+      "titulo_adoptar": "Adopt {{nombre}}",
+      "titulo_apadrinar": "Sponsor {{nombre}}",
+      "desc_adoptar": "To start the adoption process for {{nombre}}, contact us and complete the application form. We want to make sure it's the perfect home.",
+      "desc_apadrinar": "Sponsoring {{nombre}} means covering their food and veterinary care expenses. You will receive periodic updates on their well-being.",
+      "btn_contactar": "Contact Us",
+      "btn_cerrar": "Close"
+    },
+    "compromisos": {
+      "titulo_principal": "Adopt a love for life",
+      "desc_principal": "There are many reasons to adopt an animal, but the best of all is that you will save a life and in return you will have their unconditional and unparalleled love.",
+      "titulo_apadrinar": "When you sponsor, you commit to:",
+      "items_apadrinar": [
+        "A minimum monthly aid of $50,000 COP for the animal you decide to sponsor.",
+        "Let the foundation cover the animal's basic needs with the contributed money.",
+        "Be responsible for extra expenses in medicine or treatments, if necessary.",
+        "You can visit, even take them for a walk outside the foundation's facilities, for one or several days. This will be agreed upon previously due to the logistics involved."
+      ],
+      "titulo_adoptar": "When you adopt, you commit to:",
+      "items_adoptar": [
+        "Not abandon your pet for any reason (old age, behavior, illness, etc.).",
+        "Treat them with love and respect. You will not leave them exposed to inclement weather, nor to prolonged solitude, especially during holidays, you will not hand them over to zoonosis, pounds or universities for experimentation, much less to be commercialized or exploited.",
+        "Provide adequate medical care when needed.",
+        "Spay/neuter your furry friend. This is a fundamental commitment; if you refuse, we refuse to approve their adoption.",
+        "Receive follow-up visits. For us, it is essential to guarantee the adaptation of our animals to their new home, which is why we do follow-up visits."
+      ]
+    },
+    "cta": {
+      "titulo": "Can't find the right one?",
+      "descripcion": "Leave us your details and we will notify you when a new animal arrives that matches what you are looking for.",
+      "boton": "Contact Us"
+    }
+  },
+  "salvaton": {
+    "hero": {
+      "etiqueta": "Solidarity Campaign",
+      "titulo_1": "Great",
+      "titulo_2": "Salvaton Plan",
+      "descripcion": "Donate food and help us continue protecting the rescued animals of Armenia and Quindío.",
+      "boton": "I want to Donate"
+    },
+    "info": {
+      "titulo_1": "What is the",
+      "titulo_2": "Salvaton Plan?",
+      "p1": "Our campaign consists of placing collection boxes with the foundation's logo in commercial places in Quindío, with Armenia being the main city.",
+      "p2": "The participating businesses do not violate the integrity of animals. There, people can leave their contribution regardless of its value, which is completely destined to sustain the shelter.",
+      "frase": "\"Every coin counts to provide a better quality of life for our rescued animals.\""
+    },
+    "cities": {
+      "titulo": "Collection Points",
+      "subtitulo": "Find the nearest collection box and leave your mark",
+      "data": [
+        {
+          "id": "armenia",
+          "name": "Armenia",
+          "zones": [
+            {
+              "title": "Downtown Zone",
+              "points": [
+                { "name": "LVS Clothing Store", "address": "Cra. 13 # 18-53" },
+                { "name": "Jazzfa Music", "address": "Cra. 14 # 22-06" },
+                { "name": "La Quinta Porra Hotel", "address": "Cra. 14 # 15-48" },
+                { "name": "Pantera Sports", "address": "Cra. 15 # 19-02" },
+                { "name": "Motitas Pet Grooming", "address": "Cra. 16 # 9-50" },
+                { "name": "El Vaquero Store", "address": "Cra. 16 # 15-45" },
+                { "name": "La Rana Restaurant", "address": "Cra. 16 # 18-50" },
+                { "name": "Flota Blanca 1 Store", "address": "Cra. 16 # 20a-09" },
+                { "name": "Foto Palacio", "address": "Cra. 17 # 20-40" },
+                { "name": "Abox", "address": "Cra. 18 # 9-24" },
+                { "name": "Lucía Trujillo Image Consultants", "address": "Calle 14 # 14-41 Local 3" },
+                { "name": "Winners Sports Store", "address": "Cra. 14 # 17-08" },
+                { "name": "Trotta Sports Store", "address": "Unicentro 2nd level local 72" },
+                { "name": "Animals with Tails", "address": "Cra. 23 # 15-17" },
+                { "name": "Quindío Concentrates Store", "address": "Cra. 19 # 19-05" },
+                { "name": "Natural Food Plaza Veg. Rest.", "address": "Av Bolívar Cra. 14 # 4-51" },
+                { "name": "Mundo Cómputo", "address": "Cll. 21 # 11-23" },
+                { "name": "Financoop Armenia", "address": "Cll. 20 # 15-33 Office 202" },
+                { "name": "Martha Lucía Crafts Store", "address": "Cra. 16 # 14-60" },
+                { "name": "Letbrogh&co Cafe", "address": "Cll. 9 # 13-26" },
+                { "name": "Torre Mayor Parking", "address": "Cra. 13 # 23-42" },
+                { "name": "Mi Mejor Regalo Plush Toys", "address": "Cll. 21 # 24-56 Local 2" },
+                { "name": "La Casa del Caucho", "address": "Cll. 12 # 19-45 local 25" },
+                { "name": "Britania Models", "address": "Cra. 14 # 10-36 2nd floor" }
+              ]
+            },
+            {
+              "title": "North Zone",
+              "points": [
+                { "name": "El vaquero Store", "address": "Cra. 19 # 3-97" },
+                { "name": "Metromarket", "address": "Cra. 19 # 26N-49 Locales 2-3" },
+                { "name": "Safary Pet Store", "address": "Cll. 2 N # 18-151" },
+                { "name": "Caramelli Stationery", "address": "Cll. 4N # 14-10 Fundadores" },
+                { "name": "Kimara Restaurant", "address": "Cll. 4N # 13-58 Fundadores" },
+                { "name": "Cimev", "address": "Calle 5N # 18-19 B/Profesionales" },
+                { "name": "Pet House", "address": "Calle 10N # 13-42" },
+                { "name": "Minimarket la 19", "address": "Torre Verde Building Local 12" },
+                { "name": "Dr. Guillermo Aguirre", "address": "Caná Bldg Local 8" },
+                { "name": "SuperGym", "address": "Cll. 15N # 12-48" },
+                { "name": "Animal Friends VC", "address": "Cll. 21N # 9-25 Coinca" },
+                { "name": "¡Oh! My pets", "address": "Cra 19 # 22N - 23 local 4" },
+                { "name": "Sublitex", "address": "Cll. 2 # 17-05" },
+                { "name": "San Blass Veterinary Hospital", "address": "Cll. 2N # 18-151" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "montenegro",
+          "name": "Montenegro",
+          "zones": [
+            {
+              "title": "Collection Points",
+              "points": [
+                { "name": "Santa María Goretti School", "address": "Compartir Neighborhood" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "calarca",
+          "name": "Calarcá",
+          "zones": [
+            {
+              "title": "Collection Points",
+              "points": [
+                { "name": "Animal Hospital Vet", "address": "Cra 23 #38-39" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "voluntariado": {
+    "hero": {
+      "titulo_1": "Become a",
+      "titulo_2": "Volunteer",
+      "descripcion": "Donate your time and join us in the work of caring for and protecting animals",
+      "texto_1": "If you are over 14 years old, and are committed, respectful, tolerant, and patient towards all species, here you will find a brief description of the various volunteer areas to join this work.",
+      "texto_2_inicio": "Your profession doesn't matter, just having ",
+      "texto_2_bold": "valid health insurance",
+      "texto_2_medio": ". You can also do your high school community service and university internships. ",
+      "texto_2_enlace": "Contact us!"
+    },
+    "areas": {
+      "titulo": "Volunteer Areas",
+      "subtitulo": "Choose the area that best fits your availability and skills",
+      "lista": [
+        {
+          "title": "Cleaning",
+          "description": "Go to the shelter one Sunday a month, carry out a general cleaning day in kennels, catteries, hallways, food storage room, medicine room, and surroundings. Our animals also need attention and petting."
+        },
+        {
+          "title": "Adoption Days",
+          "description": "Go to an adoption day one Saturday a month, give information to passersby about the importance of adoption, the different ways to help a street animal, and how to donate to the foundation."
+        },
+        {
+          "title": "Animal Transport",
+          "description": "We help transport our animals to the vet, adoption days, and rescues. We do not have our own transport, so this would be a great help to the Foundation."
+        },
+        {
+          "title": "Donations",
+          "description": "Serve as support from Monday to Friday in the collection of pet food donations, recycling, medicines, furniture, etc."
+        },
+        {
+          "title": "Visits and Adoption Follow-ups",
+          "description": "We visit the new families to verify they have an optimal space and are prepared. Later we make follow-up visits. Receive a guide on how to treat adopters with sensitivity."
+        },
+        {
+          "title": "Help at Events",
+          "description": "Support animal and environmental awareness demonstrations and events. We need help organizing, selling vouchers, and giving awareness talks."
+        }
+      ]
+    },
+    "requisitos": {
+      "titulo": "Requirements to Be a Volunteer",
+      "subtitulo": "The only thing you need is a passion for animals",
+      "lista": [
+        {
+          "title": "Over 14 years old",
+          "description": "You must be of legal age to participate as a volunteer in our activities"
+        },
+        {
+          "title": "Commitment and Respect",
+          "description": "Be committed, respectful, and tolerant of all animal species without exception"
+        },
+        {
+          "title": "Valid Health Insurance",
+          "description": "Have active and valid health insurance to guarantee your protection"
+        },
+        {
+          "title": "Patience and Empathy",
+          "description": "Have patience, empathy, and willingness to work in a team with other volunteers"
+        }
+      ],
+      "cta_texto": "Do you want to be part of this adventure? We would love to have you.\nYou can also do your high school community service or university internships with us.",
+      "cta_boton": "Send Volunteer Application"
+    },
+    "testimonios": {
+      "titulo": "Stories from Our Volunteers",
+      "subtitulo": "See how our volunteers are making a difference",
+      "lista": [
+        {
+          "name": "María García",
+          "role": "Cleaning Volunteer",
+          "text": "Being a volunteer at Corteza Terrestre has been one of the best decisions of my life. Seeing how the little animals receive care and love is priceless."
+        },
+        {
+          "name": "Carlos Rodríguez",
+          "role": "Transport Volunteer",
+          "text": "I thought I could only help in one way, but here I discovered that my truck could make a big difference in the lives of many rescued animals."
+        },
+        {
+          "name": "Ana Martínez",
+          "role": "Adoption Volunteer",
+          "text": "Adoption days are exciting. Knowing that I have helped connect an animal with its new family fills my heart with joy."
+        }
+      ]
+    }
+  },
+  "galeria": {
+    "etiqueta": "Gallery",
+    "titulo": "Explore each story by category",
+    "descripcion": "Select a category and discover all its photos. The content is organized so that navigation is clear, fast, and pleasant on any device.",
+    "error": "We couldn't load the gallery at this time.",
+    "categorias": {
+      "etiqueta": "Categories",
+      "titulo": "Explore the gallery",
+      "total": "Total",
+      "fotos": "photo(s)",
+      "ver": "View category"
+    },
+    "detalle": {
+      "etiqueta": "Selected category",
+      "mostrando": "Showing",
+      "de": "of",
+      "fotos": "photo(s)",
+      "volver": "Back to categories",
+      "vacia": "There are no photos in this category yet.",
+      "anterior": "Previous",
+      "siguiente": "Next"
+    },
+    "modal": {
+      "fecha": "Date",
+      "imagen": "Image",
+      "de": "of"
+    }
+  },
+  "privacidad": {
+    "hero": {
+      "etiqueta": "Data Protection",
+      "titulo_1": "Privacy Policy and",
+      "titulo_2": "Data Processing",
+      "actualizacion": "Last updated: 2026"
+    },
+    "secciones": [
+      {
+        "titulo": "Introduction",
+        "contenido_p1": "At the Corteza Terrestre Foundation (hereinafter \"the Foundation\", \"we\" or \"our\"), we are committed to the protection and respect of your privacy. This Privacy Policy describes how we collect, use, protect, and share the personal information of users (hereinafter \"the User\" or \"you\") who visit our website ",
+        "contenido_url": "https://cortezaterrestre.org",
+        "contenido_p2": ", as well as those who interact with us through adoption, sponsorship, donation forms, or general inquiries.",
+        "contenido_p3": "By browsing our website or using our services, you accept the practices described in this policy."
+      },
+      {
+        "titulo": "Data Controller",
+        "li_1": "Corporate Name:",
+        "li_1_val": " Corteza Terrestre Foundation",
+        "li_2": "Website: ",
+        "li_3": "Contact Email: "
+      },
+      {
+        "titulo": "Personal Data We Collect",
+        "p1": "We collect personal information only when you provide it to us voluntarily. The data we may request includes, but is not limited to:",
+        "li_1": "Contact information:",
+        "li_1_val": " Full name, phone number, residential address, and email.",
+        "li_2": "Information for adoption/sponsorship processes:",
+        "li_2_val": " Data contained in the \"Adoption Commitment\" or \"Sponsorship Commitment\", information about lifestyle, family composition, and economic capacity (strictly what is necessary to guarantee the well-being of the animals).",
+        "li_3": "Technical information:",
+        "li_3_val": " IP address, browser type, browsing time, and pages visited (collected automatically through cookies and analytics tools to improve our website)."
+      },
+      {
+        "titulo": "Purpose of Data Processing",
+        "p1": "The personal data provided will be used exclusively for the following purposes:",
+        "li_1": "Management of Adoptions and Sponsorships:",
+        "li_1_val": " Evaluate applications, process the forms (commitments) sent to our email, and follow up on the animals given in adoption.",
+        "li_2": "Management of Donations and Volunteering:",
+        "li_2_val": " Process economic or in-kind contributions and coordinate participation in Foundation activities.",
+        "li_3": "Institutional Communication:",
+        "li_3_val": " Respond to inquiries, doubts, or comments sent through our customer service channels or website.",
+        "li_4": "Awareness Campaigns:",
+        "li_4_val": " Send relevant information about sterilization days, events, shelter news, and fundraising campaigns (always with the option to unsubscribe).",
+        "li_5": "Legal Compliance:",
+        "li_5_val": " Meet requirements from competent authorities regarding the protection and responsible ownership of animals."
+      },
+      {
+        "titulo": "Rights of the Data Subject (Habeas Data)",
+        "p1": "According to Law 1581 of 2012 and complementary regulations in Colombia, as the owner of your personal data, you have the right to:",
+        "li_1": "Know, update, and rectify your personal data before the Foundation.",
+        "li_2": "Request proof of the authorization granted for the processing of your data.",
+        "li_3": "Be informed about the use that has been given to your personal data.",
+        "li_4": "Revoke the authorization and/or request the deletion of the data when the principles, rights, and constitutional and legal guarantees are not respected in the processing.",
+        "li_5": "Access your personal data that has been subject to Processing free of charge.",
+        "p2": "To exercise any of these rights, you can send a formal request to our email: "
+      },
+      {
+        "titulo": "Information Protection and Security",
+        "p1": "The Corteza Terrestre Foundation adopts the necessary technical, human, and administrative measures to guarantee the security of personal data and prevent its alteration, loss, consultation, unauthorized or fraudulent use or access. We do not sell, rent, or share our users' personal information with third parties for commercial purposes.",
+        "p2": "We will only share information when strictly necessary to comply with a legal or judicial requirement."
+      },
+      {
+        "titulo": "Use of Cookies",
+        "p1": "Our website may use \"cookies\" to improve the user experience. Cookies are small text files that are stored on the user's device to remember preferences and analyze web traffic. You can configure your browser to reject all cookies or to notify you when a cookie is sent. However, if you do not accept cookies, some website features may not operate correctly."
+      },
+      {
+        "titulo": "Links to Third-Party Sites",
+        "p1": "Our website may contain links to other sites of interest (e.g., social networks or payment platforms). Once you click on these links and leave our page, we no longer have control over the site to which you are redirected and, therefore, we are not responsible for the privacy terms or the protection of your data on those third-party sites."
+      },
+      {
+        "titulo": "Changes to this Privacy Policy",
+        "p1": "The Corteza Terrestre Foundation reserves the right to update or modify this Privacy Policy at any time to adapt it to legislative developments or new dynamics of the organization. We recommend you review this page periodically. Any change will be notified by publishing the updated version at this same URL."
+      },
+      {
+        "titulo": "Contact",
+        "p1": "If you have any questions, doubts, or comments about this Privacy Policy and Data Processing, please contact us:",
+        "li_1": "Email: ",
+        "li_2": "Website: "
+      }
+    ],
+    "boton_volver": "Back to Home"
+  }
+}
