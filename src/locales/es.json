@@ -1,0 +1,692 @@
+{
+  "navbar": {
+    "fundacion": "Fundación",
+    "menu": {
+      "inicio": "Inicio",
+      "nosotros": "Nosotros",
+      "salvaton": "Salvatón",
+      "adoptar": "Adoptar y Apadrinar",
+      "voluntario": "Voluntario",
+      "tienda": "Tienda",
+      "galeria": "Galería",
+      "contacto": "Contacto"
+    },
+    "donar": "Donar",
+    "donar_ahora": "Donar ahora"
+  },
+  "hero": {
+    "etiqueta": "FUNDADA EN 2007 • ARMENIA, QUINDÍO",
+    "titulo_inicio": "Refugio animal en Armenia:",
+    "titulo_destacado": "Luchamos",
+    "titulo_fin": "por los que no tienen voz",
+    "descripcion": "\"Luchamos por la libertad, respeto y justicia para todos los animales, sin excepción de especies.\"",
+    "botones": {
+      "comprar": "Compra Nuestros Productos",
+      "apadrinar": "Apadrina un Animal",
+      "donar": "Donar"
+    },
+    "tarjeta": {
+      "titulo": "Max está buscando un hogar",
+      "subtitulo": "Recuperado de abandono en Armenia"
+    }
+  },
+  "adopcion": {
+    "titulo": "Adopta un amor para toda la vida",
+    "descripcion": "Hay muchas razones para adoptar un animal, pero la mejor de todas es que salvarás una vida y a cambio tendrás su amor incondicional e inigualable.",
+    "boton": "Ver Animales para Adopción"
+  },
+  "contacto_seccion": {
+    "titulo": "Hablemos",
+    "descripcion": "¿Tenés dudas o querés apadrinar a uno de nuestros protegidos? Ponete en contacto con nosotros. Estamos para escucharte.",
+    "info": {
+      "correo": "Correo",
+      "telefono": "Teléfono",
+      "horario_etiqueta": "Horario",
+      "horario_valor": "Lun - Vie: 8am - 12m / 2pm - 6pm"
+    },
+    "tarjeta": {
+      "titulo": "Fundación Corteza Terrestre",
+      "frase": "\"Luchamos por los que no tienen voz\""
+    }
+  },
+  "donacion_modal": {
+    "cerrar": "Cerrar modal",
+    "apoyo": "Tu apoyo salva vidas",
+    "donde": "¿DÓNDE DONAR?",
+    "a_nombre_de": "A nombre de:",
+    "fundacion": "Fundación Corteza Terrestre",
+    "nit": "NIT: 900.126.931",
+    "bancos": {
+      "bancolombia": "Bancolombia",
+      "davivienda": "Davivienda",
+      "ahorros": "Ahorros",
+      "copiar": "Copiar cuenta"
+    },
+    "certificado": "\"Solicita tu certificado de donación y obten beneficios tributarios del 25%.\"",
+    "protegida": "Transacción protegida y segura"
+  },
+  "footer": {
+    "fundacion": "Fundación",
+    "descripcion": "Organización sin ánimo de lucro fundada en 2007. Trabajando incansablemente por el bienestar de los animales en el Quindío.",
+    "navegacion": {
+      "titulo": "Navegación",
+      "inicio": "Inicio",
+      "adopcion": "Adopción",
+      "tienda": "Tienda Salvatore",
+      "nosotros": "Nosotros",
+      "contacto": "Contacto",
+      "dian": "Permanencia DIAN"
+    },
+    "involucrate": {
+      "titulo": "Involúcrate",
+      "salvaton": "Salvatón Animal",
+      "voluntario": "Ser Voluntario",
+      "apadrinar": "Apadrinar"
+    },
+    "copyright": "© 2026 Fundación Corteza Terrestre. Armenia, Quindío.",
+    "privacidad": "Política de Privacidad y Tratamiento de Datos",
+    "creditos": "Hecho por los estudiantes de Ingeniería de sistemas y computación de la Uniquindio",
+    "github": "Proyecto en GitHub"
+  },
+  "galeria_seccion": {
+    "error_carga": "No pudimos cargar la galería en este momento.",
+    "etiqueta": "Galería canina",
+    "titulo": "Momentos que cuentan historias reales",
+    "descripcion": "Cada foto muestra rescates, adopciones y jornadas de la fundación. Aquí la galería acerca a las personas a la historia real de cada proceso.",
+    "fotos_publicadas": "Fotos publicadas",
+    "vacio_titulo": "Todavía no hay fotos cargadas.",
+    "vacio_descripcion": "En cuanto el administrador publique imágenes, esta sección se actualizará automáticamente.",
+    "boton": "Ver galería completa"
+  },
+  "stream": {
+    "titulo": "Transmisión en Vivo",
+    "descripcion": "Acompáñanos con nuestros peludos en tiempo real.",
+    "proximamente": "Próximamente",
+    "proximamente_desc": "Pronto estaremos transmitiendo en vivo. ¡Regresa luego y mantente atento a nuestras redes sociales!"
+  },
+  "tienda": {
+    "titulo": "Tienda",
+    "descripcion": "Cada producto es una huella de amor. El 100% de las ganancias se destina a la transformación de vidas en nuestro refugio.",
+    "categorias": {
+      "mugs": "Mugs",
+      "termos": "Termos",
+      "camisetas": "Camisetas",
+      "tipis": "Tipis"
+    },
+    "estados": {
+      "cargando": "Cargando catálogo...",
+      "disponibles": "disponibles",
+      "agotado": "Agotado",
+      "unidades": "unidades",
+      "producto_social": "Producto Social",
+      "ver_detalle": "Ver detalle",
+      "sin_stock": "Sin Stock",
+      "proximamente": "Próximamente estaremos agregando nuevos productos a esta categoría."
+    },
+    "modal": {
+      "especificaciones": "Especificaciones",
+      "disponibilidad": "Disponibilidad",
+      "info": "Cada compra ayuda directamente al refugio. El 100% de las ganancias se destina a alimentación y salud animal.",
+      "btn_pedir": "Pedir por WhatsApp",
+      "btn_agotado": "Producto Agotado",
+      "whatsapp_msg": "¡Hola! Me interesa el producto:",
+      "envio": "Disponibilidad inmediata para envíos nacionales"
+    },
+    "tipis": {
+      "armado_titulo": "Instrucciones de Armado",
+      "pasos": [
+        "Sacar el teepee de su bolsa protectora e identificar los palos.",
+        "Acomodar la colchoneta acolchada en su lugar definitivo.",
+        "Insertar los palos por las guías y abrir la carpa sobre la base.",
+        "Amarrar firmemente las tiras de seguridad superiores."
+      ],
+      "medidas_titulo": "Medidas Disponibles",
+      "tallas": {
+        "s": "S (Pequeño)",
+        "m": "M (Mediano)",
+        "l": "L (Grande)"
+      },
+      "altura": "Altura",
+      "disclaimer": "* Todos nuestros teepees son fabricados de forma artesanal con materiales de alta densidad para máxima durabilidad."
+    },
+    "camisetas": {
+      "guia_titulo": "Guía de Tallas (cm)",
+      "columnas": ["Talla", "Largo Cuerpo", "Ancho Cuerpo", "Hombro", "Manga"]
+    },
+    "banner": {
+      "etiqueta": "Iniciativa Solidaria",
+      "titulo": "Salvatón Animal",
+      "descripcion": "Sostener el refugio no es fácil. Tenemos deudas veterinarias y necesitamos adecuaciones constantes. ¿Contamos contigo?"
+    },
+    "formulario": {
+      "titulo": "Haz tu Pedido",
+      "descripcion": "Nuestros productos son personalizados. Envíanos un mensaje y nos pondremos en contacto para coordinar los diseños y la entrega.",
+      "nombre": "Tu Nombre",
+      "correo": "Correo Electrónico",
+      "mensaje": "¿Qué producto te interesa?",
+      "boton": "Enviar Mensaje"
+    },
+    "sello": "100% materiales de calidad y sentido social"
+  },
+  "estadisticas": {
+    "titulo": "Nuestra Huella en Armenia",
+    "descripcion": "Cada cifra representa una vida que ha sido tocada por el amor y la dedicación de nuestros voluntarios. Trabajamos incansablemente para que estas historias tengan un final feliz.",
+    "frase": "— \"Transformando el dolor en esperanza, una pata a la vez.\"",
+    "cartas": {
+      "vidas": {
+        "numero": "60+",
+        "titulo": "Vidas Protegidas",
+        "desc": "Animales bajo nuestro cuidado constante en el refugio."
+      },
+      "adoptados": {
+        "numero": "500+",
+        "titulo": "Adoptados",
+        "desc": "Hogares transformados por el amor de un rescatado."
+      },
+      "compromiso": {
+        "numero": "100%",
+        "titulo": "Amor y Compromiso",
+        "desc": "Nuestra dedicación es total para garantizar que ningún animal vuelva a sufrir el abandono."
+      }
+    }
+  },
+  "ejes_trabajo": {
+    "titulo": "¿Qué estamos haciendo?",
+    "descripcion": "Nuestros ejes de trabajo se enfocan en soluciones integrales para el bienestar animal en nuestra región.",
+    "items": [
+      {
+        "titulo": "Esterilización",
+        "descripcion": "Gestionamos y promovemos jornadas de esterilización en diferentes sectores para evitar la reproducción descontrolada."
+      },
+      {
+        "titulo": "Atención Veterinaria",
+        "descripcion": "Brindamos tratamientos y cirugías urgentes para los animales del refugio y los que están en condición de calle."
+      },
+      {
+        "titulo": "Buen Trato",
+        "descripcion": "Nos esforzamos para que los animales se sientan queridos y protegidos, reduciendo los traumas del abandono."
+      },
+      {
+        "titulo": "Somos Portavoces",
+        "descripcion": "Velamos por el cumplimiento de la legislación colombiana contra el maltrato animal y la explotación."
+      },
+      {
+        "titulo": "Adopciones Responsables",
+        "descripcion": "Ubicamos a los animales en hogares óptimos, incluyendo esterilización y seguimiento riguroso."
+      },
+      {
+        "titulo": "Voluntariado",
+        "descripcion": "Unimos esfuerzos entre voluntarios, padrinos y simpatizantes para fortalecer el bienestar animal."
+      }
+    ]
+  },
+  "auth": {
+    "validando": "Validando acceso al panel..."
+  },
+  "about": {
+    "hero": {
+      "etiqueta": "Sobre Nosotros",
+      "titulo_1": "Nuestra labor por",
+      "titulo_2": "Los que no tienen voz",
+      "descripcion": "Luchamos por la libertad, respeto y justicia para todos los animales, sin excepción de especies."
+    },
+    "mission": {
+      "titulo": "Sensibilizamos y educamos sobre el maltrato animal",
+      "p1": "La Fundación Corteza Terrestre es fundada y tiene sus inicios a comienzos del año 2007, somos una organización sin ánimo de lucro que labora de manera voluntaria, nos dedicamos a la defensa y protección de los animales, trabajamos en la sensibilización de la comunidad, generando espacios de educación y atención básica a animales en condición de calle o víctimas de maltrato, así promovemos importantes cambios en la sociedad.",
+      "p2": "Actualmente contamos con un hogar de paso, en el que albergamos más de 60 animales entre perros y gatos rescatados de la calle y el abandono, los recuperamos y posteriormente los damos en adopción. Los miembros de la organización somos veganos o vegetarianos, porque respetamos la libertad de todos los animales sin excepción de especies.",
+      "p3_start": "Dentro de la fundación Corteza Terrestre adelantamos actividades para el sostenimiento económico de los animales como lo es el recaudo de fondos monetarios o de otras ayudas físicas, elementales para el funcionamiento del refugio, donados por la ciudadanía. También vendemos artículos para reducir desechos como cepillos en madera, vasos plegables, etc.; también ofrecemos regalos personalizados bajo nuestra marca ",
+      "p3_link": "\"Salvatore Souvenirs\"",
+      "p3_end": " como, mugs, camisetas, caramañolas, manillas, gorras, llaveros, entre otros; así pretendemos ser auto-sostenibles.",
+      "logo_text": "Fundación Corteza Terrestre"
+    },
+    "stats": {
+      "items": [
+        { "label": "Perros adoptados desde 2014" },
+        { "label": "Gatos adoptados desde 2014" },
+        { "label": "Animales apadrinados desde 2014" }
+      ],
+      "mensaje_titulo": "¡Abandonar a un animal, es abandonar un miembro de la familia!",
+      "mensaje_desc": "Los animales que rescatamos pasan meses en el refugio hasta encontrar un hogar. Si tienes que separarte de él, busca un hogar por iniciativa propia."
+    },
+    "team": {
+      "titulo": "Nuestro Equipo de Trabajo",
+      "descripcion": "Personas dedicadas y comprometidas con la causa animal",
+      "roles": {
+        "presidenta": "Presidenta y Fundadora",
+        "tesorera": "Tesorera",
+        "secretaria": "Secretaria"
+      }
+    },
+    "testimonials": {
+      "titulo": "Lo que dicen de la Fundación",
+      "items": [
+        {
+          "text": "Excelente labor la que están realizando. Estas personas contribuyen a la preservación de la vida de estos seres tan maravillosos, amorosos y llenos de inocencia.",
+          "author": "Chris Giraldo"
+        },
+        {
+          "text": "Hacen la labor más hermosa, cuidan protegen y aman a los animales en especial aquellos sin hogar.",
+          "author": "Claudia P. Cifuentes"
+        },
+        {
+          "text": "Su labor es desinteresada y honesta, son personas en verdad sensibles con los animales y luchan cada día por su bienestar.",
+          "author": "Norma Gómez"
+        }
+      ]
+    }
+  },
+  "contacto_form": {
+    "placeholders": {
+      "nombre": "Nombre",
+      "email": "Correo Electrónico",
+      "asunto": "Asunto",
+      "mensaje": "Escribe aquí tu mensaje"
+    },
+    "privacidad": "Al enviar el formulario acepto términos y condiciones de privacidad",
+    "boton_enviar": "Enviar",
+    "mensaje_exito": "Gracias por contactar, en breve nos pondremos en contacto con usted.",
+    "titulo": "Contáctanos",
+    "descripcion": "Escríbenos acerca de nuestros productos para ordenarlos o cualquier otra inquietud y te responderemos en la mayor brevedad posible.",
+    "info": {
+      "email": "Email",
+      "telefono": "Teléfono",
+      "ubicacion": "Ubicación",
+      "direccion": "Calle 22N No. 17-15, Edif. Ozono\nArmenia, Quindío"
+    },
+    "redes": "También estamos en redes:"
+  },
+  "contacto_mapa": {
+    "titulo": "Ubicación Fundación Corteza Terrestre"
+  },
+  "dian": {
+    "etiqueta": "Transparencia Legal",
+    "titulo": "Permanencia DIAN",
+    "descripcion": "Consulta nuestra documentación reglamentaria y jurídica, demostrando nuestro compromiso con la transparencia institucional.",
+    "ver_documento": "Ver documento",
+    "documentos": [
+      { "titulo": "Informe de gestión" },
+      { "titulo": "Estados Financieros" },
+      { "titulo": "Requisitos permanencia ESAL" },
+      { "titulo": "Acta de constitución" },
+      { "titulo": "Certificado de existencia y representación" },
+      { "titulo": "Acta de asamblea" },
+      { "titulo": "Estatutos" },
+      { "titulo": "Responsabilidad penal" }
+    ]
+  },
+  "mascotas": {
+    "hero": {
+      "etiqueta": "Fundación Corteza Terrestre",
+      "titulo_1": "Encuentra a tu",
+      "titulo_2": "compañero de vida",
+      "descripcion": "Estos animales esperan una segunda oportunidad. Adoptar salva dos vidas: la de ellos y la tuya.",
+      "buscar_placeholder": "Buscar por nombre o raza...",
+      "filtros": "Filtros",
+      "especie": "Especie:",
+      "cargando": "Cargando...",
+      "animal": "animal",
+      "animales": "animales",
+      "disponible": "disponible",
+      "disponibles": "disponibles"
+    },
+    "filtros": {
+      "todos": "Todos",
+      "perros": "Perros",
+      "gatos": "Gatos"
+    },
+    "tarjeta": {
+      "urgente": "⚡ Urgente",
+      "macho": "♂ Macho",
+      "hembra": "♀ Hembra",
+      "pequeno": "Pequeño",
+      "mediano": "Mediano",
+      "grande": "Grande",
+      "sonido_escuchar": "Escuchar sonido",
+      "sonido_detener": "Detener sonido",
+      "sonido_no_disponible": "Sin sonido disponible",
+      "anos": "año",
+      "anos_pl": "años",
+      "meses": "mes",
+      "meses_pl": "meses",
+      "y": "y",
+      "btn_adoptar": "Adoptar",
+      "btn_apadrinar": "Apadrinar"
+    },
+    "grid": {
+      "sin_resultados_titulo": "Sin resultados",
+      "sin_resultados_desc": "No encontramos animales con esos filtros. Intenta con otra búsqueda.",
+      "btn_ver_todos": "Ver todos"
+    },
+    "modal": {
+      "etiqueta_adoptar": "¡Qué hermosa decisión!",
+      "etiqueta_apadrinar": "¡Gracias por tu bondad!",
+      "titulo_adoptar": "Adoptar a {{nombre}}",
+      "titulo_apadrinar": "Apadrinar a {{nombre}}",
+      "desc_adoptar": "Para iniciar el proceso de adopción de {{nombre}}, comunícate con nosotros y completa el formulario de solicitud. Queremos asegurarnos de que sea el hogar perfecto.",
+      "desc_apadrinar": "Apadrinar a {{nombre}} significa cubrir sus gastos de alimentación y atención veterinaria. Recibirás actualizaciones periódicas de su bienestar.",
+      "btn_contactar": "Contáctanos",
+      "btn_cerrar": "Cerrar"
+    },
+    "compromisos": {
+      "titulo_principal": "Adopta un amor para toda la vida",
+      "desc_principal": "Hay muchas razones para adoptar un animal, pero la mejor de todas es que salvarás una vida y a cambio tendrás su amor incondicional e inigualable.",
+      "titulo_apadrinar": "Cuando apadrinas te comprometes a:",
+      "items_apadrinar": [
+        "Una ayuda mínima por el animal que decidas apadrinar es de $50.000 COP al mes.",
+        "Dejar que la fundación cubra las necesidades básicas del animal con el dinero aportado.",
+        "Responder por gastos extras en medicina o tratamientos, en caso de ser necesario.",
+        "Puedes visitar, incluso darle un paseo fuera de las instalaciones de la fundación, durante uno o varios días. Esto será acordado previamente por la logística que esto implica."
+      ],
+      "titulo_adoptar": "Cuando adoptas te comprometes a:",
+      "items_adoptar": [
+        "No abandonar a tu mascota por ningún motivo (vejez, comportamiento, enfermedad, etc.).",
+        "Tratarlo con amor y respeto. No lo dejarás expuesto a las inclemencias del clima, tampoco a una soledad prolongada, especialmente en época de vacaciones, no lo entregarás a zoonosis, perreras o universidades para experimentación, mucho menos para ser comercializado o explotado.",
+        "Suministrarle atención médica adecuada cuando lo necesite.",
+        "Esterilizar a tu peludo. Este es un compromiso fundamental; si te niegas, nos negamos a aprobar su adopción.",
+        "Recibir visitas de control. Para nosotros es fundamental garantizar la adaptación de nuestros animales a su nuevo hogar, por ello hacemos visitas de seguimiento."
+      ]
+    },
+    "cta": {
+      "titulo": "¿No encuentras al indicado?",
+      "descripcion": "Déjanos tus datos y te avisamos cuando llegue un nuevo animal que coincida con lo que buscas.",
+      "boton": "Contáctanos"
+    }
+  },
+  "salvaton": {
+    "hero": {
+      "etiqueta": "Campaña Solidaria",
+      "titulo_1": "Gran Plan",
+      "titulo_2": "Salvatón",
+      "descripcion": "Dona alimento y ayúdanos a seguir protegiendo a los animales rescatados de Armenia y el Quindío.",
+      "boton": "Quiero Donar"
+    },
+    "info": {
+      "titulo_1": "¿En qué consiste el",
+      "titulo_2": "Plan Salvatón?",
+      "p1": "Nuestra campaña consiste en ubicar alcancías con el logo de la fundación en lugares comerciales del Quindío, siendo Armenia la ciudad principal.",
+      "p2": "Los comercios que se han unido no violentan la integridad de los animales. Allí, las personas pueden dejar su aporte sin importar su valor, el cual es destinado íntegramente al sostenimiento del refugio.",
+      "frase": "\"Cada moneda cuenta para brindarles una mejor calidad de vida a nuestros rescatados.\""
+    },
+    "cities": {
+      "titulo": "Puntos de Recaudación",
+      "subtitulo": "Encuentra la alcancía más cercana y deja tu huella",
+      "data": [
+        {
+          "id": "armenia",
+          "name": "Armenia",
+          "zones": [
+            {
+              "title": "Zona Centro",
+              "points": [
+                { "name": "Tienda de Ropa LVS", "address": "Cra. 13 # 18-53" },
+                { "name": "Jazzfa Music", "address": "Cra. 14 # 22-06" },
+                { "name": "Hotel la Quinta Porra", "address": "Cra. 14 # 15-48" },
+                { "name": "Pantera Deportes", "address": "Cra. 15 # 19-02" },
+                { "name": "Peluquería Canina Motitas", "address": "Cra. 16 # 9-50" },
+                { "name": "Almacén el Vaquero", "address": "Cra. 16 # 15-45" },
+                { "name": "Restaurante la Rana", "address": "Cra. 16 # 18-50" },
+                { "name": "Almacén Flota Blanca 1", "address": "Cra. 16 # 20a-09" },
+                { "name": "Foto Palacio", "address": "Cra. 17 # 20-40" },
+                { "name": "Abox", "address": "Cra. 18 # 9-24" },
+                { "name": "Lucía Trujillo Asesores de Imagen", "address": "Calle 14 # 14-41 Local 3" },
+                { "name": "Tienda Deportiva Winners", "address": "Cra. 14 # 17-08" },
+                { "name": "Tienda Deportiva Trotta", "address": "Unicentro 2do nivel local 72" },
+                { "name": "Animales con Colas", "address": "Cra. 23 # 15-17" },
+                { "name": "Almacén Concentrados del Quindío", "address": "Cra. 19 # 19-05" },
+                { "name": "Rest. Veg. Natural Food Plaza", "address": "Av Bolívar Cra. 14 # 4-51" },
+                { "name": "Mundo Cómputo", "address": "Cll. 21 # 11-23" },
+                { "name": "Financoop Armenia", "address": "Cll. 20 # 15-33 Oficina 202" },
+                { "name": "Almacén de Artesanía Martha Lucía", "address": "Cra. 16 # 14-60" },
+                { "name": "Café Letbrogh&co", "address": "Cll. 9 # 13-26" },
+                { "name": "Parqueadero Torre Mayor", "address": "Cra. 13 # 23-42" },
+                { "name": "Peluches Mi Mejor Regalo", "address": "Cll. 21 # 24-56 Local 2" },
+                { "name": "La Casa del Caucho", "address": "Cll. 12 # 19-45 local 25" },
+                { "name": "Britania Models", "address": "Cra. 14 # 10-36 2do piso" }
+              ]
+            },
+            {
+              "title": "Zona Norte",
+              "points": [
+                { "name": "Almacén El vaquero", "address": "Cra. 19 # 3-97" },
+                { "name": "Metromarket", "address": "Cra. 19 # 26N-49 Locales 2-3" },
+                { "name": "Safary Tienda de Mascotas", "address": "Cll. 2 N # 18-151" },
+                { "name": "Papelería Caramelli", "address": "Cll. 4N # 14-10 Fundadores" },
+                { "name": "Restaurante Kimara", "address": "Cll. 4N # 13-58 Fundadores" },
+                { "name": "Cimev", "address": "Calle 5N # 18-19 B/Profesionales" },
+                { "name": "Casa de Mascotas", "address": "Calle 10N # 13-42" },
+                { "name": "Minimarket la 19", "address": "Edificio Torre Verde Local 12" },
+                { "name": "Dr. Guillermo Aguirre", "address": "Edif. Caná Local 8" },
+                { "name": "SuperGym", "address": "Cll. 15N # 12-48" },
+                { "name": "CV Animal Friends", "address": "Cll. 21N # 9-25 Coinca" },
+                { "name": "¡Oh! My pets", "address": "Cra 19 # 22N - 23 local 4" },
+                { "name": "Sublitex", "address": "Cll. 2 # 17-05" },
+                { "name": "Hospital Veterinario San Blass", "address": "Cll. 2N # 18-151" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "montenegro",
+          "name": "Montenegro",
+          "zones": [
+            {
+              "title": "Puntos de Recaudación",
+              "points": [
+                { "name": "Colegio Santa María Goretti", "address": "Barrio Compartir" }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "calarca",
+          "name": "Calarcá",
+          "zones": [
+            {
+              "title": "Puntos de Recaudación",
+              "points": [
+                { "name": "Hospital Vet. Animal Hospital", "address": "Cra 23 #38-39" }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "voluntariado": {
+    "hero": {
+      "titulo_1": "Conviértete en",
+      "titulo_2": "Voluntario",
+      "descripcion": "Dona tu tiempo y únete a nosotros en la labor de cuidar y proteger a los animales",
+      "texto_1": "Si eres una persona mayor de 14 años, además comprometida, respetuosa, tolerante y paciente frente a todas las especies, aquí encontrarás una breve descripción de las diversas áreas de voluntariado para vincularte en esta labor.",
+      "texto_2_inicio": "No importa tu profesión, solo contar con un ",
+      "texto_2_bold": "seguro médico vigente",
+      "texto_2_medio": ". También puedes realizar el trabajo social de bachiller y prácticas universitarias. ",
+      "texto_2_enlace": "¡Contáctanos!"
+    },
+    "areas": {
+      "titulo": "Áreas de Voluntariado",
+      "subtitulo": "Elige el área que más se acomode a tu disponibilidad y habilidades",
+      "lista": [
+        {
+          "title": "Limpieza",
+          "description": "Ir al refugio un domingo al mes, realizar jornada de aseo general en perreras, gateras, pasillos, cuarto de almacenamiento de comida, cuarto de medicamentos y alrededores. Nuestros animales también necesitan atención y caricias."
+        },
+        {
+          "title": "Jornadas de Adopción",
+          "description": "Ir a jornada de adopción un sábado al mes, dar información a los transeúntes acerca de la importancia de la adopción, de las diferentes formas de ayudar un animal en situación de calle y cómo donar en la fundación."
+        },
+        {
+          "title": "Transporte de Animales",
+          "description": "Ayudamos a transportar a nuestros animales al veterinario, a las jornadas de adopción y rescates. No tenemos transporte propio, por lo que esto sería de gran ayuda para la Fundación."
+        },
+        {
+          "title": "Donaciones",
+          "description": "Servir de apoyo de lunes a viernes en la recolección de donaciones de concentrado, reciclaje, medicamentos, mobiliario, etc."
+        },
+        {
+          "title": "Visitas y Seguimiento de Adopciones",
+          "description": "Visitamos a las nuevas familias para verificar que tengan un espacio óptimo y que estén preparados. Posteriormente hacemos visitas de seguimiento. Recibe una guía de cómo tratar con sensibilidad a los adoptantes."
+        },
+        {
+          "title": "Ayuda en Eventos",
+          "description": "Apoyar en manifestaciones y eventos de sensibilización animal y ambiental. Necesitamos ayuda en organización, venta de bonos y charlas de sensibilización."
+        }
+      ]
+    },
+    "requisitos": {
+      "titulo": "Requisitos para Ser Voluntario",
+      "subtitulo": "Lo único que necesitas es pasión por los animales",
+      "lista": [
+        {
+          "title": "Mayor de 14 años",
+          "description": "Debes ser mayor de edad legal para participar como voluntario en nuestras actividades"
+        },
+        {
+          "title": "Compromiso y Respeto",
+          "description": "Ser comprometido, respetuoso y tolerante con todas las especies animales sin excepción"
+        },
+        {
+          "title": "Seguro Médico Vigente",
+          "description": "Contar con un seguro médico activo y válido para garantizar tu protección"
+        },
+        {
+          "title": "Paciencia y Empatía",
+          "description": "Tener paciencia, emppatía y disposición para trabajar en equipo con otros voluntarios"
+        }
+      ],
+      "cta_texto": "¿Quieres ser parte de esta aventura? Nos encantaría contar contigo.\nTambén puedes realizar tu trabajo social de bachiller o prácticas universitarias con nosotros.",
+      "cta_boton": "Enviar Solicitud de Voluntariado"
+    },
+    "testimonios": {
+      "titulo": "Historias de Nuestros Voluntarios",
+      "subtitulo": "Conoce cómo nuestros voluntarios están haciendo la diferencia",
+      "lista": [
+        {
+          "name": "María García",
+          "role": "Voluntaria de Limpieza",
+          "text": "Ser voluntaria en Corteza Terrestre ha sido una de las mejores decisiones de mi vida. Ver cómo los animalitos reciben cuidado y amor es algo que no tiene precio."
+        },
+        {
+          "name": "Carlos Rodríguez",
+          "role": "Voluntario de Transporte",
+          "text": "Pensé que solo podía ayudar de una forma, pero aquí descubrí que mi camioneta podía hacer una gran diferencia en la vida de muchos animales rescatados."
+        },
+        {
+          "name": "Ana Martínez",
+          "role": "Voluntaria de Adopción",
+          "text": "Las jornadas de adopción son emocionantes. Saber que he ayudado a conectar a un animal con su nueva familia me llena el corazón de alegría."
+        }
+      ]
+    }
+  },
+  "galeria": {
+    "etiqueta": "Galería",
+    "titulo": "Explora cada historia por categoría",
+    "descripcion": "Selecciona una categoría y descubre todas sus fotos. El contenido está organizado para que la navegación sea clara, ágil y agradable en cualquier dispositivo.",
+    "error": "No pudimos cargar la galería en este momento.",
+    "categorias": {
+      "etiqueta": "Categorías",
+      "titulo": "Explora la galería",
+      "total": "Total",
+      "fotos": "foto(s)",
+      "ver": "Ver categoría"
+    },
+    "detalle": {
+      "etiqueta": "Categoría seleccionada",
+      "mostrando": "Mostrando",
+      "de": "de",
+      "fotos": "foto(s)",
+      "volver": "Regresar a categorías",
+      "vacia": "Todavía no hay fotos en esta categoría.",
+      "anterior": "Anterior",
+      "siguiente": "Siguiente"
+    },
+    "modal": {
+      "fecha": "Fecha",
+      "imagen": "Imagen",
+      "de": "de"
+    }
+  },
+  "privacidad": {
+    "hero": {
+      "etiqueta": "Protección de Datos",
+      "titulo_1": "Política de Privacidad y",
+      "titulo_2": "Tratamiento de Datos",
+      "actualizacion": "Última actualización: 2026"
+    },
+    "secciones": [
+      {
+        "titulo": "Introducción",
+        "contenido_p1": "En la Fundación Corteza Terrestre (en adelante \"la Fundación\", \"nosotros\" o \"nuestro\"), estamos comprometidos con la protección y el respeto de tu privacidad. Esta Política de Privacidad describe cómo recopilamos, utilizamos, protegemos y compartimos la información personal de los usuarios (en adelante \"el Usuario\" o \"tú\") que visitan nuestro sitio web ",
+        "contenido_url": "https://cortezaterrestre.org",
+        "contenido_p2": ", así como de aquellas personas que interactúan con nosotros a través de formularios de adopción, apadrinamiento, donaciones o consultas generales.",
+        "contenido_p3": "Al navegar por nuestro sitio web o utilizar nuestros servicios, aceptas las prácticas descritas en esta política."
+      },
+      {
+        "titulo": "Responsable del Tratamiento de la Información",
+        "li_1": "Razón Social:",
+        "li_1_val": " Fundación Corteza Terrestre",
+        "li_2": "Sitio Web: ",
+        "li_3": "Correo Electrónico de Contacto: "
+      },
+      {
+        "titulo": "Datos Personales que Recopilamos",
+        "p1": "Recopilamos información personal únicamente cuando nos la proporcionas de forma voluntaria. Los datos que podemos solicitar incluyen, entre otros:",
+        "li_1": "Información de contacto:",
+        "li_1_val": " Nombre completo, número de teléfono, dirección de residencia y correo electrónico.",
+        "li_2": "Información para procesos de adopción/apadrinamiento:",
+        "li_2_val": " Datos contenidos en el \"Compromiso de Adopción\" o \"Compromiso de Apadrinamiento\", información sobre el estilo de vida, composición familiar y capacidad económica (estrictamente lo necesario para garantizar el bienestar de los animales).",
+        "li_3": "Información técnica:",
+        "li_3_val": " Dirección IP, tipo de navegador, tiempo de navegación y páginas visitadas (recopilada automáticamente a través de cookies y herramientas de análisis para mejorar nuestro sitio web)."
+      },
+      {
+        "titulo": "Finalidad del Tratamiento de los Datos",
+        "p1": "Los datos personales proporcionados serán utilizados exclusivamente para los siguientes propósitos:",
+        "li_1": "Gestión de Adopciones y Apadrinamientos:",
+        "li_1_val": " Evaluar las solicitudes, procesar los formularios (compromisos) enviados a nuestro correo y realizar seguimiento a los animales entregados en adopción.",
+        "li_2": "Gestión de Donaciones y Voluntariado:",
+        "li_2_val": " Procesar aportes económicos o en especie y coordinar la participación en actividades de la Fundación.",
+        "li_3": "Comunicación Institucional:",
+        "li_3_val": " Responder a consultas, dudas o comentarios enviados a través de nuestros canales de atención o sitio web.",
+        "li_4": "Campañas de Concientización:",
+        "li_4_val": " Enviar información relevante sobre jornadas de esterilización, eventos, noticias del refugio y campañas de recaudación de fondos (siempre con la opción de darse de baja).",
+        "li_5": "Cumplimiento Legal:",
+        "li_5_val": " Atender requerimientos de autoridades competentes en relación con la protección y tenencia responsable de animales."
+      },
+      {
+        "titulo": "Derechos del Titular de los Datos (Habeas Data)",
+        "p1": "De acuerdo con la Ley 1581 de 2012 y normativas complementarias en Colombia, como titular de tus datos personales, tienes derecho a:",
+        "li_1": "Conocer, actualizar y rectificar tus datos personales frente a la Fundación.",
+        "li_2": "Solicitar prueba de la autorización otorgada para el tratamiento de tus datos.",
+        "li_3": "Ser informado sobre el uso que se le ha dado a tus datos personales.",
+        "li_4": "Revocar la autorización y/o solicitar la supresión del dato cuando en el tratamiento no se respeten los principios, derechos y garantías constitucionales y legales.",
+        "li_5": "Acceder en forma gratuita a tus datos personales que hayan sido objeto de Tratamiento.",
+        "p2": "Para ejercer cualquiera de estos derechos, puedes enviar una solicitud formal a nuestro correo electrónico: "
+      },
+      {
+        "titulo": "Protección y Seguridad de la Información",
+        "p1": "La Fundación Corteza Terrestre adopta las medidas técnicas, humanas y administrativas necesarias para garantizar la seguridad de los datos personales y evitar su alteración, pérdida, consulta, uso o acceso no autorizado o fraudulento. No vendemos, alquilamos ni compartimos la información personal de nuestros usuarios con terceros con fines comerciales.",
+        "p2": "Solo compartiremos información cuando sea estrictamente necesario para cumplir con un requerimiento legal o judicial."
+      },
+      {
+        "titulo": "Uso de Cookies",
+        "p1": "Nuestro sitio web puede utilizar \"cookies\" para mejorar la experiencia del usuario. Las cookies son pequeños archivos de texto que se guardan en el dispositivo del usuario para recordar preferencias y analizar el tráfico de la web. Puedes configurar tu navegador para rechazar todas las cookies o para que te avise cuando se envíe una cookie. Sin embargo, si no aceptas las cookies, es posible que algunas funciones del sitio web no operen correctamente."
+      },
+      {
+        "titulo": "Enlaces a Sitios de Terceros",
+        "p1": "Nuestro sitio web puede contener enlaces a otros sitios de interés (ej. redes sociales o plataformas de pago). Una vez que hagas clic en estos enlaces y abandones nuestra página, ya no tenemos control sobre el sitio al que eres redirigido y, por lo tanto, no somos responsables de los términos de privacidad ni de la protección de tus datos en esos sitios de terceros."
+      },
+      {
+        "titulo": "Cambios a esta Política de Privacidad",
+        "p1": "La Fundación Corteza Terrestre se reserva el derecho de actualizar o modificar esta Política de Privacidad en cualquier momento para adaptarla a novedades legislativas o nuevas dinámicas de la organización. Te recomendamos revisar esta página periódicamente. Cualquier cambio será notificado publicando la versión actualizada en esta misma URL."
+      },
+      {
+        "titulo": "Contacto",
+        "p1": "Si tienes alguna pregunta, duda o comentario sobre esta Política de Privacidad y Tratamiento de Datos, por favor contáctanos:",
+        "li_1": "Correo electrónico: ",
+        "li_2": "Página Web: "
+      }
+    ],
+    "boton_volver": "Volver al Inicio"
+  }
+}

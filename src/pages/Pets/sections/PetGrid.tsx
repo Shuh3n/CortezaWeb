@@ -1,8 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 import PetCard from './PetCard';
 import type { Pet } from '../types';
-
-// ─── Skeleton ──────────────────────────────────────────────────────────────────
 
 const SkeletonCard = () => (
     <div className="bg-white rounded-[32px] overflow-hidden border border-slate-100 animate-pulse">
@@ -20,8 +19,6 @@ const SkeletonCard = () => (
     </div>
 );
 
-// ─── Grid ──────────────────────────────────────────────────────────────────────
-
 interface PetGridProps {
     pets: Pet[];
     loading: boolean;
@@ -31,6 +28,8 @@ interface PetGridProps {
 }
 
 const PetGrid = ({ pets, loading, onAdopt, onSponsor, onClearFilters }: PetGridProps) => {
+    const { t } = useTranslation();
+
     if (loading) {
         return (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -49,9 +48,9 @@ const PetGrid = ({ pets, loading, onAdopt, onSponsor, onClearFilters }: PetGridP
                 className="text-center py-24"
             >
                 <div className="text-7xl mb-6">🐾</div>
-                <h3 className="text-2xl font-black text-text-h mb-3">Sin resultados</h3>
+                <h3 className="text-2xl font-black text-text-h mb-3">{t('mascotas.grid.sin_resultados_titulo')}</h3>
                 <p className="text-text-muted font-medium">
-                    No encontramos animales con esos filtros. Intenta con otra búsqueda.
+                    {t('mascotas.grid.sin_resultados_desc')}
                 </p>
                 <motion.button
                     whileHover={{ scale: 1.05 }}
@@ -59,7 +58,7 @@ const PetGrid = ({ pets, loading, onAdopt, onSponsor, onClearFilters }: PetGridP
                     onClick={onClearFilters}
                     className="mt-6 bg-primary text-white px-8 py-3 rounded-2xl font-bold"
                 >
-                    Ver todos
+                    {t('mascotas.grid.btn_ver_todos')}
                 </motion.button>
             </motion.div>
         );
