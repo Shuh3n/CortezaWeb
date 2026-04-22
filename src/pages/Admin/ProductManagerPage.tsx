@@ -59,10 +59,12 @@ export default function AdminProductManagerPage() {
   const fetchProducts = async () => {
     try {
       setIsLoading(true);
+      // Implementamos un límite razonable para el administrador también
       const { data, error } = await supabase
         .from('products')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(200); // Límite de seguridad
 
       if (error) throw error;
       setProducts(data || []);
