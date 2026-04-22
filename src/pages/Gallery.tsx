@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Images, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -34,11 +34,15 @@ export default function PublicGalleryPage() {
     async function loadGallery() {
       try {
         setIsLoading(true);
-        const [summaryData, imageData] = await Promise.all([listGallerySummary(), listGalleryImages(slug)]);
+        // Traemos el resumen (conteos y portadas) y solo la primera página de la categoría actual
+        const [summaryData, imageData] = await Promise.all([
+          listGallerySummary(),
+          listGalleryImages(slug, currentPage, IMAGES_PER_PAGE)
+        ]);
+
         if (!ignore) {
           setSummary(summaryData);
           setImages(imageData);
-          setCurrentPage(1);
           setErrorMessage(null);
         }
       } catch (error) {
@@ -57,7 +61,11 @@ export default function PublicGalleryPage() {
     return () => {
       ignore = true;
     };
-  }, [slug, t]);
+  }, [slug, t, currentPage]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [slug]);
 
   useEffect(() => {
     if (!selectedImage) return;
@@ -71,11 +79,9 @@ export default function PublicGalleryPage() {
   }, [selectedImage]);
 
   const currentCategory = useMemo(() => summary.find((item) => item.category.slug === slug) ?? null, [summary, slug]);
-  const totalPages = Math.max(1, Math.ceil(images.length / IMAGES_PER_PAGE));
-  const paginatedImages = useMemo(() => {
-    const start = (currentPage - 1) * IMAGES_PER_PAGE;
-    return images.slice(start, start + IMAGES_PER_PAGE);
-  }, [currentPage, images]);
+  const totalCount = currentCategory?.total ?? 0;
+  const totalPages = Math.max(1, Math.ceil(totalCount / IMAGES_PER_PAGE));
+  const paginatedImages = images; // Ya vienen paginadas del server
 
   function showPreviousImage() {
     if (!selectedImage) return;

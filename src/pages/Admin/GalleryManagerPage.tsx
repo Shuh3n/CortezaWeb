@@ -83,14 +83,42 @@ export default function AdminGalleryManagerPage() {
       .on(
         'postgres_changes',
         { event: '*', table: 'imagenes', schema: 'public' },
-        async () => {
-          // Re-fetch images to ensure full relation data is loaded
-          const result = await listAdminImages({
-            categoriaId: categoryFilter === 'all' ? null : Number(categoryFilter),
-            nombre: searchName,
-            includeDeleted: false,
-          });
-          if (!ignore) setImages(result);
+        async (payload) => {
+          if (ignore) return;
+
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            const { data: updatedImg, error } = await supabase
+              .from('imagenes')
+              .select(`
+                id,
+                nombre,
+                fecha,
+                url,
+                created_at,
+                deleted_at,
+                categoria_id,
+                galeria_categorias (
+                  id,
+                  nombre,
+                  slug,
+                  activa
+                )
+              `)
+              .eq('id', (payload.new as any).id)
+              .maybeSingle();
+
+            if (error || !updatedImg) return;
+
+            setImages((prev) => {
+              const exists = prev.some(img => img.id === updatedImg.id);
+              if (exists) {
+                return prev.map(img => img.id === updatedImg.id ? (updatedImg as any) : img);
+              }
+              return [(updatedImg as any), ...prev].sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+            });
+          } else if (payload.eventType === 'DELETE') {
+            setImages((prev) => prev.filter(img => img.id !== payload.old.id));
+          }
         }
       )
       .subscribe();

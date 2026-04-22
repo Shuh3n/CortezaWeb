@@ -1,4 +1,4 @@
-﻿import { GALLERY_BUCKET, normalizeText, slugifyText } from '../constants/gallery';
+import { GALLERY_BUCKET, normalizeText, slugifyText } from '../constants/gallery';
 import type { GalleryCategory, GalleryImage } from '../types/gallery';
 import { supabase } from './supabase';
 
@@ -90,7 +90,7 @@ export async function listGalleryCategories(includeInactive = false, includeDele
   return (data ?? []) as GalleryCategory[];
 }
 
-export async function listGalleryImages(categorySlug?: string) {
+export async function listGalleryImages(categorySlug?: string, page = 1, pageSize = 50) {
   let query = supabase
     .from('imagenes')
     .select(IMAGE_SELECT)
@@ -120,6 +120,13 @@ export async function listGalleryImages(categorySlug?: string) {
     query = query.eq('categoria_id', category.id);
   }
 
+  // Aplicar paginación
+  if (page > 0 && pageSize > 0) {
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+    query = query.range(from, to);
+  }
+
   const { data, error } = await query;
 
   if (error) {
@@ -130,16 +137,40 @@ export async function listGalleryImages(categorySlug?: string) {
 }
 
 export async function listGallerySummary() {
-  const [categories, images] = await Promise.all([listGalleryCategories(), listGalleryImages()]);
+  const categories = await listGalleryCategories();
 
-  return categories.map((category) => {
-    const categoryImages = images.filter((image) => image.categoria_id === category.id);
+  // Optimizamos: Traemos solo la primera imagen de cada categoría para la portada
+  // y el conteo total por separado o en una query más liviana.
+  const summaryPromises = categories.map(async (category) => {
+    // Consulta para el conteo (muy liviana)
+    const { count, error: countError } = await supabase
+      .from('imagenes')
+      .select('id', { count: 'exact', head: true })
+      .eq('categoria_id', category.id)
+      .is('deleted_at', null);
+
+    if (countError) throw countError;
+
+    // Consulta para la portada (solo 1 registro)
+    const { data: coverData, error: coverError } = await supabase
+      .from('imagenes')
+      .select('url')
+      .eq('categoria_id', category.id)
+      .is('deleted_at', null)
+      .order('fecha', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (coverError) throw coverError;
+
     return {
       category,
-      total: categoryImages.length,
-      cover: categoryImages[0]?.url ?? null,
+      total: count ?? 0,
+      cover: coverData?.url ?? null,
     };
   });
+
+  return Promise.all(summaryPromises);
 }
 
 export async function deleteGalleryPhotoRow(id: number) {
