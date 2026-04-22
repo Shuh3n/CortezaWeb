@@ -688,5 +688,10 @@
       }
     ],
     "boton_volver": "Volver al Inicio"
+  },
+  "contacto_page": {
+    "etiqueta": "Contacto",
+    "titulo": "¿Hablamos?",
+    "descripcion": "Estamos aquí para escucharte y trabajar juntos por el bienestar animal. Escríbenos y nos pondremos en contacto pronto."
   }
 }

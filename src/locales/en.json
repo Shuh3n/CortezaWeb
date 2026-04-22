@@ -688,5 +688,10 @@
       }
     ],
     "boton_volver": "Back to Home"
+  },
+  "contacto_page": {
+    "etiqueta": "Contact",
+    "titulo": "Let's Talk?",
+    "descripcion": "We are here to listen to you and work together for animal welfare. Write to us and we will get in touch soon."
   }
 }
