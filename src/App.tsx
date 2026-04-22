@@ -21,6 +21,7 @@ import AdminGalleryCategoriesPage from './pages/Admin/GalleryCategoriesPage';
 import AdminGalleryUploadsPage from './pages/Admin/GalleryUploadsPage';
 import AdminProductManagerPage from './pages/Admin/ProductManagerPage';
 import Pets from "./pages/Pets";
+import PetManagement from './pages/Admin/PetManagement';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -69,6 +70,7 @@ function App() {
               <Route path="galeria/categorias" element={<AdminGalleryCategoriesPage />} />
               <Route path="galeria/cargas" element={<AdminGalleryUploadsPage />} />
               <Route path="gestion" element={<Navigate to="/admin/galeria/categorias" replace />} />
+              <Route path="peludos" element={<PetManagement />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />
