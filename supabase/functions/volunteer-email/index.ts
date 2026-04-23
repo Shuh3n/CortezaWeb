@@ -5,6 +5,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 interface VolunteerPayload {
   nombre: string;
   correo: string;
+  telefono: string;
   asunto: string;
   mensaje: string;
 }
@@ -39,9 +40,9 @@ function sanitize(value: string): string {
 }
 
 function validatePayload(payload: Partial<VolunteerPayload>): ValidationResult {
-  const { nombre, correo, asunto, mensaje } = payload;
+  const { nombre, correo, telefono, asunto, mensaje } = payload;
 
-  if (!nombre || !correo || !asunto || !mensaje) {
+  if (!nombre || !correo || !telefono || !asunto || !mensaje) {
     return { valid: false, error: "Todos los campos son obligatorios." };
   }
 
@@ -50,7 +51,7 @@ function validatePayload(payload: Partial<VolunteerPayload>): ValidationResult {
   }
 
   for (
-    const [key, val] of Object.entries({ nombre, correo, asunto, mensaje })
+    const [key, val] of Object.entries({ nombre, correo, telefono, asunto, mensaje })
   ) {
     if (typeof val !== "string") {
       return { valid: false, error: `El campo '${key}' debe ser texto.` };
@@ -70,7 +71,7 @@ function validatePayload(payload: Partial<VolunteerPayload>): ValidationResult {
 }
 
 function buildEmailHtml(data: VolunteerPayload): string {
-  const { nombre, correo, asunto, mensaje } = data;
+  const { nombre, correo, telefono, asunto, mensaje } = data;
   return `
     <!DOCTYPE html>
     <html lang="es">
@@ -97,10 +98,14 @@ function buildEmailHtml(data: VolunteerPayload): string {
               <td style="padding:10px 0; color:#222;"><a href="mailto:${correo}" style="color:#1B4332;">${correo}</a></td>
             </tr>
             <tr>
+              <td style="padding:10px 0; font-weight:bold; color:#555; vertical-align:top;">Teléfono:</td>
+              <td style="padding:10px 0; color:#222;"><a href="tel:${telefono}" style="color:#1B4332;">${telefono}</a></td>
+            </tr>
+            <tr style="background:#f9f9f9;">
               <td style="padding:10px 0; font-weight:bold; color:#555; vertical-align:top;">Área de interés:</td>
               <td style="padding:10px 0; color:#222;">${asunto}</td>
             </tr>
-            <tr style="background:#f9f9f9;">
+            <tr>
               <td style="padding:10px 0; font-weight:bold; color:#555; vertical-align:top;">Motivación:</td>
               <td style="padding:10px 0; color:#222; white-space:pre-wrap;">${mensaje}</td>
             </tr>
@@ -146,10 +151,11 @@ serve(async (req: Request) => {
 
   // Read environment variables
   const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-  const CORTEZA_EMAIL = Deno.env.get("CORTEZA_EMAIL");
+  // Default to molarisops@gmail.com if CORTEZA_EMAIL is not set
+  const CORTEZA_EMAIL = Deno.env.get("CORTEZA_EMAIL") || "molarisops@gmail.com";
 
-  if (!RESEND_API_KEY || !CORTEZA_EMAIL) {
-    console.error("[volunteer-email] Missing environment variables.");
+  if (!RESEND_API_KEY) {
+    console.error("[volunteer-email] Missing RESEND_API_KEY.");
     return jsonResponse({ error: "Error de configuración del servidor." }, 500);
   }
 
@@ -173,6 +179,7 @@ serve(async (req: Request) => {
     const payload: VolunteerPayload = {
       nombre: sanitize(rawBody.nombre!),
       correo: sanitize(rawBody.correo!),
+      telefono: sanitize(rawBody.telefono!),
       asunto: sanitize(rawBody.asunto!),
       mensaje: sanitize(rawBody.mensaje!),
     };
@@ -185,7 +192,7 @@ serve(async (req: Request) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Corteza Voluntarios <no-reply@tudominio.com>", // Replace with your verified Resend sender
+        from: "Corteza Voluntarios <no-reply@tudominio.com>",
         to: [CORTEZA_EMAIL],
         reply_to: payload.correo,
         subject: `[Voluntario] ${payload.asunto} — ${payload.nombre}`,

@@ -1,24 +1,47 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import DonationModal from '../components/DonationModal';
+import VolunteerModal from '../components/VolunteerModal';
+
+type ModalType = 'donation' | 'volunteer' | null;
 
 interface ModalContextType {
+  activeModal: ModalType;
   openDonationModal: () => void;
+  openVolunteerModal: () => void;
+  closeModal: () => void;
+  // For backward compatibility (if needed)
   closeDonationModal: () => void;
 }
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
 
 export const ModalProvider = ({ children }: { children: ReactNode }) => {
-  const [isDonationModalOpen, setIsDonationModalOpen] = useState(false);
+  const [activeModal, setActiveModal] = useState<ModalType>(null);
 
-  const openDonationModal = () => setIsDonationModalOpen(true);
-  const closeDonationModal = () => setIsDonationModalOpen(false);
+  const openDonationModal = () => setActiveModal('donation');
+  const openVolunteerModal = () => setActiveModal('volunteer');
+  const closeModal = () => setActiveModal(null);
 
   return (
-    <ModalContext.Provider value={{ openDonationModal, closeDonationModal }}>
+    <ModalContext.Provider 
+      value={{ 
+        activeModal, 
+        openDonationModal, 
+        openVolunteerModal, 
+        closeModal,
+        closeDonationModal: closeModal
+      }}
+    >
       {children}
-      <DonationModal isOpen={isDonationModalOpen} onClose={closeDonationModal} />
+      <DonationModal 
+        isOpen={activeModal === 'donation'} 
+        onClose={closeModal} 
+      />
+      <VolunteerModal 
+        isOpen={activeModal === 'volunteer'} 
+        onClose={closeModal} 
+      />
     </ModalContext.Provider>
   );
 };

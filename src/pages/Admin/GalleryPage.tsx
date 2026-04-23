@@ -1,81 +1,85 @@
-import { Link } from 'react-router-dom';
-import { FolderCog, ImagePlus } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useState } from 'react';
+import { FolderCog, ImagePlus, ArrowLeft } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import AdminManagementPage from './ManagementPage';
+import AdminGalleryManagerPage from './GalleryManagerPage';
 
-const sections: Array<{
-  id: 'categories' | 'uploads';
-  to: string;
-  title: string;
-  description: string;
-  icon: typeof FolderCog;
-}> = [
-  {
-    id: 'categories',
-    to: '/admin/galeria/categorias',
-    title: 'Categorias',
-    description: 'Crear, editar, desactivar y reactivar categorias.',
-    icon: FolderCog,
-  },
-  {
-    id: 'uploads',
-    to: '/admin/galeria/cargas',
-    title: 'Gestor de imagenes',
-    description: 'Ver, buscar, filtrar, editar y eliminar imagenes de la galeria.',
-    icon: ImagePlus,
-  },
-];
+type View = 'menu' | 'categories' | 'images';
 
 export default function AdminGalleryPage() {
-  const categorySection = sections.find(s => s.id === 'categories')!;
-  const imageSection = sections.find(s => s.id === 'uploads')!;
-  const CategoryIcon = categorySection.icon;
-  const ImageIcon = imageSection.icon;
+  const [view, setView] = useState<View>('menu');
 
   return (
     <div className="space-y-6">
-      <section className="rounded-[32px] bg-white p-6 shadow-lg shadow-primary/5 sm:p-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/60">Galeria</p>
-        <h1 className="mt-2 text-3xl font-black text-text-h">Panel unificado de galeria</h1>
-        <p className="mt-3 text-text-muted">Elegi que queres administrar: categorias o gestor de imagenes. Todo queda en esta misma pantalla.</p>
-
-        <div className="mt-8 space-y-4">
-          {/* Categorías - Primera opción, ancho completo */}
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
+      <AnimatePresence mode="wait">
+        {view === 'menu' && (
+          <motion.section
+            key="menu"
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35 }}
-            className="rounded-3xl border border-primary/10 bg-white p-6 text-left transition hover:-translate-y-0.5 hover:border-primary/20"
+            exit={{ opacity: 0, y: -18 }}
+            className="rounded-[32px] bg-white p-6 shadow-lg shadow-primary/5 sm:p-8"
           >
-            <Link to={categorySection.to} className="flex flex-col sm:flex-row sm:items-center sm:gap-6">
-              <div className="inline-flex shrink-0 self-start rounded-2xl bg-primary/10 p-4 text-primary sm:self-center">
-                <CategoryIcon className="h-8 w-8" />
-              </div>
-              <div className="mt-4 sm:mt-0">
-                <h2 className="text-2xl font-black text-text-h">{categorySection.title}</h2>
-                <p className="mt-2 text-base text-text-muted">{categorySection.description}</p>
-              </div>
-            </Link>
-          </motion.div>
+            <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/60">Galería</p>
+            <h1 className="mt-2 text-3xl font-black text-text-h">Panel unificado de galería</h1>
+            <p className="mt-3 text-text-muted">Elegí qué querés administrar: categorías o gestor de imágenes. Todo queda en esta misma pantalla.</p>
 
-          {/* Gestor de Imágenes - Debajo */}
+            <div className="mt-8 space-y-4">
+              <motion.button
+                whileHover={{ y: -4 }}
+                onClick={() => setView('categories')}
+                className="w-full text-left rounded-3xl border border-primary/10 bg-white p-6 transition hover:border-primary/20 cursor-pointer"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6">
+                  <div className="inline-flex shrink-0 self-start rounded-2xl bg-primary/10 p-4 text-primary sm:self-center">
+                    <FolderCog className="h-8 w-8" />
+                  </div>
+                  <div className="mt-4 sm:mt-0">
+                    <h2 className="text-2xl font-black text-text-h">Categorías</h2>
+                    <p className="mt-2 text-base text-text-muted">Crear, editar, desactivar y reactivar categorías.</p>
+                  </div>
+                </div>
+              </motion.button>
+
+              <motion.button
+                whileHover={{ y: -4 }}
+                onClick={() => setView('images')}
+                className="w-full text-left rounded-3xl border border-primary/10 bg-white p-6 transition hover:border-primary/20 cursor-pointer"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-6">
+                  <div className="inline-flex shrink-0 self-start rounded-2xl bg-primary/10 p-4 text-primary sm:self-center">
+                    <ImagePlus className="h-8 w-8" />
+                  </div>
+                  <div className="mt-4 sm:mt-0">
+                    <h2 className="text-2xl font-black text-text-h">Gestor de imágenes</h2>
+                    <p className="mt-2 text-base text-text-muted">Ver, buscar, filtrar, editar y eliminar imágenes de la galería.</p>
+                  </div>
+                </div>
+              </motion.button>
+            </div>
+          </motion.section>
+        )}
+
+        {view !== 'menu' && (
           <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.06, duration: 0.35 }}
-            className="rounded-3xl border border-primary/10 bg-white p-6 text-left transition hover:-translate-y-0.5 hover:border-primary/20"
+            key={view}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            className="space-y-6"
           >
-            <Link to={imageSection.to} className="flex flex-col sm:flex-row sm:items-center sm:gap-6">
-              <div className="inline-flex shrink-0 self-start rounded-2xl bg-primary/10 p-4 text-primary sm:self-center">
-                <ImageIcon className="h-8 w-8" />
-              </div>
-              <div className="mt-4 sm:mt-0">
-                <h2 className="text-2xl font-black text-text-h">{imageSection.title}</h2>
-                <p className="mt-2 text-base text-text-muted">{imageSection.description}</p>
-              </div>
-            </Link>
+            <button
+              onClick={() => setView('menu')}
+              className="inline-flex items-center gap-2 rounded-2xl border border-primary/10 bg-white px-6 py-3 font-black uppercase tracking-widest text-primary shadow-sm transition hover:-translate-y-0.5 cursor-pointer text-xs"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Volver al menú de galería
+            </button>
+
+            {view === 'categories' ? <AdminManagementPage /> : <AdminGalleryManagerPage />}
           </motion.div>
-        </div>
-      </section>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
