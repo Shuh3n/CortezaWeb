@@ -34,9 +34,18 @@ export default function AdminGalleryManagerPage() {
   const [uploadCategoriaId, setUploadCategoriaId] = useState<number | null>(null);
   const [uploadFecha, setUploadFecha] = useState(today());
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
-  const [uploadPreview, setUploadPreview] = useState<string | null>(null);
+  const [uploadPreviews, setUploadPreviews] = useState<string[]>([]);
+  const [enlargedPreview, setEnlargedPreview] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Auto-close notifications
+  useEffect(() => {
+    if (feedback) {
+      const timer = setTimeout(() => setFeedback(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [feedback]);
 
   async function refreshImages() {
     setIsLoading(true);
@@ -136,6 +145,52 @@ export default function AdminGalleryManagerPage() {
     return images.slice(start, start + IMAGES_PER_PAGE);
   }, [currentPage, images]);
 
+  const PaginationControls = () => (
+    <div className="flex flex-wrap items-center justify-center gap-3">
+      <button
+        type="button"
+        onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+        disabled={currentPage === 1}
+        className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        Anterior
+      </button>
+      <div className="flex items-center gap-2">
+        {Array.from({ length: totalPages }).map((_, index) => {
+          const page = index + 1;
+          if (totalPages > 7) {
+            if (page !== 1 && page !== totalPages && Math.abs(page - currentPage) > 2) {
+              if (Math.abs(page - currentPage) === 3) return <span key={page} className="px-1 text-primary/40">...</span>;
+              return null;
+            }
+          }
+          return (
+            <button
+              key={page}
+              type="button"
+              onClick={() => setCurrentPage(page)}
+              className={`h-11 w-11 cursor-pointer rounded-2xl font-bold transition ${
+                page === currentPage
+                  ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                  : 'bg-white text-primary shadow-sm hover:-translate-y-0.5'
+              }`}
+            >
+              {page}
+            </button>
+          );
+        })}
+      </div>
+      <button
+        type="button"
+        onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+        disabled={currentPage === totalPages}
+        className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        Siguiente
+      </button>
+    </div>
+  );
+
   function handleOpenEdit(image: GalleryImage) {
     setEditingImage(image);
     setEditingNombre(image.nombre ?? '');
@@ -199,11 +254,12 @@ export default function AdminGalleryManagerPage() {
     const selectedFiles = Array.from(event.target.files ?? []);
     setUploadFiles(selectedFiles);
 
-    if (uploadPreview) {
-      URL.revokeObjectURL(uploadPreview);
-    }
-
-    setUploadPreview(selectedFiles[0] ? URL.createObjectURL(selectedFiles[0]) : null);
+    // Limpiar previews viejos
+    uploadPreviews.forEach(url => URL.revokeObjectURL(url));
+    
+    // Generar nuevos previews
+    const newPreviews = selectedFiles.map(file => URL.createObjectURL(file));
+    setUploadPreviews(newPreviews);
   }
 
   function closeUploadModal() {
@@ -213,10 +269,10 @@ export default function AdminGalleryManagerPage() {
     setUploadFiles([]);
     setUploadProgress(0);
 
-    if (uploadPreview) {
-      URL.revokeObjectURL(uploadPreview);
-      setUploadPreview(null);
-    }
+    // Limpiar todas las URLs de preview
+    uploadPreviews.forEach(url => URL.revokeObjectURL(url));
+    setUploadPreviews([]);
+    setEnlargedPreview(null);
 
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -262,6 +318,34 @@ export default function AdminGalleryManagerPage() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: 'easeOut' }} className="space-y-8">
+      {/* Lightbox for Preview */}
+      <AnimatePresence>
+        {enlargedPreview && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[250] flex items-center justify-center bg-slate-950/90 p-4 backdrop-blur-md"
+            onClick={() => setEnlargedPreview(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="relative max-h-[90vh] max-w-5xl overflow-hidden rounded-[32px] bg-white shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={() => setEnlargedPreview(null)}
+                className="absolute right-6 top-6 z-10 rounded-full bg-slate-950/50 p-2 text-white transition hover:bg-slate-950"
+              >
+                <X size={24} />
+              </button>
+              <img src={enlargedPreview} alt="Preview ampliada" className="max-h-[85vh] w-full object-contain" />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Floating Notifications */}
       <AnimatePresence>
         {feedback && (
@@ -368,14 +452,23 @@ export default function AdminGalleryManagerPage() {
 
       <section className="rounded-[32px] bg-white p-6 shadow-lg shadow-primary/5 sm:p-8">
         <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/60">Resultados</p>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
           <h2 className="mt-2 text-2xl font-black text-text-h">Imágenes Cargadas</h2>
           <p className="text-sm text-text-muted">Página {currentPage} de {totalPages}</p>
         </div>
 
+        {totalPages > 1 && !isLoading && images.length > 0 && (
+          <div className="mb-8">
+            <PaginationControls />
+          </div>
+        )}
+
         <div className="mt-6">
           {isLoading ? (
-            <div className="rounded-3xl border border-primary/10 bg-primary/5 px-5 py-8 text-center text-text-muted">Cargando imágenes...</div>
+            <div className="rounded-3xl border border-primary/10 bg-primary/5 px-5 py-20 text-center flex flex-col items-center justify-center gap-4">
+              <div className="h-12 w-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+              <p className="text-lg font-bold text-primary italic">Cargando imágenes...</p>
+            </div>
           ) : images.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-primary/20 bg-primary/5 px-5 py-8 text-center text-text-muted">No hay imágenes para los filtros seleccionados.</div>
           ) : (
@@ -416,48 +509,8 @@ export default function AdminGalleryManagerPage() {
               </div>
 
               {totalPages > 1 && (
-                <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-                    disabled={currentPage === 1}
-                    className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Anterior
-                  </button>
-                  <div className="flex items-center gap-2">
-                    {Array.from({ length: totalPages }).map((_, index) => {
-                      const page = index + 1;
-                      if (totalPages > 7) {
-                        if (page !== 1 && page !== totalPages && Math.abs(page - currentPage) > 2) {
-                          if (Math.abs(page - currentPage) === 3) return <span key={page} className="px-1 text-primary/40">...</span>;
-                          return null;
-                        }
-                      }
-                      return (
-                        <button
-                          key={page}
-                          type="button"
-                          onClick={() => setCurrentPage(page)}
-                          className={`h-11 w-11 cursor-pointer rounded-2xl font-bold transition ${
-                            page === currentPage
-                              ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                              : 'bg-white text-primary shadow-sm hover:-translate-y-0.5'
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
-                    disabled={currentPage === totalPages}
-                    className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    Siguiente
-                  </button>
+                <div className="mt-10">
+                  <PaginationControls />
                 </div>
               )}
             </>
@@ -476,111 +529,149 @@ export default function AdminGalleryManagerPage() {
               className="fixed inset-0 z-[100] bg-primary/20 backdrop-blur-sm"
             />
 
-            <div className="pointer-events-none fixed inset-0 z-[101] flex items-center justify-center px-4">
+            <div className="pointer-events-none fixed inset-0 z-[101] flex items-center justify-center p-2 sm:p-4">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 16 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 16 }}
-                className="pointer-events-auto w-full max-w-2xl rounded-[32px] bg-white p-6 shadow-2xl sm:p-8"
+                className="pointer-events-auto relative flex max-h-[95vh] w-full max-w-2xl flex-col overflow-hidden rounded-[24px] bg-white shadow-2xl sm:rounded-[40px]"
               >
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary/60">Agregar fotos</p>
-                <h3 className="mt-2 text-2xl font-black text-text-h">Subir imagenes a la galeria</h3>
+                {/* Header fijo */}
+                <div className="border-b border-primary/5 p-5 sm:px-10 sm:py-8">
+                  <button
+                    onClick={closeUploadModal}
+                    className="absolute right-4 top-4 rounded-full bg-neutral-soft p-2 text-primary transition hover:bg-primary/10 sm:right-8 sm:top-8"
+                  >
+                    <X size={20} />
+                  </button>
+                  <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary/60 sm:text-xs">Agregar fotos</p>
+                  <h3 className="mt-1 text-xl font-black text-text-h sm:mt-2 sm:text-3xl italic uppercase tracking-tighter">Subir imágenes</h3>
+                </div>
 
-                <form className="mt-6 space-y-4" onSubmit={handleUploadSubmit}>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <label className="block">
-                      <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main"><Type className="h-4 w-4 text-primary" />Nombre opcional</span>
-                      <input
-                        type="text"
-                        value={uploadNombre}
-                        onChange={(event) => setUploadNombre(event.target.value)}
-                        placeholder="Ej: Jornada del sabado"
-                        className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
-                      />
-                    </label>
-
-                    <label className="block">
-                      <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main"><Tag className="h-4 w-4 text-primary" />Categoria</span>
-                      <select
-                        value={uploadCategoriaId ?? ''}
-                        onChange={(event) => setUploadCategoriaId(Number(event.target.value))}
-                        className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
-                      >
-                        {categories.map((category) => (
-                          <option key={category.id} value={category.id}>
-                            {category.nombre}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  </div>
-
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <label className="block">
-                      <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main"><CalendarDays className="h-4 w-4 text-primary" />Fecha visible</span>
-                      <input
-                        type="date"
-                        value={uploadFecha}
-                        onChange={(event) => setUploadFecha(event.target.value)}
-                        required
-                        className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
-                      />
-                    </label>
-
-                    <label className="block">
-                      <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main"><ImageUp className="h-4 w-4 text-primary" />Fotos</span>
-                      <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*"
-                        multiple
-                        onChange={handleUploadFilesChange}
-                        required
-                        className="w-full cursor-pointer rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 text-text-muted outline-none transition file:mr-4 file:cursor-pointer file:rounded-full file:border-0 file:bg-primary file:px-4 file:py-2 file:font-semibold file:text-white hover:file:opacity-90"
-                      />
-                    </label>
-                  </div>
-
-                  {uploadPreview ? (
-                    <div className="overflow-hidden rounded-2xl border border-primary/10">
-                      <img src={uploadPreview} alt="Vista previa de carga" className="h-56 w-full object-cover" />
-                    </div>
-                  ) : null}
-
-                  {isSubmitting ? (
-                    <div className="rounded-2xl border border-primary/10 bg-primary/5 px-4 py-4">
-                      <div className="mb-2 flex items-center justify-between">
-                        <span className="text-sm font-semibold text-primary">Subiendo imagenes...</span>
-                        <span className="text-sm font-black text-primary">{uploadProgress}%</span>
-                      </div>
-                      <div className="h-3 w-full overflow-hidden rounded-full bg-white">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${uploadProgress}%` }}
-                          transition={{ duration: 0.25, ease: 'easeOut' }}
-                          className="h-full rounded-full bg-primary"
+                {/* Contenido scrolleable */}
+                <div className="flex-1 overflow-y-auto p-5 sm:p-10 custom-scrollbar">
+                  <form id="upload-form" className="space-y-6" onSubmit={handleUploadSubmit}>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <label className="block">
+                        <span className="mb-2 flex items-center gap-2 text-xs font-bold text-text-main sm:text-sm"><Type className="h-4 w-4 text-primary" />Nombre opcional</span>
+                        <input
+                          type="text"
+                          value={uploadNombre}
+                          onChange={(event) => setUploadNombre(event.target.value)}
+                          placeholder="Ej: Jornada del sábado"
+                          className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 text-sm outline-none transition focus:border-primary sm:text-base"
                         />
-                      </div>
-                    </div>
-                  ) : null}
+                      </label>
 
-                  <div className="mt-4 flex flex-wrap justify-end gap-3">
-                    <button
-                      type="button"
-                      onClick={closeUploadModal}
-                      className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary"
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-primary px-4 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-                    >
-                      Publicar en galeria
-                    </button>
-                  </div>
-                </form>
+                      <label className="block">
+                        <span className="mb-2 flex items-center gap-2 text-xs font-bold text-text-main sm:text-sm"><Tag className="h-4 w-4 text-primary" />Categoría</span>
+                        <select
+                          value={uploadCategoriaId ?? ''}
+                          onChange={(event) => setUploadCategoriaId(Number(event.target.value))}
+                          className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 text-sm outline-none transition focus:border-primary sm:text-base cursor-pointer"
+                        >
+                          {categories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                              {category.nombre}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    </div>
+
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <label className="block">
+                        <span className="mb-2 flex items-center gap-2 text-xs font-bold text-text-main sm:text-sm"><CalendarDays className="h-4 w-4 text-primary" />Fecha visible</span>
+                        <input
+                          type="date"
+                          value={uploadFecha}
+                          onChange={(event) => setUploadFecha(event.target.value)}
+                          required
+                          className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 text-sm outline-none transition focus:border-primary sm:text-base"
+                        />
+                      </label>
+
+                      <label className="block">
+                        <span className="mb-2 flex items-center gap-2 text-xs font-bold text-text-main sm:text-sm"><ImageUp className="h-4 w-4 text-primary" />Fotos</span>
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleUploadFilesChange}
+                          required
+                          className="w-full cursor-pointer rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 text-[11px] text-text-muted outline-none transition file:mr-4 file:cursor-pointer file:rounded-full file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-[10px] file:font-black file:uppercase file:text-white hover:file:opacity-90 sm:text-sm sm:file:px-4 sm:file:py-2 sm:file:text-xs"
+                        />
+                      </label>
+                    </div>
+
+                    {uploadPreviews.length > 0 ? (
+                      <div className="space-y-3">
+                        <span className="flex items-center gap-2 text-xs font-bold text-text-main sm:text-sm">
+                          <ImageUp className="h-4 w-4 text-primary" />
+                          Vista previa ({uploadPreviews.length} fotos)
+                        </span>
+                        <div className="max-h-[220px] sm:max-h-[320px] overflow-y-auto rounded-3xl border border-primary/10 bg-neutral-soft/30 p-3 sm:p-4 custom-scrollbar">
+                          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 md:grid-cols-4">
+                            {uploadPreviews.map((url, index) => (
+                              <motion.div
+                                key={url}
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: index * 0.02 }}
+                                className="group relative aspect-square cursor-pointer overflow-hidden rounded-xl border-2 border-white shadow-sm transition hover:shadow-md sm:rounded-2xl"
+                                onClick={() => setEnlargedPreview(url)}
+                              >
+                                <img src={url} alt={`Preview ${index}`} className="h-full w-full object-cover transition duration-300 group-hover:scale-110" />
+                                <div className="absolute inset-0 flex items-center justify-center bg-primary/20 opacity-0 transition-opacity group-hover:opacity-100">
+                                  <PlusCircle className="text-white w-5 h-5 sm:w-6 sm:h-6" />
+                                </div>
+
+                              </motion.div>
+                            ))}
+                          </div>
+                        </div>
+                        <p className="text-center text-[9px] font-black uppercase tracking-[0.2em] text-primary/40 sm:text-[10px]">Toca una imagen para ampliar</p>
+                      </div>
+                    ) : null}
+
+                    {isSubmitting ? (
+                      <div className="rounded-2xl border border-primary/10 bg-primary/5 p-4">
+                        <div className="mb-2 flex items-center justify-between">
+                          <span className="text-xs font-bold text-primary sm:text-sm uppercase tracking-widest">Subiendo...</span>
+                          <span className="text-sm font-black text-primary">{uploadProgress}%</span>
+                        </div>
+                        <div className="h-2 w-full overflow-hidden rounded-full bg-white sm:h-3">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${uploadProgress}%` }}
+                            transition={{ duration: 0.25, ease: 'easeOut' }}
+                            className="h-full rounded-full bg-primary"
+                          />
+                        </div>
+                      </div>
+                    ) : null}
+                  </form>
+                </div>
+
+                {/* Footer fijo con acciones */}
+                <div className="flex flex-col-reverse gap-3 border-t border-primary/5 bg-neutral-soft/30 p-5 sm:flex-row sm:justify-end sm:gap-4 sm:p-8">
+                  <button
+                    type="button"
+                    onClick={closeUploadModal}
+                    className="w-full cursor-pointer rounded-2xl border border-primary/10 bg-white px-6 py-4 text-xs font-black uppercase tracking-widest text-primary transition hover:bg-neutral-100 sm:w-auto sm:text-sm"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    form="upload-form"
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-primary px-8 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-primary/20 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto sm:text-sm"
+                  >
+                    Publicar ahora
+                  </button>
+                </div>
               </motion.div>
             </div>
           </>
@@ -598,66 +689,79 @@ export default function AdminGalleryManagerPage() {
               className="fixed inset-0 z-[100] bg-primary/20 backdrop-blur-sm"
             />
 
-            <div className="pointer-events-none fixed inset-0 z-[101] flex items-center justify-center px-4">
+            <div className="pointer-events-none fixed inset-0 z-[101] flex items-center justify-center p-2 sm:p-4">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 16 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 16 }}
-                className="pointer-events-auto w-full max-w-xl rounded-[32px] bg-white p-6 shadow-2xl sm:p-8"
+                className="pointer-events-auto relative flex max-h-[95vh] w-full max-w-xl flex-col overflow-hidden rounded-[24px] bg-white shadow-2xl sm:rounded-[40px]"
               >
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary/60">Editar imagen</p>
-                <h3 className="mt-2 text-2xl font-black text-text-h">Actualiza la informacion</h3>
-
-                <div className="mt-6 space-y-4">
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-bold text-text-main">Nombre</span>
-                    <input
-                      type="text"
-                      value={editingNombre}
-                      onChange={(event) => setEditingNombre(event.target.value)}
-                      className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
-                    />
-                  </label>
-
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-bold text-text-main">Fecha visible</span>
-                    <input
-                      type="date"
-                      value={editingFecha}
-                      onChange={(event) => setEditingFecha(event.target.value)}
-                      className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
-                    />
-                  </label>
-
-                  <label className="block">
-                    <span className="mb-2 block text-sm font-bold text-text-main">Categoria</span>
-                    <select
-                      value={editingCategoriaId ?? ''}
-                      onChange={(event) => setEditingCategoriaId(Number(event.target.value))}
-                      className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
-                    >
-                      {categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.nombre}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
+                {/* Header */}
+                <div className="border-b border-primary/5 p-5 sm:px-10 sm:py-8">
+                  <button
+                    onClick={() => setEditingImage(null)}
+                    className="absolute right-4 top-4 rounded-full bg-neutral-soft p-2 text-primary transition hover:bg-primary/10 sm:right-8 sm:top-8"
+                  >
+                    <X size={20} />
+                  </button>
+                  <p className="text-[10px] font-black uppercase tracking-[0.25em] text-primary/60 sm:text-xs">Editar imagen</p>
+                  <h3 className="mt-1 text-xl font-black text-text-h sm:mt-2 sm:text-3xl italic uppercase tracking-tighter">Actualizar info</h3>
                 </div>
 
-                <div className="mt-6 flex flex-wrap justify-end gap-3">
+                {/* Body */}
+                <div className="flex-1 overflow-y-auto p-5 sm:p-10 custom-scrollbar">
+                  <form id="edit-form" className="space-y-5" onSubmit={(e) => { e.preventDefault(); void handleSaveEdit(); }}>
+                    <label className="block">
+                      <span className="mb-2 block text-xs font-bold text-text-main sm:text-sm">Nombre</span>
+                      <input
+                        type="text"
+                        value={editingNombre}
+                        onChange={(event) => setEditingNombre(event.target.value)}
+                        className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 text-sm outline-none transition focus:border-primary sm:text-base"
+                      />
+                    </label>
+
+                    <label className="block">
+                      <span className="mb-2 block text-xs font-bold text-text-main sm:text-sm">Fecha visible</span>
+                      <input
+                        type="date"
+                        value={editingFecha}
+                        onChange={(event) => setEditingFecha(event.target.value)}
+                        className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 text-sm outline-none transition focus:border-primary sm:text-base"
+                      />
+                    </label>
+
+                    <label className="block">
+                      <span className="mb-2 block text-xs font-bold text-text-main sm:text-sm">Categoría</span>
+                      <select
+                        value={editingCategoriaId ?? ''}
+                        onChange={(event) => setEditingCategoriaId(Number(event.target.value))}
+                        className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 text-sm outline-none transition focus:border-primary sm:text-base cursor-pointer"
+                      >
+                        {categories.map((category) => (
+                          <option key={category.id} value={category.id}>
+                            {category.nombre}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </form>
+                </div>
+
+                {/* Footer */}
+                <div className="flex flex-col-reverse gap-3 border-t border-primary/5 bg-neutral-soft/30 p-5 sm:flex-row sm:justify-end sm:gap-4 sm:p-8">
                   <button
                     type="button"
                     onClick={() => setEditingImage(null)}
-                    className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary"
+                    className="w-full cursor-pointer rounded-2xl border border-primary/10 bg-white px-6 py-4 text-xs font-black uppercase tracking-widest text-primary transition hover:bg-neutral-100 sm:w-auto sm:text-sm"
                   >
                     Cancelar
                   </button>
                   <button
-                    type="button"
+                    form="edit-form"
+                    type="submit"
                     disabled={isSubmitting}
-                    onClick={() => void handleSaveEdit()}
-                    className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-primary px-4 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-primary px-8 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-primary/20 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto sm:text-sm"
                   >
                     Guardar cambios
                   </button>
@@ -676,42 +780,48 @@ export default function AdminGalleryManagerPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setPendingDeleteImage(null)}
-              className="fixed inset-0 z-[100] bg-primary/20 backdrop-blur-sm"
+              className="fixed inset-0 z-[100] bg-red-950/20 backdrop-blur-sm"
             />
 
-            <div className="pointer-events-none fixed inset-0 z-[101] flex items-center justify-center px-4">
+            <div className="pointer-events-none fixed inset-0 z-[101] flex items-center justify-center p-2 sm:p-4">
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 16 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 16 }}
-                className="pointer-events-auto w-full max-w-xl rounded-[32px] bg-white p-6 shadow-2xl sm:p-8"
+                className="pointer-events-auto relative flex max-h-[95vh] w-full max-w-xl flex-col overflow-hidden rounded-[24px] bg-white shadow-2xl sm:rounded-[40px]"
               >
-                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-red-600">Confirmacion</p>
-                <h3 className="mt-2 text-2xl font-black text-text-h">Estas seguro de eliminar esta imagen?</h3>
-                <p className="mt-3 text-text-muted">Esta accion aplica soft delete y la imagen dejara de verse en la galeria publica.</p>
+                <div className="p-6 text-center sm:p-10">
+                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 text-red-600 mb-6">
+                    <Trash2 size={32} />
+                  </div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.25em] text-red-600 sm:text-xs">Confirmación</p>
+                  <h3 className="mt-2 text-xl font-black text-text-h sm:text-3xl italic uppercase tracking-tighter">¿Eliminar imagen?</h3>
+                  <p className="mt-4 text-sm text-text-muted sm:text-lg leading-relaxed">
+                    Esta acción es <span className="font-black text-red-600 uppercase">permanente</span>. La imagen se borrará de la base de datos y del servidor.
+                  </p>
 
-                <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3">
-                  <p className="text-sm font-semibold text-red-800">Imagen seleccionada</p>
-                  <p className="mt-1 text-lg font-black text-red-700">{pendingDeleteImage.nombre || 'Sin nombre'}</p>
-                </div>
+                  <div className="mt-6 rounded-2xl border border-red-100 bg-red-50 p-4 text-left">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-red-800/50">Seleccionada</p>
+                    <p className="mt-1 text-base font-black text-red-700 truncate">{pendingDeleteImage.nombre || 'Sin nombre'}</p>
+                  </div>
 
-                <div className="mt-6 flex flex-wrap justify-end gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setPendingDeleteImage(null)}
-                    className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="button"
-                    disabled={isSubmitting}
-                    onClick={() => void handleConfirmDelete()}
-                    className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 font-semibold text-red-700 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Si, eliminar
-                  </button>
+                  <div className="mt-8 flex flex-col-reverse gap-3 sm:flex-row sm:gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setPendingDeleteImage(null)}
+                      className="w-full cursor-pointer rounded-2xl border border-primary/10 bg-white px-6 py-4 text-xs font-black uppercase tracking-widest text-primary transition hover:bg-neutral-100 sm:w-auto"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isSubmitting}
+                      onClick={() => void handleConfirmDelete()}
+                      className="w-full inline-flex cursor-pointer items-center justify-center gap-2 rounded-2xl bg-red-600 px-8 py-4 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-red-200 transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70 sm:w-auto"
+                    >
+                      Si, eliminar permanentemente
+                    </button>
+                  </div>
                 </div>
               </motion.div>
             </div>

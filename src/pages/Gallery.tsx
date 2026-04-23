@@ -34,6 +34,11 @@ export default function PublicGalleryPage() {
     async function loadGallery() {
       try {
         setIsLoading(true);
+        // Reset images to avoid showing old category data
+        if (slug) {
+          setImages([]);
+        }
+
         // Traemos el resumen (conteos y portadas) y solo la primera página de la categoría actual
         const [summaryData, imageData] = await Promise.all([
           listGallerySummary(),
@@ -208,7 +213,6 @@ export default function PublicGalleryPage() {
                   </div>
                   <div className="w-full space-y-4 p-6 lg:w-[360px]">
                     <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary/60">{selectedImage.categoria.nombre}</p>
-                    <h3 className="text-3xl font-black text-text-h">{selectedImage.nombre}</h3>
                     <p className="text-sm text-text-muted">{t('galeria.modal.fecha')}: {formatGalleryDate(selectedImage.fecha, i18n.language)}</p>
                     <p className="text-sm text-text-muted">{t('galeria.modal.imagen')} {images.findIndex((image) => image.id === selectedImage.id) + 1} {t('galeria.modal.de')} {images.length}</p>
                   </div>

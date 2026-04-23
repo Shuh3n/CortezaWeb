@@ -284,6 +284,7 @@
     },
     "privacidad": "By submitting the form I accept the privacy terms and conditions",
     "boton_enviar": "Send",
+    "error_envio": "There was an error sending your message. Please try again later.",
     "mensaje_exito": "Thank you for contacting us, we will get in touch with you shortly.",
     "titulo": "Contact Us",
     "descripcion": "Write to us about our products to order them or any other concerns and we will respond as soon as possible.",
@@ -555,7 +556,22 @@
         }
       ],
       "cta_texto": "Do you want to be part of this adventure? We would love to have you.\nYou can also do your high school community service or university internships with us.",
-      "cta_boton": "Send Volunteer Application"
+      "cta_boton": "Send Volunteer Application",
+      "formulario": {
+        "etiqueta": "Join the team",
+        "titulo": "Become a Volunteer",
+        "placeholder_nombre": "Your Full Name",
+        "placeholder_correo": "Email Address",
+        "placeholder_area": "Area of interest",
+        "placeholder_mensaje": "Why do you want to volunteer?",
+        "boton_enviar": "Send Application",
+        "error_requerido": "This field is required",
+        "error_correo": "Invalid email address",
+        "error": "There was an error sending. Please try again later.",
+        "exito_titulo": "Application Received!",
+        "exito_desc": "Thank you for joining us. We will contact you shortly.",
+        "proteccion": "Your data is protected by our privacy policy"
+      }
     },
     "testimonios": {
       "titulo": "Stories from Our Volunteers",
@@ -688,5 +704,10 @@
       }
     ],
     "boton_volver": "Back to Home"
+  },
+  "contacto_page": {
+    "etiqueta": "Contact",
+    "titulo": "Let's Talk?",
+    "descripcion": "We are here to listen to you and work together for animal welfare. Write to us and we will get in touch soon."
   }
 }

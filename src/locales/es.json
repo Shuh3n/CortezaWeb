@@ -284,6 +284,7 @@
     },
     "privacidad": "Al enviar el formulario acepto términos y condiciones de privacidad",
     "boton_enviar": "Enviar",
+    "error_envio": "Hubo un error al enviar tu mensaje. Por favor, intenta de nuevo más tarde.",
     "mensaje_exito": "Gracias por contactar, en breve nos pondremos en contacto con usted.",
     "titulo": "Contáctanos",
     "descripcion": "Escríbenos acerca de nuestros productos para ordenarlos o cualquier otra inquietud y te responderemos en la mayor brevedad posible.",
@@ -555,7 +556,22 @@
         }
       ],
       "cta_texto": "¿Quieres ser parte de esta aventura? Nos encantaría contar contigo.\nTambén puedes realizar tu trabajo social de bachiller o prácticas universitarias con nosotros.",
-      "cta_boton": "Enviar Solicitud de Voluntariado"
+      "cta_boton": "Enviar Solicitud de Voluntariado",
+      "formulario": {
+        "etiqueta": "Sumate al equipo",
+        "titulo": "Ser Voluntario",
+        "placeholder_nombre": "Tu Nombre completo",
+        "placeholder_correo": "Correo Electrónico",
+        "placeholder_area": "Área de interés",
+        "placeholder_mensaje": "¿Por qué quieres ser voluntario?",
+        "boton_enviar": "Enviar Solicitud",
+        "error_requerido": "Este campo es obligatorio",
+        "error_correo": "Correo electrónico no válido",
+        "error": "Hubo un error al enviar. Intenta más tarde.",
+        "exito_titulo": "¡Solicitud Recibida!",
+        "exito_desc": "Gracias por querer sumarte. Pronto nos pondremos en contacto contigo.",
+        "proteccion": "Tus datos están protegidos por nuestra política de privacidad"
+      }
     },
     "testimonios": {
       "titulo": "Historias de Nuestros Voluntarios",
@@ -688,5 +704,10 @@
       }
     ],
     "boton_volver": "Volver al Inicio"
+  },
+  "contacto_page": {
+    "etiqueta": "Contacto",
+    "titulo": "¿Hablamos?",
+    "descripcion": "Estamos aquí para escucharte y trabajar juntos por el bienestar animal. Escríbenos y nos pondremos en contacto pronto."
   }
 }

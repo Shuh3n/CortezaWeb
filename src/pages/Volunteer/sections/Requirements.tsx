@@ -1,11 +1,13 @@
 import { motion } from 'framer-motion';
 import { CheckCircle2, Heart, Shield, Users } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useModal } from '../../../context/ModalContext';
 
 const icons = [CheckCircle2, Heart, Shield, Users];
 
 const VolunteerRequirements = () => {
   const { t } = useTranslation();
+  const { openVolunteerModal } = useModal();
   const requirements = t('voluntariado.requisitos.lista', { returnObjects: true }) as Array<{ title: string, description: string }>;
 
   return (
@@ -118,7 +120,8 @@ const VolunteerRequirements = () => {
             <motion.button
                 whileHover={{ scale: 1.05, translateY: -4 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-primary text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all"
+                onClick={openVolunteerModal}
+                className="bg-primary text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all cursor-pointer"
             >
               {t('voluntariado.requisitos.cta_boton')}
             </motion.button>
