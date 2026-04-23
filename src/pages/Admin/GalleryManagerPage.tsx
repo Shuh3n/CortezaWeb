@@ -624,8 +624,9 @@ export default function AdminGalleryManagerPage() {
                               >
                                 <img src={url} alt={`Preview ${index}`} className="h-full w-full object-cover transition duration-300 group-hover:scale-110" />
                                 <div className="absolute inset-0 flex items-center justify-center bg-primary/20 opacity-0 transition-opacity group-hover:opacity-100">
-                                  <PlusCircle className="text-white" size={20} sm:size={24} />
+                                  <PlusCircle className="text-white w-5 h-5 sm:w-6 sm:h-6" />
                                 </div>
+
                               </motion.div>
                             ))}
                           </div>
