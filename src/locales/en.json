@@ -333,7 +333,8 @@
     "filtros": {
       "todos": "All",
       "perros": "Dogs",
-      "gatos": "Cats"
+      "gatos": "Cats",
+      "otros": "Others"
     },
     "tarjeta": {
       "urgente": "⚡ Urgent",
