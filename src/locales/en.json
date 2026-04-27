@@ -279,6 +279,7 @@
     "placeholders": {
       "nombre": "Name",
       "email": "Email Address",
+      "telefono": "Phone / WhatsApp (Colombia)",
       "asunto": "Subject",
       "mensaje": "Write your message here"
     },

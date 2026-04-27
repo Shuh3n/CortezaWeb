@@ -270,6 +270,21 @@ const VolunteerModal = ({ isOpen, onClose }: VolunteerModalProps) => {
                       {errors.mensaje && <span className="text-red-500 text-xs ml-4">{t('voluntariado.requisitos.formulario.error_requerido')}</span>}
                     </div>
 
+                    <div className="flex items-center gap-3 px-2 py-2">
+                      <input
+                        type="checkbox"
+                        id="privacy-volunteer"
+                        className="w-5 h-5 rounded-lg border-primary/20 text-primary focus:ring-primary/20 cursor-pointer"
+                        required
+                      />
+                      <label 
+                        htmlFor="privacy-volunteer" 
+                        className="text-[11px] text-text-muted font-bold uppercase tracking-tight cursor-pointer hover:text-primary transition-colors select-none"
+                      >
+                        {t('contacto_form.privacidad')}
+                      </label>
+                    </div>
+
                     {error && <div className="text-red-500 text-sm text-center font-bold">{error}</div>}
 
                     <motion.button

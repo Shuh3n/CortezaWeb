@@ -8,6 +8,7 @@ const ContactForm = () => {
   const [formData, setFormData] = useState({
     nombre: '',
     correo: '',
+    telefono: '',
     asunto: '',
     mensaje: ''
   });
@@ -24,10 +25,20 @@ const ContactForm = () => {
     }));
   };
 
+  const validatePhone = (phone: string) => {
+    return /^3\d{9}$/.test(phone);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
+
+    if (!validatePhone(formData.telefono)) {
+      setError(t('voluntariado.requisitos.formulario.error_telefono') || 'Número de teléfono no válido.');
+      setIsSubmitting(false);
+      return;
+    }
 
     try {
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-email`, {
@@ -42,7 +53,7 @@ const ContactForm = () => {
       if (!response.ok) throw new Error('Failed to send');
 
       setSubmitted(true);
-      setFormData({ nombre: '', correo: '', asunto: '', mensaje: '' });
+      setFormData({ nombre: '', correo: '', telefono: '', asunto: '', mensaje: '' });
       setTimeout(() => {
         setSubmitted(false);
       }, 5000);
@@ -84,37 +95,39 @@ const ContactForm = () => {
                 transition={{ duration: 0.6 }}
             >
               <form onSubmit={handleSubmit} className="space-y-4">
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                >
-                  <input
-                      type="text"
-                      name="nombre"
-                      placeholder={t('contacto_form.placeholders.nombre')}
-                      value={formData.nombre}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 bg-neutral-soft border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                      required
-                  />
-                </motion.div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 }}
+                  >
+                    <input
+                        type="text"
+                        name="nombre"
+                        placeholder={t('contacto_form.placeholders.nombre')}
+                        value={formData.nombre}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 bg-neutral-soft border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium"
+                        required
+                    />
+                  </motion.div>
 
-                <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.15 }}
-                >
-                  <input
-                      type="email"
-                      name="correo"
-                      placeholder={t('contacto_form.placeholders.email')}
-                      value={formData.correo}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 bg-neutral-soft border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                      required
-                  />
-                </motion.div>
+                  <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.15 }}
+                  >
+                    <input
+                        type="tel"
+                        name="telefono"
+                        placeholder={t('contacto_form.placeholders.telefono')}
+                        value={formData.telefono}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 bg-neutral-soft border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium"
+                        required
+                    />
+                  </motion.div>
+                </div>
 
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -122,12 +135,12 @@ const ContactForm = () => {
                     transition={{ delay: 0.2 }}
                 >
                   <input
-                      type="text"
-                      name="asunto"
-                      placeholder={t('contacto_form.placeholders.asunto')}
-                      value={formData.asunto}
+                      type="email"
+                      name="correo"
+                      placeholder={t('contacto_form.placeholders.email')}
+                      value={formData.correo}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 bg-neutral-soft border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                      className="w-full px-4 py-3 bg-neutral-soft border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium"
                       required
                   />
                 </motion.div>
@@ -137,13 +150,29 @@ const ContactForm = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.25 }}
                 >
+                  <input
+                      type="text"
+                      name="asunto"
+                      placeholder={t('contacto_form.placeholders.asunto')}
+                      value={formData.asunto}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 bg-neutral-soft border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all font-medium"
+                      required
+                  />
+                </motion.div>
+
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                >
                 <textarea
                     name="mensaje"
                     placeholder={t('contacto_form.placeholders.mensaje')}
                     value={formData.mensaje}
                     onChange={handleChange}
                     rows={5}
-                    className="w-full px-4 py-3 bg-neutral-soft border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none"
+                    className="w-full px-4 py-3 bg-neutral-soft border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none font-medium"
                     required
                 />
                 </motion.div>
@@ -152,15 +181,15 @@ const ContactForm = () => {
                     initial={{ opacity: 0, y: 10 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
-                    className="flex items-center gap-2 mb-4"
+                    className="flex items-center gap-3 mb-6 px-1"
                 >
                   <input
                       type="checkbox"
                       id="privacy"
-                      className="rounded"
+                      className="w-5 h-5 rounded border-slate-200 text-primary focus:ring-primary/20 cursor-pointer"
                       required
                   />
-                  <label htmlFor="privacy" className="text-sm text-text-muted">
+                  <label htmlFor="privacy" className="text-sm text-text-muted cursor-pointer hover:text-primary transition-colors select-none font-medium">
                     {t('contacto_form.privacidad')}
                   </label>
                 </motion.div>
@@ -170,7 +199,7 @@ const ContactForm = () => {
                     whileTap={{ scale: 0.98 }}
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-primary text-white py-3 rounded-lg font-bold hover:bg-opacity-90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                    className="w-full bg-primary text-white py-4 rounded-xl font-bold hover:bg-opacity-90 transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
                 >
                   {isSubmitting ? (
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
