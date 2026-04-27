@@ -14,7 +14,7 @@ const About = () => {
     >
       <AboutHero />
       <Mission />
-      <Team />
+      {/* <Team /> */}
       <Stats />
       <Testimonials />
     </motion.div>

@@ -17,11 +17,10 @@ const SalvatonInfo = () => {
             >
               <div className="absolute -inset-4 bg-primary/5 rounded-[40px] rotate-2 -z-10" />
               <img
-                  src="/images/salvaton.jpg"
-                  alt={t('salvaton.info.titulo_2')}
-                  className="w-full rounded-[32px] shadow-2xl border-4 border-white"
-              />
-            </motion.div>
+                 src="/images/salvatonimage.webp"
+                 alt={t('salvaton.info.titulo_2')}
+                 className="w-full rounded-[32px] shadow-2xl border-4 border-white"
+              />            </motion.div>
 
             <motion.div
                 initial={{ opacity: 0, x: 50 }}
