@@ -20,7 +20,8 @@ const Hero = ({ search, setSearch, species, setSpecies, total, loading }: HeroPr
     const speciesFilters: { value: Species; label: string; icon: string }[] = [
         { value: 'all',   label: t('mascotas.filtros.todos'),  icon: 'icons/paw_prints.svg' },
         { value: 'dog',   label: t('mascotas.filtros.perros'), icon: 'icons/dog_icon.svg' },
-        { value: 'cat',   label: t('mascotas.filtros.gatos'),  icon: 'icons/cat_icon.svg' }
+        { value: 'cat',   label: t('mascotas.filtros.gatos'),  icon: 'icons/cat_icon.svg' },
+        { value: 'other', label: t('mascotas.filtros.otros'),  icon: 'icons/paw_prints.svg' }
     ];
 
     return (

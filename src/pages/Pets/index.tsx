@@ -66,7 +66,8 @@ const Pets = () => {
             setLoading(true);
             try {
                 const params = new URLSearchParams();
-                if (species !== 'all') params.set('especie', species === 'dog' ? 'perro' : 'gato');
+                if (species === 'dog') params.set('especie', 'perro');
+                if (species === 'cat') params.set('especie', 'gato');
                 if (search.trim()) params.set('search', search.trim());
 
                 const res = await fetch(`${SUPABASE_URL}/functions/v1/get-peludos?${params.toString()}`);
