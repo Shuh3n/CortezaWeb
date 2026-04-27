@@ -165,7 +165,11 @@ const PetCard = ({ pet, onAdopt, onSponsor }: PetCardProps) => {
                         <h3 className="text-2xl font-black text-text-h">{pet.name}</h3>
                         <img src={speciesIcon[pet.species]} alt={pet.species} className="w-6 h-6 opacity-60" />
                     </div>
-                    <p className="text-sm font-bold text-primary">{pet.breed}</p>
+                    <div className="flex items-center gap-2 text-sm font-bold text-primary italic">
+                        <span>{pet.species_name}</span>
+                        <span className="w-1 h-1 rounded-full bg-primary/30" />
+                        <span>{pet.breed}</span>
+                    </div>
                 </div>
 
                 {/* Quick stats chips */}

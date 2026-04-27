@@ -21,6 +21,12 @@ entrypoint = "./functions/manage-photos/index.ts"
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/manage-photos/*.html" ]
 
+[functions.get-peludos]
+enabled = true
+verify_jwt = false
+import_map = "./functions/get-peludos/deno.json"
+entrypoint = "./functions/get-peludos/index.ts"
+
 [functions.send-email]
 enabled = true
 verify_jwt = false

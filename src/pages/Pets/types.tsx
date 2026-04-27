@@ -4,6 +4,7 @@ export interface Pet {
     id: string;
     name: string;
     species: 'dog' | 'cat' | 'other';
+    species_name: string;
     breed: string;
     age_years: number;
     age_months: number;

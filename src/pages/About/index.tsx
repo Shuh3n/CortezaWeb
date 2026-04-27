@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import AboutHero from './sections/Hero';
 import Mission from './sections/Mission';
-import Team from './sections/Team';
 import Stats from './sections/Stats';
 import Testimonials from './sections/Testimonials';
 

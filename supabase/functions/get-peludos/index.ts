@@ -30,71 +30,58 @@ Deno.serve(async (req) => {
         return jsonResponse(500, { error: "Faltan variables de entorno." });
     }
 
-    // Cliente público (sin autenticación) — lectura pública de peludos disponibles
+    // Cliente público (sin autenticación)
     const supabase = createClient(supabaseUrl, anonKey, {
         auth: { persistSession: false, autoRefreshToken: false },
     });
 
     try {
         const reqUrl = new URL(req.url);
-        const especie = reqUrl.searchParams.get("especie"); // "perro" | "gato" | null
-        const search = reqUrl.searchParams.get("search");   // búsqueda por nombre/raza
-        const id = reqUrl.searchParams.get("id");           // peludo individual
+        const especieName = reqUrl.searchParams.get("especie"); // nombre de la especie
+        const search = reqUrl.searchParams.get("search");
+        const id = reqUrl.searchParams.get("id");
 
-        // ── Peludo individual ────────────────────────────────────────────────────
+        const selectQuery = `
+            id, nombre, sexo, edad, caracteristicas,
+            esterilizado, vacunado, desparasitado, especie, peso,
+            especie_id, raza_id,
+            especies (id, nombre),
+            razas (id, nombre),
+            imagenes (id, url)
+        `;
+
         if (id) {
-            const peludoId = Number(id);
-            if (!Number.isFinite(peludoId) || peludoId <= 0) {
-                return jsonResponse(400, { error: "ID de peludo inválido." });
-            }
-
             const { data: peludo, error } = await supabase
                 .from("peludos")
-                .select(`
-          id, nombre, sexo, edad, caracteristicas,
-          esterilizado, vacunado, desparasitado, especie, peso,
-          imagenes (id, url)
-        `)
-                .eq("id", peludoId)
+                .select(selectQuery)
+                .eq("id", id)
                 .single();
 
-            if (error || !peludo) {
-                return jsonResponse(404, { error: "Peludo no encontrado." });
-            }
-
+            if (error || !peludo) return jsonResponse(404, { error: "Peludo no encontrado." });
             return jsonResponse(200, { data: peludo });
         }
 
-        // ── Listado con filtros opcionales ───────────────────────────────────────
-        let query = supabase
-            .from("peludos")
-            .select(`
-        id, nombre, sexo, edad, caracteristicas,
-        esterilizado, vacunado, desparasitado, especie, peso,
-        imagenes (id, url)
-      `)
-            .order("id", { ascending: false });
+        let query = supabase.from("peludos").select(selectQuery).order("id", { ascending: false });
 
-        if (especie) {
-            query = query.ilike("especie", `%${especie}%`);
+        if (especieName) {
+            // Nota: Podríamos filtrar por especie_id si tuviéramos el ID, 
+            // pero para mantener compatibilidad con la URL actual usamos el JOIN
+            // Esto asume que el nombre de la especie es único
+            const { data: esp } = await supabase.from("especies").select("id").ilike("nombre", especieName).single();
+            if (esp) {
+                query = query.eq("especie_id", esp.id);
+            }
         }
 
         if (search) {
-            // Búsqueda en nombre o características
-            query = query.or(
-                `nombre.ilike.%${search}%,caracteristicas.ilike.%${search}%`
-            );
+            query = query.or(`nombre.ilike.%${search}%,caracteristicas.ilike.%${search}%`);
         }
 
         const { data, error } = await query;
-
-        if (error) {
-            return jsonResponse(500, { error: error.message });
-        }
+        if (error) return jsonResponse(500, { error: error.message });
 
         return jsonResponse(200, { data: data ?? [] });
     } catch (err) {
-        const message = err instanceof Error ? err.message : "Error inesperado.";
-        return jsonResponse(500, { error: message });
+        return jsonResponse(500, { error: err instanceof Error ? err.message : "Error inesperado." });
     }
 });

@@ -19,12 +19,16 @@ function mapPeludoToPet(p: {
     esterilizado: boolean;
     vacunado: boolean;
     desparasitado: boolean;
+    especies?: { id: number; nombre: string };
+    razas?: { id: number; nombre: string };
     imagenes?: { id: number; url: string }[];
 }): Pet {
-    const especieLower = p.especie.toLowerCase();
+    const speciesName = p.especies?.nombre || p.especie || 'Otra';
+    const breedName = p.razas?.nombre || 'Criollo';
+    
     const species: Pet['species'] =
-        especieLower.includes('perro') || especieLower.includes('dog') ? 'dog'
-            : especieLower.includes('gato') || especieLower.includes('cat') ? 'cat'
+        speciesName.toLowerCase().includes('perro') || speciesName.toLowerCase().includes('dog') ? 'dog'
+            : speciesName.toLowerCase().includes('gato') || speciesName.toLowerCase().includes('cat') ? 'cat'
                 : 'other';
 
     const age_years = Math.floor(p.edad / 12);
@@ -36,7 +40,8 @@ function mapPeludoToPet(p: {
         id: String(p.id),
         name: p.nombre,
         species,
-        breed: p.especie,
+        species_name: speciesName,
+        breed: breedName,
         age_years,
         age_months,
         size,
