@@ -11,7 +11,6 @@ import {
   PawPrint,
   ShoppingBag,
   Settings,
-  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
