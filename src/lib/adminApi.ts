@@ -320,3 +320,19 @@ export async function deletePhoto(id: number) {
 
   return parseResponse(response);
 }
+
+export async function deletePhotos(ids: number[]) {
+  const response = await fetchFunctionWithAuth(`/manage-photos?ids=${ids.join(',')}`, 'DELETE', {
+    body: undefined,
+  });
+
+  return parseResponse(response);
+}
+
+export async function deletePhotosByCategory(categoriaId: number) {
+  const response = await fetchFunctionWithAuth(`/manage-photos?categoriaId=${categoriaId}`, 'DELETE', {
+    body: undefined,
+  });
+
+  return parseResponse(response);
+}

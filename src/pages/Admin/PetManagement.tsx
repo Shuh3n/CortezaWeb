@@ -18,6 +18,7 @@ import {
     Syringe,
     Bug,
     X,
+    XCircle,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import SearchableSelect from '../../components/SearchableSelect';
@@ -289,6 +290,16 @@ export default function PetManagementPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
+
+    // Auto-close feedback
+    useEffect(() => {
+        if (feedback) {
+            const timer = setTimeout(() => {
+                setFeedback(null);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [feedback]);
 
     const [searchText, setSearchText] = useState('');
     const [especieFilter, setEspecieFilter] = useState('');
@@ -609,13 +620,30 @@ export default function PetManagementPage() {
                         </div>
                     </label>
 
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="inline-flex h-12 self-end items-center justify-center rounded-2xl bg-primary px-8 font-black text-[11px] uppercase tracking-widest text-white shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
-                    >
-                        Filtrar
-                    </button>
+                    <div className="flex self-end items-center gap-2">
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="flex-1 inline-flex h-12 items-center justify-center rounded-2xl bg-primary px-8 font-black text-[11px] uppercase tracking-widest text-white shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                        >
+                            Filtrar
+                        </button>
+                        {(searchText.trim() !== '' || especieFilter !== '') && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSearchText('');
+                                    setEspecieFilter('');
+                                    void fetchData();
+                                }}
+                                disabled={isLoading}
+                                className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/10 bg-white text-primary shadow-lg shadow-primary/5 hover:bg-primary/5 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+                                title="Limpiar filtros"
+                            >
+                                <XCircle size={20} />
+                            </button>
+                        )}
+                    </div>
                 </form>
             </section>
 

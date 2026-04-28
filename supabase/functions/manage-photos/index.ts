@@ -312,40 +312,54 @@ Deno.serve(async (req) => {
     if (req.method === "DELETE") {
       const requestUrl = new URL(req.url);
       const id = Number(requestUrl.searchParams.get("id") ?? 0);
+      const idsParam = requestUrl.searchParams.get("ids");
+      const categoriaId = Number(requestUrl.searchParams.get("categoriaId") ?? 0);
 
-      if (!Number.isFinite(id) || id <= 0) {
-        return jsonResponse(400, { error: "ID de imagen inválido." });
+      let query = adminClient.from("imagenes").select("id, url");
+
+      if (idsParam) {
+        const ids = idsParam.split(",").map(Number).filter(n => Number.isFinite(n) && n > 0);
+        if (ids.length === 0) {
+          return jsonResponse(400, { error: "Lista de IDs inválida." });
+        }
+        query = query.in("id", ids);
+      } else if (Number.isFinite(categoriaId) && categoriaId > 0) {
+        query = query.eq("categoria_id", categoriaId);
+      } else if (Number.isFinite(id) && id > 0) {
+        query = query.eq("id", id);
+      } else {
+        return jsonResponse(400, { error: "Debe proporcionar id, ids o categoriaId para eliminar." });
       }
 
-      const { data: existingRow, error: existingError } = await adminClient
-        .from("imagenes")
-        .select("id, url")
-        .eq("id", id)
-        .single();
+      const { data: rows, error: fetchError } = await query;
 
-      if (existingError || !existingRow) {
-        return jsonResponse(404, { error: existingError?.message ?? "La imagen no existe." });
+      if (fetchError) {
+        return jsonResponse(500, { error: fetchError.message ?? "No se pudieron obtener las imágenes a eliminar." });
       }
 
-      const storagePath = extractStoragePathFromPublicUrl(existingRow.url);
-
-      if (!storagePath) {
-        return jsonResponse(500, { error: "No se pudo resolver la ruta del archivo en storage." });
+      if (!rows || rows.length === 0) {
+        return jsonResponse(200, { data: { count: 0 }, message: "No se encontraron imágenes para eliminar." });
       }
 
-      const { error: storageError } = await adminClient.storage.from(GALLERY_BUCKET).remove([storagePath]);
+      const storagePaths = rows
+        .map(row => extractStoragePathFromPublicUrl(row.url))
+        .filter((path): path is string => !!path);
 
-      if (storageError) {
-        return jsonResponse(500, { error: storageError.message ?? "No se pudo eliminar el archivo en storage." });
+      if (storagePaths.length > 0) {
+        const { error: storageError } = await adminClient.storage.from(GALLERY_BUCKET).remove(storagePaths);
+        if (storageError) {
+          return jsonResponse(500, { error: storageError.message ?? "Error eliminando archivos de storage." });
+        }
       }
 
-      const { error: deleteError } = await adminClient.from("imagenes").delete().eq("id", id);
+      const rowIds = rows.map(r => r.id);
+      const { error: deleteError } = await adminClient.from("imagenes").delete().in("id", rowIds);
 
       if (deleteError) {
-        return jsonResponse(500, { error: deleteError.message ?? "No se pudo eliminar el registro de la imagen." });
+        return jsonResponse(500, { error: deleteError.message ?? "Error eliminando registros de base de datos." });
       }
 
-      return jsonResponse(200, { data: { id } });
+      return jsonResponse(200, { data: { deletedIds: rowIds, count: rowIds.length } });
     }
 
     return jsonResponse(405, { error: "Método no permitido." });

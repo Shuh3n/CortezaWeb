@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Search, SlidersHorizontal } from 'lucide-react';
+import { Search, SlidersHorizontal, XCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Species } from '../types';
 
@@ -79,6 +79,24 @@ const Hero = ({ search, setSearch, species, setSpecies, total, loading }: HeroPr
                             <SlidersHorizontal size={18} />
                             <span className="hidden sm:inline">{t('mascotas.hero.filtros')}</span>
                         </motion.button>
+
+                        {(search !== '' || species !== 'all') && (
+                            <motion.button
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => {
+                                    setSearch('');
+                                    setSpecies('all');
+                                }}
+                                className="px-5 rounded-2xl font-bold flex items-center gap-2 bg-red-500 text-white shadow-lg cursor-pointer"
+                                title="Limpiar filtros"
+                            >
+                                <XCircle size={18} />
+                                <span className="hidden sm:inline">Limpiar</span>
+                            </motion.button>
+                        )}
                     </motion.div>
                 </div>
             </section>
