@@ -276,6 +276,9 @@ const SalvatoreStore = () => {
                                     <img
                                         src={getSupabaseImageUrl(product.image)}
                                         alt={product.name}
+                                    loading="lazy"
+                                    decoding="async"
+                                    fetchPriority="low"
                                         className={`w-full h-full object-cover transition-transform duration-700 ${product.stock > 0 ? 'group-hover:scale-110' : ''}`}
                                     />
                                 ) : (
@@ -414,6 +417,9 @@ const SalvatoreStore = () => {
                       <img
                           src={getSupabaseImageUrl(selectedProduct.image)}
                           alt={selectedProduct.name}
+                          loading="eager"
+                          decoding="async"
+                          fetchPriority="high"
                           className="w-full h-full object-cover"
                       />
                       <div className="absolute top-6 left-6 bg-accent text-white px-4 py-1.5 rounded-full text-xs font-bold shadow-lg uppercase tracking-wider">
