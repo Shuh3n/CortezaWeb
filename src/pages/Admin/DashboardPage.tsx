@@ -17,6 +17,16 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     let ignore = false;
 
+    async function loadMetrics() {
+      const { count: total, error: err1 } = await supabase.from('products').select('id', { count: 'exact', head: true });
+      const { count: low, error: err2 } = await supabase.from('products').select('id', { count: 'exact', head: true }).lte('stock', 5);
+
+      if (!ignore) {
+        setProductCount(total || 0);
+        setLowStockCount(low || 0);
+      }
+    }
+
     async function loadDashboard() {
       if (ignore) return;
       setIsLoading(true);
@@ -33,19 +43,10 @@ export default function AdminDashboardPage() {
         console.error('❌ Error en métricas de galería:', err);
       }
 
-      // 2. Cargar Métricas de Tienda (Individual para que no se bloqueen)
+      // 2. Cargar Métricas de Tienda
       try {
-        const { count: total, error: err1 } = await supabase.from('products').select('id', { count: 'exact', head: true });
-        const { count: low, error: err2 } = await supabase.from('products').select('id', { count: 'exact', head: true }).lte('stock', 5);
-
-        if (err1) console.error('❌ Error Supabase (Total Productos):', err1);
-        if (err2) console.error('❌ Error Supabase (Stock Bajo):', err2);
-
-        if (!ignore) {
-          setProductCount(total || 0);
-          setLowStockCount(low || 0);
-          console.log('✅ Tienda cargada:', { total, low });
-        }
+        await loadMetrics();
+        console.log('✅ Tienda cargada');
       } catch (err) {
         console.error('❌ Error en métricas de tienda:', err);
       }
@@ -58,8 +59,18 @@ export default function AdminDashboardPage() {
 
     void loadDashboard();
 
+    // 3. Real-time listener para cambios en productos
+    const channel = supabase
+      .channel('dashboard-products', { config: { broadcast: { self: true } } })
+      .on('postgres_changes', { event: '*', table: 'products', schema: 'public' }, () => {
+        console.log('📊 Cambio detectado en productos, actualizando métricas...');
+        void loadMetrics();
+      })
+      .subscribe();
+
     return () => {
       ignore = true;
+      supabase.removeChannel(channel);
     };
   }, []);
 

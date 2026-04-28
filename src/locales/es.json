@@ -85,7 +85,7 @@
     },
     "copyright": "© 2026 Fundación Corteza Terrestre. Armenia, Quindío.",
     "privacidad": "Política de Privacidad y Tratamiento de Datos",
-    "creditos": "Hecho por los estudiantes de Ingeniería de sistemas y computación de la Uniquindio",
+    "creditos": "Hecho por los estudiantes del curso de Semionario de Ingeniería de Ingenieria de Sistemas y Computacion de la Uniquindio.",
     "github": "Proyecto en GitHub"
   },
   "galeria_seccion": {
@@ -279,6 +279,7 @@
     "placeholders": {
       "nombre": "Nombre",
       "email": "Correo Electrónico",
+      "telefono": "Teléfono / WhatsApp (Colombia)",
       "asunto": "Asunto",
       "mensaje": "Escribe aquí tu mensaje"
     },
@@ -333,7 +334,8 @@
     "filtros": {
       "todos": "Todos",
       "perros": "Perros",
-      "gatos": "Gatos"
+      "gatos": "Gatos",
+      "otros": "Otros"
     },
     "tarjeta": {
       "urgente": "⚡ Urgente",
@@ -561,12 +563,18 @@
         "etiqueta": "Sumate al equipo",
         "titulo": "Ser Voluntario",
         "placeholder_nombre": "Tu Nombre completo",
+        "placeholder_cedula": "Número de Cédula",
+        "placeholder_fecha_nacimiento": "Fecha de Nacimiento",
+        "placeholder_edad": "Edad",
         "placeholder_correo": "Correo Electrónico",
+        "placeholder_telefono": "Celular / WhatsApp (Colombia)",
         "placeholder_area": "Área de interés",
         "placeholder_mensaje": "¿Por qué quieres ser voluntario?",
         "boton_enviar": "Enviar Solicitud",
         "error_requerido": "Este campo es obligatorio",
         "error_correo": "Correo electrónico no válido",
+        "error_telefono": "Número no válido. Debe empezar por 3 y tener 10 dígitos.",
+        "error_cedula": "Cédula no válida. Ingrese entre 7 y 10 dígitos.",
         "error": "Hubo un error al enviar. Intenta más tarde.",
         "exito_titulo": "¡Solicitud Recibida!",
         "exito_desc": "Gracias por querer sumarte. Pronto nos pondremos en contacto contigo.",

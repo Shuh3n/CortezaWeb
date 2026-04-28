@@ -181,4 +181,4 @@ Lineamientos de diseno documentados en KNOWLEDGE.md:
 
 ## Creditos
 
-Hecho por los estudiantes de Ingenieria de sistemas y computacion de la Uniquindio.
+Hecho por los estudiantes del curso de Semionario de Ingeniería de Ingenieria de Sistemas y Computacion de la Uniquindio.

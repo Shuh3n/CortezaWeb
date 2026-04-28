@@ -85,7 +85,7 @@
     },
     "copyright": "© 2026 Corteza Terrestre Foundation. Armenia, Quindío.",
     "privacidad": "Privacy Policy and Data Processing",
-    "creditos": "Made by Systems and Computer Engineering students from Uniquindio",
+    "creditos": "Created by students in the Systems and Computer Engineering Seminar course at Uniquindio.",
     "github": "Project on GitHub"
   },
   "galeria_seccion": {
@@ -279,6 +279,7 @@
     "placeholders": {
       "nombre": "Name",
       "email": "Email Address",
+      "telefono": "Phone / WhatsApp (Colombia)",
       "asunto": "Subject",
       "mensaje": "Write your message here"
     },
@@ -333,7 +334,8 @@
     "filtros": {
       "todos": "All",
       "perros": "Dogs",
-      "gatos": "Cats"
+      "gatos": "Cats",
+      "otros": "Others"
     },
     "tarjeta": {
       "urgente": "⚡ Urgent",
@@ -561,12 +563,18 @@
         "etiqueta": "Join the team",
         "titulo": "Become a Volunteer",
         "placeholder_nombre": "Your Full Name",
+        "placeholder_cedula": "ID Number (Cédula)",
+        "placeholder_fecha_nacimiento": "Date of Birth",
+        "placeholder_edad": "Age",
         "placeholder_correo": "Email Address",
+        "placeholder_telefono": "Phone / WhatsApp (Colombia)",
         "placeholder_area": "Area of interest",
         "placeholder_mensaje": "Why do you want to volunteer?",
         "boton_enviar": "Send Application",
         "error_requerido": "This field is required",
         "error_correo": "Invalid email address",
+        "error_telefono": "Invalid number. Must start with 3 and have 10 digits.",
+        "error_cedula": "Invalid ID. Enter between 7 and 10 digits.",
         "error": "There was an error sending. Please try again later.",
         "exito_titulo": "Application Received!",
         "exito_desc": "Thank you for joining us. We will contact you shortly.",

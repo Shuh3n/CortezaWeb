@@ -24,6 +24,7 @@ import { supabase } from '../../lib/supabase';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Sexo = 'macho' | 'hembra';
+type Especie = 'perro' | 'gato' | 'otra';
 
 export interface PeludoImagen {
     id: number;
@@ -54,6 +55,21 @@ function getErrorMessage(error: unknown) {
     return 'No se pudo completar la operación.';
 }
 
+function normalizeEspecie(value: string): Especie {
+    const normalized = value.trim().toLowerCase();
+    if (normalized.includes('perr') || normalized.includes('dog')) return 'perro';
+    if (normalized.includes('gat') || normalized.includes('cat')) return 'gato';
+    return 'otra';
+}
+
+function getEspeciePersonalizada(value: string): string {
+    return normalizeEspecie(value) === 'otra' ? value.trim() : '';
+}
+
+function resolveEspecie(form: FormState): string {
+    return form.especie === 'otra' ? form.especiePersonalizada.trim() : form.especie;
+}
+
 /** Obtiene el JWT de la sesión activa para enviarlo a las Edge Functions */
 async function getAuthHeader(): Promise<Record<string, string>> {
     const { data } = await supabase.auth.getSession();
@@ -68,7 +84,8 @@ const EMPTY_FORM = {
     nombre: '',
     sexo: 'macho' as Sexo,
     edad: '',
-    especie: '',
+    especie: 'perro' as Especie,
+    especiePersonalizada: '',
     peso: '',
     caracteristicas: '',
     esterilizado: false,
@@ -126,16 +143,35 @@ function PeludoFormFields({
             <div className="grid gap-4 md:grid-cols-2">
                 <label className="block">
           <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main">
-            <Stethoscope className="h-4 w-4 text-primary" /> Especie
+            <Stethoscope className="h-4 w-4 text-primary" /> Especie *
           </span>
-                    <input
-                        type="text"
+                    <select
+                        required
                         value={form.especie}
                         onChange={(e) => onChangeText('especie', e.target.value)}
-                        placeholder="Ej: Perro, Gato, Ave..."
                         className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
-                    />
+                    >
+                        <option value="perro">Perro</option>
+                        <option value="gato">Gato</option>
+                        <option value="otra">Otra</option>
+                    </select>
                 </label>
+
+                {form.especie === 'otra' && (
+                    <label className="block">
+          <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main">
+            <Stethoscope className="h-4 w-4 text-primary" /> ¿Cuál especie? *
+          </span>
+                        <input
+                            type="text"
+                            required
+                            value={form.especiePersonalizada}
+                            onChange={(e) => onChangeText('especiePersonalizada', e.target.value)}
+                            placeholder="Ej: Conejo"
+                            className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
+                        />
+                    </label>
+                )}
 
                 <label className="block">
           <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main">
@@ -305,12 +341,18 @@ export default function PetManagementPage() {
             setIsSubmitting(true);
             setFeedback(null);
 
+            const especie = resolveEspecie(createForm);
+            if (!especie) {
+                setFeedback({ type: 'error', msg: 'Debe indicar la especie del peludo.' });
+                return;
+            }
+
             const headers = await getAuthHeader();
             const formData = new FormData();
             formData.append('nombre', createForm.nombre);
             formData.append('sexo', createForm.sexo);
             formData.append('edad', createForm.edad);
-            formData.append('especie', createForm.especie || 'Sin especificar');
+            formData.append('especie', especie);
             formData.append('caracteristicas', createForm.caracteristicas);
             formData.append('esterilizado', String(createForm.esterilizado));
             formData.append('vacunado', String(createForm.vacunado));
@@ -349,7 +391,8 @@ export default function PetManagementPage() {
             nombre: peludo.nombre,
             sexo: peludo.sexo,
             edad: String(peludo.edad),
-            especie: peludo.especie === 'Sin especificar' ? '' : peludo.especie,
+            especie: normalizeEspecie(peludo.especie),
+            especiePersonalizada: getEspeciePersonalizada(peludo.especie),
             peso: peludo.peso != null ? String(peludo.peso) : '',
             caracteristicas: peludo.caracteristicas,
             esterilizado: peludo.esterilizado,
@@ -373,13 +416,19 @@ export default function PetManagementPage() {
             setIsSubmitting(true);
             setFeedback(null);
 
+            const especie = resolveEspecie(editForm);
+            if (!especie) {
+                setFeedback({ type: 'error', msg: 'Debe indicar la especie del peludo.' });
+                return;
+            }
+
             const headers = await getAuthHeader();
             const formData = new FormData();
             formData.append('id', String(editingPeludo.id));
             formData.append('nombre', editForm.nombre);
             formData.append('sexo', editForm.sexo);
             formData.append('edad', editForm.edad);
-            formData.append('especie', editForm.especie || 'Sin especificar');
+            formData.append('especie', especie);
             formData.append('caracteristicas', editForm.caracteristicas);
             formData.append('esterilizado', String(editForm.esterilizado));
             formData.append('vacunado', String(editForm.vacunado));

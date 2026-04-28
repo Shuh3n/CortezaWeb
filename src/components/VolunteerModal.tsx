@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, User, Mail, MessageSquare, Send, ShieldCheck, Heart, Phone, ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { X, User, Mail, MessageSquare, Send, ShieldCheck, Heart, Phone, ChevronDown, IdCard, Calendar } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm, Controller } from 'react-hook-form';
 
@@ -11,6 +11,9 @@ interface VolunteerModalProps {
 
 interface VolunteerFormData {
   nombre: string;
+  cedula: string;
+  fechaNacimiento: string;
+  edad: string;
   correo: string;
   telefono: string;
   asunto: string;
@@ -24,7 +27,24 @@ const VolunteerModal = ({ isOpen, onClose }: VolunteerModalProps) => {
   const [error, setError] = useState<string | null>(null);
   const [isSelectOpen, setIsSelectOpen] = useState(false);
 
-  const { register, handleSubmit, reset, control, formState: { errors } } = useForm<VolunteerFormData>();
+  const { register, handleSubmit, reset, control, watch, setValue, formState: { errors } } = useForm<VolunteerFormData>({
+    mode: 'onChange'
+  });
+
+  const fechaNacimiento = watch('fechaNacimiento');
+
+  useEffect(() => {
+    if (fechaNacimiento) {
+      const birthDate = new Date(fechaNacimiento);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const m = today.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      setValue('edad', age.toString(), { shouldValidate: true });
+    }
+  }, [fechaNacimiento, setValue]);
 
   const onSubmit = async (data: VolunteerFormData) => {
     setIsSubmitting(true);
@@ -99,14 +119,61 @@ const VolunteerModal = ({ isOpen, onClose }: VolunteerModalProps) => {
               <div className="p-8 space-y-6">
                 {!submitted ? (
                   <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                    <div className="relative">
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40" size={20} />
-                      <input
-                        {...register('nombre', { required: true })}
-                        placeholder={t('voluntariado.requisitos.formulario.placeholder_nombre')}
-                        className="w-full pl-12 pr-4 py-4 bg-neutral-soft rounded-2xl border border-primary/5 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
-                      />
-                      {errors.nombre && <span className="text-red-500 text-xs ml-4">{t('voluntariado.requisitos.formulario.error_requerido')}</span>}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="relative">
+                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40" size={20} />
+                        <input
+                          {...register('nombre', { required: true })}
+                          placeholder={t('voluntariado.requisitos.formulario.placeholder_nombre')}
+                          className="w-full pl-12 pr-4 py-4 bg-neutral-soft rounded-2xl border border-primary/5 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+                        />
+                        {errors.nombre && <span className="text-red-500 text-[10px] ml-4 font-bold">{t('voluntariado.requisitos.formulario.error_requerido')}</span>}
+                      </div>
+
+                      <div className="relative">
+                        <IdCard className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40" size={20} />
+                        <input
+                          {...register('cedula', { 
+                            required: true,
+                            pattern: /^\d{7,10}$/
+                          })}
+                          type="text"
+                          inputMode="numeric"
+                          placeholder={t('voluntariado.requisitos.formulario.placeholder_cedula')}
+                          className="w-full pl-12 pr-4 py-4 bg-neutral-soft rounded-2xl border border-primary/5 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
+                        />
+                        {errors.cedula && (
+                          <span className="text-red-500 text-[10px] ml-4 font-bold">
+                            {errors.cedula.type === 'required' 
+                              ? t('voluntariado.requisitos.formulario.error_requerido')
+                              : t('voluntariado.requisitos.formulario.error_cedula')}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="relative">
+                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40" size={20} />
+                        <input
+                          {...register('fechaNacimiento', { required: true })}
+                          type="date"
+                          placeholder={t('voluntariado.requisitos.formulario.placeholder_fecha_nacimiento')}
+                          className="w-full pl-12 pr-4 py-4 bg-neutral-soft rounded-2xl border border-primary/5 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium text-text-h"
+                        />
+                        {errors.fechaNacimiento && <span className="text-red-500 text-[10px] ml-4 font-bold">{t('voluntariado.requisitos.formulario.error_requerido')}</span>}
+                      </div>
+
+                      <div className="relative">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40 font-bold text-sm">#</div>
+                        <input
+                          {...register('edad', { required: true })}
+                          type="text"
+                          readOnly
+                          placeholder={t('voluntariado.requisitos.formulario.placeholder_edad')}
+                          className="w-full pl-12 pr-4 py-4 bg-neutral-100 rounded-2xl border border-primary/5 focus:outline-none transition-all font-black text-primary cursor-default"
+                        />
+                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -118,18 +185,27 @@ const VolunteerModal = ({ isOpen, onClose }: VolunteerModalProps) => {
                           placeholder={t('voluntariado.requisitos.formulario.placeholder_correo')}
                           className="w-full pl-12 pr-4 py-4 bg-neutral-soft rounded-2xl border border-primary/5 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
                         />
-                        {errors.correo && <span className="text-red-500 text-xs ml-4">{t('voluntariado.requisitos.formulario.error_correo')}</span>}
+                        {errors.correo && <span className="text-red-500 text-[10px] ml-4 font-bold">{t('voluntariado.requisitos.formulario.error_correo')}</span>}
                       </div>
 
                       <div className="relative">
                         <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40" size={20} />
                         <input
-                          {...register('telefono', { required: true })}
+                          {...register('telefono', { 
+                            required: true,
+                            pattern: /^3\d{9}$/
+                          })}
                           type="tel"
-                          placeholder={t('voluntariado.requisitos.formulario.placeholder_telefono') || 'Celular / WhatsApp'}
+                          placeholder={t('voluntariado.requisitos.formulario.placeholder_telefono')}
                           className="w-full pl-12 pr-4 py-4 bg-neutral-soft rounded-2xl border border-primary/5 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium"
                         />
-                        {errors.telefono && <span className="text-red-500 text-xs ml-4">{t('voluntariado.requisitos.formulario.error_requerido')}</span>}
+                        {errors.telefono && (
+                          <span className="text-red-500 text-[10px] ml-4 font-bold">
+                            {errors.telefono.type === 'required'
+                              ? t('voluntariado.requisitos.formulario.error_requerido')
+                              : t('voluntariado.requisitos.formulario.error_telefono')}
+                          </span>
+                        )}
                       </div>
                     </div>
 
@@ -192,6 +268,21 @@ const VolunteerModal = ({ isOpen, onClose }: VolunteerModalProps) => {
                         className="w-full pl-12 pr-4 py-4 bg-neutral-soft rounded-2xl border border-primary/5 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all font-medium resize-none"
                       />
                       {errors.mensaje && <span className="text-red-500 text-xs ml-4">{t('voluntariado.requisitos.formulario.error_requerido')}</span>}
+                    </div>
+
+                    <div className="flex items-center gap-3 px-2 py-2">
+                      <input
+                        type="checkbox"
+                        id="privacy-volunteer"
+                        className="w-5 h-5 rounded-lg border-primary/20 text-primary focus:ring-primary/20 cursor-pointer"
+                        required
+                      />
+                      <label 
+                        htmlFor="privacy-volunteer" 
+                        className="text-[11px] text-text-muted font-bold uppercase tracking-tight cursor-pointer hover:text-primary transition-colors select-none"
+                      >
+                        {t('contacto_form.privacidad')}
+                      </label>
                     </div>
 
                     {error && <div className="text-red-500 text-sm text-center font-bold">{error}</div>}

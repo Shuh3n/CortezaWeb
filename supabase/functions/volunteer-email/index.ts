@@ -4,6 +4,9 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
 interface VolunteerPayload {
   nombre: string;
+  cedula: string;
+  fechaNacimiento: string;
+  edad: string;
   correo: string;
   telefono: string;
   asunto: string;
@@ -20,6 +23,8 @@ interface ValidationResult {
 const MAX_BODY_SIZE = 10_000; // 10 KB
 const MAX_FIELD_LENGTH = 2000;
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_REGEX = /^3\d{9}$/;
+const CEDULA_REGEX = /^\d{7,10}$/;
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*", // In production: replace * with your domain
@@ -40,9 +45,9 @@ function sanitize(value: string): string {
 }
 
 function validatePayload(payload: Partial<VolunteerPayload>): ValidationResult {
-  const { nombre, correo, telefono, asunto, mensaje } = payload;
+  const { nombre, cedula, fechaNacimiento, edad, correo, telefono, asunto, mensaje } = payload;
 
-  if (!nombre || !correo || !telefono || !asunto || !mensaje) {
+  if (!nombre || !cedula || !fechaNacimiento || !edad || !correo || !telefono || !asunto || !mensaje) {
     return { valid: false, error: "Todos los campos son obligatorios." };
   }
 
@@ -50,8 +55,16 @@ function validatePayload(payload: Partial<VolunteerPayload>): ValidationResult {
     return { valid: false, error: "El correo electrónico no es válido." };
   }
 
+  if (!PHONE_REGEX.test(telefono)) {
+    return { valid: false, error: "El número de teléfono no es válido para Colombia." };
+  }
+
+  if (!CEDULA_REGEX.test(cedula)) {
+    return { valid: false, error: "El número de cédula no es válido." };
+  }
+
   for (
-    const [key, val] of Object.entries({ nombre, correo, telefono, asunto, mensaje })
+    const [key, val] of Object.entries({ nombre, cedula, fechaNacimiento, edad, correo, telefono, asunto, mensaje })
   ) {
     if (typeof val !== "string") {
       return { valid: false, error: `El campo '${key}' debe ser texto.` };
@@ -71,48 +84,82 @@ function validatePayload(payload: Partial<VolunteerPayload>): ValidationResult {
 }
 
 function buildEmailHtml(data: VolunteerPayload): string {
-  const { nombre, correo, telefono, asunto, mensaje } = data;
+  const { nombre, cedula, fechaNacimiento, edad, correo, telefono, asunto, mensaje } = data;
+  const whatsappUrl = `https://wa.me/57${telefono}`;
+
   return `
     <!DOCTYPE html>
     <html lang="es">
     <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
     <body style="font-family: Arial, sans-serif; background:#f4f4f4; margin:0; padding:20px;">
-      <div style="max-width:600px; margin:auto; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-        <div style="background:#1B4332; padding:24px 32px;">
-          <h1 style="color:#fff; margin:0; font-size:20px;">🌿 Nueva solicitud de voluntariado</h1>
-          <p style="color:#95D5B2; margin:4px 0 0; font-size:13px;">Formulario de Voluntarios — Corteza</p>
+      <div style="max-width:600px; margin:auto; background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+        <div style="background:#1B4332; padding:32px; text-align:center;">
+          <h1 style="color:#fff; margin:0; font-size:24px; letter-spacing:1px;">🌿 Fundación Corteza Terrestre</h1>
+          <p style="color:#95D5B2; margin:8px 0 0; font-size:14px; font-weight:bold; text-transform:uppercase;">Solicitud de Voluntariado</p>
         </div>
-        <div style="padding:16px 32px; background:#D8F3DC;">
-          <p style="margin:0; color:#1B4332; font-size:13px; font-weight:bold;">
-            ✅ Un nuevo candidato quiere unirse al equipo de Corteza
+        
+        <div style="padding:20px 32px; background:#D8F3DC; border-bottom:1px solid #B7E4C7;">
+          <p style="margin:0; color:#1B4332; font-size:14px; font-weight:bold; text-align:center;">
+            📢 ¡Nuevo candidato interesado!
           </p>
         </div>
+
         <div style="padding:32px;">
-          <table style="width:100%; border-collapse:collapse;">
+          <table style="width:100%; border-collapse:collapse; margin-bottom:32px;">
             <tr>
-              <td style="padding:10px 0; font-weight:bold; color:#555; width:120px; vertical-align:top;">Nombre:</td>
-              <td style="padding:10px 0; color:#222;">${nombre}</td>
-            </tr>
-            <tr style="background:#f9f9f9;">
-              <td style="padding:10px 0; font-weight:bold; color:#555; vertical-align:top;">Correo:</td>
-              <td style="padding:10px 0; color:#222;"><a href="mailto:${correo}" style="color:#1B4332;">${correo}</a></td>
+              <td style="padding:12px 0; font-weight:bold; color:#555; width:150px; border-bottom:1px solid #eee;">Nombre completo:</td>
+              <td style="padding:12px 0; color:#1B4332; font-weight:bold; border-bottom:1px solid #eee;">${nombre}</td>
             </tr>
             <tr>
-              <td style="padding:10px 0; font-weight:bold; color:#555; vertical-align:top;">Teléfono:</td>
-              <td style="padding:10px 0; color:#222;"><a href="tel:${telefono}" style="color:#1B4332;">${telefono}</a></td>
-            </tr>
-            <tr style="background:#f9f9f9;">
-              <td style="padding:10px 0; font-weight:bold; color:#555; vertical-align:top;">Área de interés:</td>
-              <td style="padding:10px 0; color:#222;">${asunto}</td>
+              <td style="padding:12px 0; font-weight:bold; color:#555; border-bottom:1px solid #eee;">Cédula:</td>
+              <td style="padding:12px 0; color:#222; border-bottom:1px solid #eee;">${cedula}</td>
             </tr>
             <tr>
-              <td style="padding:10px 0; font-weight:bold; color:#555; vertical-align:top;">Motivación:</td>
-              <td style="padding:10px 0; color:#222; white-space:pre-wrap;">${mensaje}</td>
+              <td style="padding:12px 0; font-weight:bold; color:#555; border-bottom:1px solid #eee;">F. Nacimiento:</td>
+              <td style="padding:12px 0; color:#222; border-bottom:1px solid #eee;">${fechaNacimiento}</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 0; font-weight:bold; color:#555; border-bottom:1px solid #eee;">Edad:</td>
+              <td style="padding:12px 0; color:#222; border-bottom:1px solid #eee;">${edad} años</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 0; font-weight:bold; color:#555; border-bottom:1px solid #eee;">Correo:</td>
+              <td style="padding:12px 0; color:#222; border-bottom:1px solid #eee;">${correo}</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 0; font-weight:bold; color:#555; border-bottom:1px solid #eee;">Teléfono:</td>
+              <td style="padding:12px 0; color:#222; border-bottom:1px solid #eee;">${telefono}</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 0; font-weight:bold; color:#555; border-bottom:1px solid #eee;">Área de interés:</td>
+              <td style="padding:12px 0; color:#1B4332; font-weight:bold; border-bottom:1px solid #eee;">${asunto}</td>
+            </tr>
+            <tr>
+              <td style="padding:12px 0; font-weight:bold; color:#555; vertical-align:top; border-bottom:1px solid #eee;">Motivación:</td>
+              <td style="padding:12px 0; color:#444; white-space:pre-wrap; font-style:italic; border-bottom:1px solid #eee;">"${mensaje}"</td>
             </tr>
           </table>
+
+          <div style="text-align:center; padding-top:10px;">
+            <p style="color:#777; font-size:13px; margin-bottom:20px; font-weight:bold;">ACCIONES RÁPIDAS DE CONTACTO:</p>
+            
+            <div style="margin-bottom:15px;">
+              <a href="mailto:${correo}" style="display:block; background:#2D6A4F; color:#ffffff; padding:14px 20px; text-decoration:none; border-radius:8px; font-weight:bold; margin-bottom:10px;">📧 RESPONDER POR CORREO</a>
+            </div>
+            
+            <div style="margin-bottom:15px;">
+              <a href="tel:${telefono}" style="display:block; background:#40916C; color:#ffffff; padding:14px 20px; text-decoration:none; border-radius:8px; font-weight:bold; margin-bottom:10px;">📞 LLAMAR POR TELÉFONO</a>
+            </div>
+            
+            <div>
+              <a href="${whatsappUrl}" style="display:block; background:#25D366; color:#ffffff; padding:14px 20px; text-decoration:none; border-radius:8px; font-weight:bold;">💬 ENVIAR WHATSAPP</a>
+            </div>
+          </div>
         </div>
-        <div style="background:#f0f0f0; padding:16px 32px; font-size:12px; color:#888; text-align:center;">
-          Este mensaje fue enviado automáticamente desde el formulario de voluntarios de Corteza.
+
+        <div style="background:#f8f9fa; padding:24px; font-size:12px; color:#999; text-align:center; border-top:1px solid #eee;">
+          Este es un mensaje automático del sistema de voluntariado de <strong>Fundación Corteza Terrestre</strong>.<br>
+          © 2026 Armenia, Quindío.
         </div>
       </div>
     </body>
@@ -151,8 +198,8 @@ serve(async (req: Request) => {
 
   // Read environment variables
   const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-  // Default to molarisops@gmail.com if CORTEZA_EMAIL is not set
-  const CORTEZA_EMAIL = Deno.env.get("CORTEZA_EMAIL") || "molarisops@gmail.com";
+  // Default to corteza.terrestreuq@gmail.com if CORTEZA_EMAIL is not set
+  const CORTEZA_EMAIL = Deno.env.get("CORTEZA_EMAIL") || "corteza.terrestreuq@gmail.com";
 
   if (!RESEND_API_KEY) {
     console.error("[volunteer-email] Missing RESEND_API_KEY.");
@@ -178,6 +225,9 @@ serve(async (req: Request) => {
     // Sanitize inputs
     const payload: VolunteerPayload = {
       nombre: sanitize(rawBody.nombre!),
+      cedula: sanitize(rawBody.cedula!),
+      fechaNacimiento: sanitize(rawBody.fechaNacimiento!),
+      edad: sanitize(rawBody.edad!),
       correo: sanitize(rawBody.correo!),
       telefono: sanitize(rawBody.telefono!),
       asunto: sanitize(rawBody.asunto!),
@@ -192,7 +242,7 @@ serve(async (req: Request) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "Corteza Voluntarios <no-reply@tudominio.com>",
+        from: "Corteza Voluntarios <no-reply@cortezaterrestre.org>",
         to: [CORTEZA_EMAIL],
         reply_to: payload.correo,
         subject: `[Voluntario] ${payload.asunto} — ${payload.nombre}`,

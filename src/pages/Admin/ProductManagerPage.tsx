@@ -241,7 +241,7 @@ export default function AdminProductManagerPage() {
       setUploadProgress(100);
       setTimeout(() => {
         closeModal();
-        fetchProducts();
+        // El real-time listener actualizará automáticamente la lista
       }, 500);
 
     } catch (error) {

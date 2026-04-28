@@ -38,6 +38,58 @@ export default function AdminGalleryManagerPage() {
   const [enlargedPreview, setEnlargedPreview] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const dropdownTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const [dropdownRect, setDropdownRect] = useState<{ top: number, left: number, width: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+
+  // Update dropdown position when opened
+  useEffect(() => {
+    if (isCategoryDropdownOpen && dropdownTriggerRef.current) {
+      const rect = dropdownTriggerRef.current.getBoundingClientRect();
+      setDropdownRect({
+        top: rect.bottom,
+        left: rect.left,
+        width: rect.width
+      });
+    }
+  }, [isCategoryDropdownOpen]);
+
+  // Drag and drop handlers
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isUploadModalOpen) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (isUploadModalOpen && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const droppedFiles = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+      if (droppedFiles.length > 0) {
+        processFiles(droppedFiles);
+      }
+    }
+  };
+
+  function processFiles(selectedFiles: File[]) {
+    setUploadFiles(prev => [...prev, ...selectedFiles]);
+    
+    // Generar nuevos previews
+    const newPreviews = selectedFiles.map(file => URL.createObjectURL(file));
+    setUploadPreviews(prev => [...prev, ...newPreviews]);
+  }
 
   // Auto-close notifications
   useEffect(() => {
@@ -113,7 +165,7 @@ export default function AdminGalleryManagerPage() {
                   activa
                 )
               `)
-              .eq('id', (payload.new as any).id)
+              .eq('id', (payload.new as { id: number }).id)
               .maybeSingle();
 
             if (error || !updatedImg) return;
@@ -121,9 +173,9 @@ export default function AdminGalleryManagerPage() {
             setImages((prev) => {
               const exists = prev.some(img => img.id === updatedImg.id);
               if (exists) {
-                return prev.map(img => img.id === updatedImg.id ? (updatedImg as any) : img);
+                return prev.map(img => img.id === updatedImg.id ? (updatedImg as unknown as GalleryImage) : img);
               }
-              return [(updatedImg as any), ...prev].sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
+              return [(updatedImg as unknown as GalleryImage), ...prev].sort((a, b) => new Date(b.fecha).getTime() - new Date(a.fecha).getTime());
             });
           } else if (payload.eventType === 'DELETE') {
             setImages((prev) => prev.filter(img => img.id !== payload.old.id));
@@ -317,7 +369,42 @@ export default function AdminGalleryManagerPage() {
   }
 
   return (
-    <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: 'easeOut' }} className="space-y-8">
+    <motion.div 
+      initial={{ opacity: 0, y: 18 }} 
+      animate={{ opacity: 1, y: 0 }} 
+      transition={{ duration: 0.45, ease: 'easeOut' }} 
+      className="space-y-8"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      {/* Global Drag Overlay */}
+      <AnimatePresence>
+        {isDragging && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[300] flex items-center justify-center bg-primary/40 backdrop-blur-md"
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              className="flex flex-col items-center gap-6 rounded-[40px] border-4 border-dashed border-white bg-primary/20 p-16 text-white"
+            >
+              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-white text-primary shadow-2xl">
+                <ImageUp size={48} className="animate-bounce" />
+              </div>
+              <div className="text-center">
+                <h2 className="text-4xl font-black italic uppercase tracking-tighter">¡Soltá las imágenes!</h2>
+                <p className="mt-2 text-xl font-bold opacity-80">Se añadirán automáticamente a la lista</p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Lightbox for Preview */}
       <AnimatePresence>
         {enlargedPreview && (
@@ -563,20 +650,59 @@ export default function AdminGalleryManagerPage() {
                         />
                       </label>
 
-                      <label className="block">
+                      <div className="relative">
                         <span className="mb-2 flex items-center gap-2 text-xs font-bold text-text-main sm:text-sm"><Tag className="h-4 w-4 text-primary" />Categoría</span>
-                        <select
-                          value={uploadCategoriaId ?? ''}
-                          onChange={(event) => setUploadCategoriaId(Number(event.target.value))}
-                          className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 text-sm outline-none transition focus:border-primary sm:text-base cursor-pointer"
-                        >
-                          {categories.map((category) => (
-                            <option key={category.id} value={category.id}>
-                              {category.nombre}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
+                        <div className="relative">
+                          <button
+                            ref={dropdownTriggerRef}
+                            type="button"
+                            onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                            className="flex w-full items-center justify-between rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 text-sm font-bold text-text-h outline-none transition focus:border-primary sm:text-base cursor-pointer"
+                          >
+                            <span>{categories.find(c => c.id === uploadCategoriaId)?.nombre || 'Seleccionar...'}</span>
+                            <Filter className={`h-4 w-4 text-primary/40 transition-transform ${isCategoryDropdownOpen ? 'rotate-180' : ''}`} />
+                          </button>
+
+                          <AnimatePresence>
+                            {isCategoryDropdownOpen && dropdownRect && (
+                              <>
+                                <div 
+                                  className="fixed inset-0 z-[110]" 
+                                  onClick={() => setIsCategoryDropdownOpen(false)} 
+                                />
+                                <motion.div
+                                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                                  className="fixed z-[120] mt-2 max-h-60 overflow-y-auto rounded-2xl border border-primary/10 bg-white p-2 shadow-2xl custom-scrollbar"
+                                  style={{
+                                    top: dropdownRect.top,
+                                    left: dropdownRect.left,
+                                    width: dropdownRect.width
+                                  }}
+                                >
+                                  {categories.map((category) => (
+                                    <button
+                                      key={category.id}
+                                      type="button"
+                                      onClick={() => {
+                                        setUploadCategoriaId(category.id);
+                                        setIsCategoryDropdownOpen(false);
+                                      }}
+                                      className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-bold transition-all hover:bg-primary/5 ${
+                                        uploadCategoriaId === category.id ? 'bg-primary/10 text-primary' : 'text-text-h'
+                                      }`}
+                                    >
+                                      <div className={`h-2 w-2 rounded-full ${uploadCategoriaId === category.id ? 'bg-primary' : 'bg-primary/20'}`} />
+                                      {category.nombre}
+                                    </button>
+                                  ))}
+                                </motion.div>
+                              </>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      </div>
                     </div>
 
                     <div className="grid gap-4 sm:grid-cols-2">
@@ -593,15 +719,27 @@ export default function AdminGalleryManagerPage() {
 
                       <label className="block">
                         <span className="mb-2 flex items-center gap-2 text-xs font-bold text-text-main sm:text-sm"><ImageUp className="h-4 w-4 text-primary" />Fotos</span>
-                        <input
-                          ref={fileInputRef}
-                          type="file"
-                          accept="image/*"
-                          multiple
-                          onChange={handleUploadFilesChange}
-                          required
-                          className="w-full cursor-pointer rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 text-[11px] text-text-muted outline-none transition file:mr-4 file:cursor-pointer file:rounded-full file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-[10px] file:font-black file:uppercase file:text-white hover:file:opacity-90 sm:text-sm sm:file:px-4 sm:file:py-2 sm:file:text-xs"
-                        />
+                        <div
+                          onClick={() => fileInputRef.current?.click()}
+                          className="group relative flex w-full cursor-pointer flex-col items-center justify-center gap-4 rounded-3xl border-2 border-dashed border-primary/20 bg-neutral-soft/50 p-8 transition-all hover:border-primary/50 hover:bg-white"
+                        >
+                          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110">
+                            <ImageUp size={24} />
+                          </div>
+                          <div className="text-center">
+                            <p className="text-sm font-black uppercase tracking-widest text-primary">Seleccionar o arrastrar imágenes</p>
+                            <p className="mt-1 text-[10px] font-bold text-text-muted opacity-60">Puede subir múltiples archivos a la vez</p>
+                          </div>
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={handleUploadFilesChange}
+                            required
+                            className="hidden"
+                          />
+                        </div>
                       </label>
                     </div>
 
