@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import { PencilLine, RotateCcw, Trash2, CheckCircle2, AlertCircle, X, FolderPlus, Eye, EyeOff } from 'lucide-react';
+import { PencilLine, RotateCcw, Trash2, CheckCircle2, AlertCircle, X, FolderPlus, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { createCategory, listAdminCategories, setCategoryStatus, updateCategory } from '../../lib/adminApi';
 import type { GalleryCategory } from '../../types/gallery';
 
@@ -8,7 +9,7 @@ function getErrorMessage(error: unknown) {
   return error instanceof Error ? error.message : 'No se pudo completar la operación.';
 }
 
-export default function AdminManagementPage() {
+export default function AdminGalleryCategoryManagerPage() {
   const [categories, setCategories] = useState<GalleryCategory[]>([]);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -19,6 +20,7 @@ export default function AdminManagementPage() {
   const [pendingReactivateCategory, setPendingReactivateCategory] = useState<GalleryCategory | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [showInactive, setShowInactive] = useState(false);
+  const navigate = useNavigate();
 
   async function refreshCategories() {
     const data = await listAdminCategories({ includeInactive: true, includeDeleted: true });
@@ -150,22 +152,32 @@ export default function AdminManagementPage() {
         )}
       </AnimatePresence>
 
-      {/* Main Header / Action */}
-      <section className="rounded-[32px] bg-white p-6 shadow-lg shadow-primary/5 sm:p-8">
-        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/60">Configuración</p>
-        <h1 className="mt-2 text-3xl font-black text-text-h">Gestión de Categorías</h1>
-        <p className="mt-3 text-text-muted text-lg">Define la estructura visual de la galería organizando el contenido por temas.</p>
+      <div className="flex flex-col gap-6">
+        <button
+          onClick={() => navigate('/admin/gestion')}
+          className="inline-flex w-fit items-center gap-2 rounded-2xl border border-primary/10 bg-white px-6 py-3 font-black uppercase tracking-widest text-primary shadow-sm transition hover:-translate-y-0.5 cursor-pointer text-xs"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Volver a Gestión
+        </button>
 
-        <div className="mt-8">
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="inline-flex h-16 w-full cursor-pointer items-center justify-center gap-3 rounded-2xl bg-secondary px-8 text-lg font-black text-white transition hover:opacity-90 shadow-lg shadow-secondary/20"
-          >
-            <FolderPlus className="h-6 w-6" />
-            Crear nueva categoría
-          </button>
-        </div>
-      </section>
+        {/* Main Header / Action */}
+        <section className="rounded-[32px] bg-white p-6 shadow-lg shadow-primary/5 sm:p-8">
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/60">Configuración</p>
+          <h1 className="mt-2 text-3xl font-black text-text-h">Gestión de Categorías</h1>
+          <p className="mt-3 text-text-muted text-lg">Define la estructura visual de la galería organizando el contenido por temas.</p>
+
+          <div className="mt-8">
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="inline-flex h-16 w-full cursor-pointer items-center justify-center gap-3 rounded-2xl bg-secondary px-8 text-lg font-black text-white transition hover:opacity-90 shadow-lg shadow-secondary/20"
+            >
+              <FolderPlus className="h-6 w-6" />
+              Crear nueva categoría
+            </button>
+          </div>
+        </section>
+      </div>
 
       {/* List Section */}
       <section className="rounded-[32px] bg-white p-6 shadow-lg shadow-primary/5 sm:p-8">

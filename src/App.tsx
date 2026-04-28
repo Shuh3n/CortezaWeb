@@ -17,10 +17,14 @@ import AdminLayout from './layouts/AdminLayout';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminLoginPage from './pages/Admin/LoginPage';
 import AdminDashboardPage from './pages/Admin/DashboardPage';
-import AdminGalleryPage from './pages/Admin/GalleryPage';
 import AdminProductManagerPage from './pages/Admin/ProductManagerPage';
+import AdminManagementHubPage from './pages/Admin/ManagementHubPage';
+import AdminSpeciesManagerPage from './pages/Admin/SpeciesManagerPage';
+import AdminBreedsManagerPage from './pages/Admin/BreedsManagerPage';
+import AdminGalleryCategoryManagerPage from './pages/Admin/GalleryCategoryManagerPage';
 import Pets from "./pages/Pets";
 import PetManagement from './pages/Admin/PetManagement';
+import AdminGalleryManagerPage from './pages/Admin/GalleryManagerPage';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -129,9 +133,14 @@ function App() {
                 }
               >
                 <Route path="dashboard" element={<AdminDashboardPage />} />
-                <Route path="galeria" element={<AdminGalleryPage />} />
+                <Route path="galeria" element={<AdminGalleryManagerPage />} />
                 <Route path="tienda" element={<AdminProductManagerPage />} />
-                <Route path="gestion" element={<Navigate to="/admin/galeria" replace />} />
+                <Route path="gestion">
+                  <Route index element={<AdminManagementHubPage />} />
+                  <Route path="especies" element={<AdminSpeciesManagerPage />} />
+                  <Route path="razas" element={<AdminBreedsManagerPage />} />
+                  <Route path="categorias" element={<AdminGalleryCategoryManagerPage />} />
+                </Route>
                 <Route path="peludos" element={<PetManagement />} />
               </Route>
 

@@ -31,7 +31,12 @@ export default function SearchableSelect({
     const [search, setSearch] = useState('');
     const dropdownRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLButtonElement>(null);
-    const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({});
+    const inputRef = useRef<HTMLInputElement>(null);
+    const [dropdownStyle, setDropdownStyle] = useState<React.CSSProperties>({
+        position: 'fixed',
+        opacity: 0,
+        pointerEvents: 'none'
+    });
 
     const selectedOption = options.find(opt => opt.id === Number(value));
 
@@ -42,7 +47,6 @@ export default function SearchableSelect({
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-                // Si el click es fuera del disparador también
                 if (triggerRef.current && !triggerRef.current.contains(event.target as Node)) {
                     setIsOpen(false);
                 }
@@ -55,31 +59,43 @@ export default function SearchableSelect({
     useEffect(() => {
         if (isOpen && triggerRef.current) {
             const rect = triggerRef.current.getBoundingClientRect();
-            // Determinamos si hay más espacio arriba o abajo
             const spaceBelow = window.innerHeight - rect.bottom;
             const spaceAbove = rect.top;
             const dropdownHeight = Math.min(filteredOptions.length * 45 + 60, 300);
 
             if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
-                // Abrir hacia arriba
                 setDropdownStyle({
                     position: 'fixed',
                     top: rect.top - 8,
                     left: rect.left,
                     width: rect.width,
                     transform: 'translateY(-100%)',
-                    zIndex: 9999
+                    zIndex: 9999,
+                    opacity: 1,
+                    pointerEvents: 'auto'
                 });
             } else {
-                // Abrir hacia abajo
                 setDropdownStyle({
                     position: 'fixed',
                     top: rect.bottom + 8,
                     left: rect.left,
                     width: rect.width,
-                    zIndex: 9999
+                    zIndex: 9999,
+                    opacity: 1,
+                    pointerEvents: 'auto'
                 });
             }
+
+            // Enfocar el input sin scrollear
+            requestAnimationFrame(() => {
+                inputRef.current?.focus({ preventScroll: true });
+            });
+        } else {
+            setDropdownStyle({
+                position: 'fixed',
+                opacity: 0,
+                pointerEvents: 'none'
+            });
         }
     }, [isOpen, filteredOptions.length]);
 
@@ -131,8 +147,8 @@ export default function SearchableSelect({
                                 <div className="relative flex items-center rounded-xl bg-neutral-soft px-3 py-2 border border-primary/5 focus-within:border-primary/20">
                                     <Search className="h-4 w-4 text-primary/30" />
                                     <input
+                                        ref={inputRef}
                                         type="text"
-                                        autoFocus
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
                                         placeholder="Buscar..."

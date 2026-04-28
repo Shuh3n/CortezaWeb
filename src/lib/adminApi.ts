@@ -336,3 +336,90 @@ export async function deletePhotosByCategory(categoriaId: number) {
 
   return parseResponse(response);
 }
+
+// --- Especies ---
+
+export async function createSpecies(name: string) {
+  const response = await fetchFunctionWithAuth('/manage-especies', 'POST', {
+    contentType: 'application/json',
+    body: JSON.stringify({ nombre: name }),
+  });
+
+  return parseResponse(response);
+}
+
+export async function listAdminSpecies(options?: { includeInactive?: boolean }) {
+  const params = new URLSearchParams({
+    includeInactive: String(options?.includeInactive ?? true),
+  });
+
+  const response = await fetchFunctionWithAuth(`/manage-especies?${params.toString()}`, 'GET', {
+    body: undefined,
+  });
+
+  return parseResponse<any[]>(response);
+}
+
+export async function updateSpecies(id: number, name: string) {
+  const response = await fetchFunctionWithAuth('/manage-especies', 'PATCH', {
+    contentType: 'application/json',
+    body: JSON.stringify({ id, nombre: name }),
+  });
+
+  return parseResponse(response);
+}
+
+export async function setSpeciesStatus(id: number, active: boolean) {
+  const response = await fetchFunctionWithAuth('/manage-especies', 'PATCH', {
+    contentType: 'application/json',
+    body: JSON.stringify({ id, activa: active }),
+  });
+
+  return parseResponse(response);
+}
+
+// --- Razas ---
+
+export async function createBreed(name: string, speciesId: number) {
+  const response = await fetchFunctionWithAuth('/manage-razas', 'POST', {
+    contentType: 'application/json',
+    body: JSON.stringify({ nombre: name, especie_id: speciesId }),
+  });
+
+  return parseResponse(response);
+}
+
+export async function listAdminBreeds(options?: { includeInactive?: boolean; speciesId?: number }) {
+  const params = new URLSearchParams({
+    includeInactive: String(options?.includeInactive ?? true),
+  });
+
+  if (options?.speciesId) {
+    params.set('especieId', String(options.speciesId));
+  }
+
+  const response = await fetchFunctionWithAuth(`/manage-razas?${params.toString()}`, 'GET', {
+    body: undefined,
+  });
+
+  return parseResponse<any[]>(response);
+}
+
+export async function updateBreed(id: number, name: string, speciesId?: number) {
+  const response = await fetchFunctionWithAuth('/manage-razas', 'PATCH', {
+    contentType: 'application/json',
+    body: JSON.stringify({ id, nombre: name, especie_id: speciesId }),
+  });
+
+  return parseResponse(response);
+}
+
+export async function setBreedStatus(id: number, active: boolean) {
+  const response = await fetchFunctionWithAuth('/manage-razas', 'PATCH', {
+    contentType: 'application/json',
+    body: JSON.stringify({ id, activa: active }),
+  });
+
+  return parseResponse(response);
+}
+
