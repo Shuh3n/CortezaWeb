@@ -30,14 +30,14 @@ Deno.serve(async (req) => {
         return jsonResponse(500, { error: "Faltan variables de entorno." });
     }
 
-    // Cliente público (sin autenticación)
     const supabase = createClient(supabaseUrl, anonKey, {
         auth: { persistSession: false, autoRefreshToken: false },
     });
 
     try {
         const reqUrl = new URL(req.url);
-        const especieName = reqUrl.searchParams.get("especie"); // nombre de la especie
+        const especieId = reqUrl.searchParams.get("especie_id"); 
+        const especieName = reqUrl.searchParams.get("especie"); // Retrocompatibilidad
         const search = reqUrl.searchParams.get("search");
         const id = reqUrl.searchParams.get("id");
 
@@ -63,10 +63,9 @@ Deno.serve(async (req) => {
 
         let query = supabase.from("peludos").select(selectQuery).order("id", { ascending: false });
 
-        if (especieName) {
-            // Nota: Podríamos filtrar por especie_id si tuviéramos el ID, 
-            // pero para mantener compatibilidad con la URL actual usamos el JOIN
-            // Esto asume que el nombre de la especie es único
+        if (especieId && !isNaN(Number(especieId))) {
+            query = query.eq("especie_id", Number(especieId));
+        } else if (especieName) {
             const { data: esp } = await supabase.from("especies").select("id").ilike("nombre", especieName).single();
             if (esp) {
                 query = query.eq("especie_id", esp.id);

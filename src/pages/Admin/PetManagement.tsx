@@ -302,7 +302,7 @@ export default function PetManagementPage() {
     }, [feedback]);
 
     const [searchText, setSearchText] = useState('');
-    const [especieFilter, setEspecieFilter] = useState('');
+    const [especieFilter, setEspecieFilter] = useState<string>('');
 
     const [currentPage, setCurrentPage] = useState(1);
     const PETS_PER_PAGE = 12;
@@ -329,13 +329,19 @@ export default function PetManagementPage() {
         return peludos.slice(start, start + PETS_PER_PAGE);
     }, [currentPage, peludos]);
 
-    const createRazas = useMemo(() => 
-        allRazas.filter(r => r.especie_id === Number(createForm.especie_id)), 
-    [allRazas, createForm.especie_id]);
+    const createRazas = useMemo(() => {
+        if (!createForm.especie_id) return [];
+        const filtered = allRazas.filter(r => Number(r.especie_id) === Number(createForm.especie_id));
+        console.log(`🔍 Filtrando razas para especie_id: ${createForm.especie_id}. Encontradas: ${filtered.length}`);
+        return filtered;
+    }, [allRazas, createForm.especie_id]);
 
-    const editRazas = useMemo(() => 
-        allRazas.filter(r => r.especie_id === Number(editForm.especie_id)), 
-    [allRazas, editForm.especie_id]);
+    const editRazas = useMemo(() => {
+        if (!editForm.especie_id) return [];
+        const filtered = allRazas.filter(r => Number(r.especie_id) === Number(editForm.especie_id));
+        console.log(`🔍 Filtrando razas para edición (especie_id: ${editForm.especie_id}). Encontradas: ${filtered.length}`);
+        return filtered;
+    }, [allRazas, editForm.especie_id]);
 
     // ── Fetch ────────────────────────────────────────────────────────────────────
 
@@ -343,7 +349,7 @@ export default function PetManagementPage() {
         setIsLoading(true);
         try {
             const params = new URLSearchParams();
-            if (especieFilter.trim()) params.set('especie', especieFilter.trim());
+            if (especieFilter) params.set('especie_id', especieFilter);
             if (searchText.trim()) params.set('search', searchText.trim());
 
             const [peludosRes, metadataRes] = await Promise.all([
@@ -354,12 +360,15 @@ export default function PetManagementPage() {
             const peludosJson = await peludosRes.json();
             const metadataJson = await metadataRes.json();
 
+            console.log('📊 Metadata cargada:', metadataJson);
+
             if (!peludosRes.ok) throw new Error(peludosJson.error ?? 'Error al cargar peludos.');
             if (!metadataRes.ok) throw new Error(metadataJson.error ?? 'Error al cargar metadatos.');
             
             setPeludos(peludosJson.data ?? []);
             setEspecies(metadataJson.data?.especies ?? []);
             setAllRazas(metadataJson.data?.razas ?? []);
+            console.log('✅ Razas configuradas en estado:', metadataJson.data?.razas?.length);
             setCurrentPage(1);
         } catch (err) {
             setFeedback({ type: 'error', msg: getErrorMessage(err) });
@@ -403,6 +412,11 @@ export default function PetManagementPage() {
             formData.append('edad', createForm.edad);
             formData.append('especie_id', createForm.especie_id);
             formData.append('raza_id', createForm.raza_id);
+            
+            // Sincronizar nombre de especie para compatibilidad
+            const especieName = especies.find(e => e.id === Number(createForm.especie_id))?.nombre || '';
+            formData.append('especie', especieName);
+
             formData.append('caracteristicas', createForm.caracteristicas);
             formData.append('esterilizado', String(createForm.esterilizado));
             formData.append('vacunado', String(createForm.vacunado));
@@ -469,6 +483,11 @@ export default function PetManagementPage() {
             formData.append('edad', editForm.edad);
             formData.append('especie_id', editForm.especie_id);
             formData.append('raza_id', editForm.raza_id);
+            
+            // Sincronizar nombre de especie para compatibilidad
+            const especieName = especies.find(e => e.id === Number(editForm.especie_id))?.nombre || '';
+            formData.append('especie', especieName);
+
             formData.append('caracteristicas', editForm.caracteristicas);
             formData.append('esterilizado', String(editForm.esterilizado));
             formData.append('vacunado', String(editForm.vacunado));
@@ -590,7 +609,7 @@ export default function PetManagementPage() {
                     Registrar nuevo peludo
                 </button>
 
-                <form className="mt-8 grid gap-4 md:grid-cols-[1fr_1fr_auto]" onSubmit={(e) => { e.preventDefault(); fetchData(); }}>
+                <form className="mt-8 grid gap-6 md:grid-cols-[1fr_1fr_auto]" onSubmit={(e) => { e.preventDefault(); fetchData(); }}>
                     <label className="block">
                         <span className="mb-2 block text-xs font-black uppercase tracking-widest text-primary/50">Buscar</span>
                         <div className="flex h-12 items-center gap-3 rounded-2xl border border-primary/10 bg-neutral-soft/50 px-4 focus-within:border-primary focus-within:bg-white transition-all">
@@ -605,20 +624,16 @@ export default function PetManagementPage() {
                         </div>
                     </label>
 
-                    <label className="block">
-                        <span className="mb-2 block text-xs font-black uppercase tracking-widest text-primary/50">Especie</span>
-                        <div className="flex h-12 items-center gap-3 rounded-2xl border border-primary/10 bg-neutral-soft/50 px-4 focus-within:border-primary focus-within:bg-white transition-all">
-                            <Stethoscope className="h-5 w-5 text-primary/30" />
-                            <select
-                                value={especieFilter}
-                                onChange={(e) => setEspecieFilter(e.target.value)}
-                                className="w-full bg-transparent text-sm font-bold text-text-h outline-none cursor-pointer appearance-none"
-                            >
-                                <option value="">Todas las especies</option>
-                                {especies.map(e => <option key={e.id} value={e.nombre}>{e.nombre}</option>)}
-                            </select>
-                        </div>
-                    </label>
+                    <SearchableSelect
+                        label="Filtrar por Especie"
+                        icon={Stethoscope}
+                        options={[{ id: 0, nombre: 'Todas las especies' }, ...especies]}
+                        value={especieFilter}
+                        onChange={(id) => {
+                            setEspecieFilter(id === 0 ? '' : String(id));
+                        }}
+                        placeholder="Todas las especies"
+                    />
 
                     <div className="flex self-end items-center gap-2">
                         <button
