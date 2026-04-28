@@ -163,8 +163,15 @@
       "descripcion": "Our products are customized. Send us a message and we will contact you to coordinate designs and delivery.",
       "nombre": "Your Name",
       "correo": "Email Address",
+      "telefono": "Phone (e.g: 3148114884)",
       "mensaje": "Which product are you interested in?",
-      "boton": "Send Message"
+      "boton": "Send Message",
+      "validacion": "Please fill in all fields",
+      "email_invalido": "Please enter a valid email address",
+      "telefono_invalido": "Please enter a valid phone number (10 digits starting with 3)",
+      "exito": "Message sent! We will contact you soon.",
+      "error": "Error sending message. Please try again.",
+      "enviando": "Sending..."
     },
     "sello": "100% quality materials and social impact"
   },
