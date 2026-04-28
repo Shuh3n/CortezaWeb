@@ -22,7 +22,7 @@ const ActionModal = ({ pet, type, onClose }: ActionModalProps) => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-primary/20 backdrop-blur-sm z-[100]"
+                        className="fixed inset-0 bg-primary/20 backdrop-blur-sm z-[100] cursor-pointer"
                     />
 
                     <div className="fixed inset-0 flex items-center justify-center pointer-events-none z-[101] px-4">
@@ -34,7 +34,7 @@ const ActionModal = ({ pet, type, onClose }: ActionModalProps) => {
                         >
                             <button
                                 onClick={onClose}
-                                className="absolute top-5 right-5 p-2 hover:bg-slate-100 rounded-full transition-colors text-white hover:text-primary z-10"
+                                className="absolute top-5 right-5 p-2 hover:bg-slate-100 rounded-full transition-colors text-white hover:text-primary z-10 cursor-pointer"
                             >
                                 <X size={20} />
                             </button>
@@ -65,13 +65,13 @@ const ActionModal = ({ pet, type, onClose }: ActionModalProps) => {
                                 <div className="flex gap-3 pt-2">
                                     <a
                                         href="/contacto"
-                                        className="flex-1 bg-primary text-white py-3 rounded-2xl font-bold text-sm text-center hover:shadow-lg hover:shadow-primary/20 transition-all"
+                                        className="flex-1 bg-primary text-white py-3 rounded-2xl font-bold text-sm text-center hover:shadow-lg hover:shadow-primary/20 transition-all cursor-pointer"
                                     >
                                         {t('mascotas.modal.btn_contactar')}
                                     </a>
                                     <button
                                         onClick={onClose}
-                                        className="flex-1 border-2 border-slate-200 text-text-muted py-3 rounded-2xl font-bold text-sm hover:border-primary hover:text-primary transition-all"
+                                        className="flex-1 border-2 border-slate-200 text-text-muted py-3 rounded-2xl font-bold text-sm hover:border-primary hover:text-primary transition-all cursor-pointer"
                                     >
                                         {t('mascotas.modal.btn_cerrar')}
                                     </button>

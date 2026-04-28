@@ -59,7 +59,7 @@ const VolunteerAreas = () => {
                       viewport={{ once: true }}
                       transition={{ duration: 0.6, delay: index * 0.1 }}
                       whileHover={{ translateY: -8, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}
-                      className="bg-white rounded-[32px] p-8 border border-slate-100 hover:border-primary/30 transition-all group shadow-sm"
+                      className="bg-white rounded-[32px] p-8 border border-slate-100 hover:border-primary/30 transition-all group shadow-sm cursor-pointer"
                   >
                     <div className={`w-14 h-14 ${currentColor} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg text-white`}>
                       <Icon className="w-7 h-7" />

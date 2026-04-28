@@ -24,7 +24,7 @@ const Footer = () => {
                     href="https://www.instagram.com/corteza_terrestre/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group"
+                    className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group cursor-pointer"
                 >
                   <img
                       src="/icons/instagram.svg"
@@ -36,7 +36,7 @@ const Footer = () => {
                     href="https://www.facebook.com/cortezaterrestre/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group"
+                    className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group cursor-pointer"
                 >
                   <img
                       src="/icons/facebook.svg"
@@ -46,7 +46,7 @@ const Footer = () => {
                 </a>
                 <a
                     href="mailto:fundacioncortezaterrestre@gmail.com"
-                    className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group"
+                    className="w-12 h-12 rounded-full bg-slate-50 flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group cursor-pointer"
                 >
                   <img
                       src="/icons/mail.svg"
@@ -60,21 +60,21 @@ const Footer = () => {
             <div>
               <h4 className="font-bold text-text-h mb-6 uppercase text-sm tracking-widest">{t('footer.navegacion.titulo')}</h4>
               <ul className="space-y-4 text-text-muted font-medium">
-                <li><Link to="/" className="hover:text-primary transition-colors">{t('footer.navegacion.inicio')}</Link></li>
-                <li><Link to="/#adopcion" className="hover:text-primary transition-colors">{t('footer.navegacion.adopcion')}</Link></li>
-                <li><Link to="/tienda" className="hover:text-primary transition-colors">{t('footer.navegacion.tienda')}</Link></li>
-                <li><Link to="/nosotros" className="hover:text-primary transition-colors">{t('footer.navegacion.nosotros')}</Link></li>
-                <li><Link to="/contacto" className="hover:text-primary transition-colors">{t('footer.navegacion.contacto')}</Link></li>
-                <li><Link to="/dian" className="hover:text-primary transition-colors">{t('footer.navegacion.dian')}</Link></li>
+                <li><Link to="/" className="hover:text-primary transition-colors cursor-pointer">{t('footer.navegacion.inicio')}</Link></li>
+                <li><Link to="/#adopcion" className="hover:text-primary transition-colors cursor-pointer">{t('footer.navegacion.adopcion')}</Link></li>
+                <li><Link to="/tienda" className="hover:text-primary transition-colors cursor-pointer">{t('footer.navegacion.tienda')}</Link></li>
+                <li><Link to="/nosotros" className="hover:text-primary transition-colors cursor-pointer">{t('footer.navegacion.nosotros')}</Link></li>
+                <li><Link to="/contacto" className="hover:text-primary transition-colors cursor-pointer">{t('footer.navegacion.contacto')}</Link></li>
+                <li><Link to="/dian" className="hover:text-primary transition-colors cursor-pointer">{t('footer.navegacion.dian')}</Link></li>
               </ul>
             </div>
 
             <div>
               <h4 className="font-bold text-text-h mb-6 uppercase text-sm tracking-widest">{t('footer.involucrate.titulo')}</h4>
               <ul className="space-y-4 text-text-muted font-medium">
-                <li><Link to="/salvaton" className="hover:text-primary transition-colors">{t('footer.involucrate.salvaton')}</Link></li>
-                <li><Link to="/voluntario" className="hover:text-primary transition-colors">{t('footer.involucrate.voluntario')}</Link></li>
-                <li><Link to="/adoptar" className="hover:text-primary transition-colors">{t('footer.involucrate.apadrinar')}</Link></li>
+                <li><Link to="/salvaton" className="hover:text-primary transition-colors cursor-pointer">{t('footer.involucrate.salvaton')}</Link></li>
+                <li><Link to="/voluntario" className="hover:text-primary transition-colors cursor-pointer">{t('footer.involucrate.voluntario')}</Link></li>
+                <li><Link to="/adoptar" className="hover:text-primary transition-colors cursor-pointer">{t('footer.involucrate.apadrinar')}</Link></li>
               </ul>
             </div>
           </div>
@@ -84,7 +84,7 @@ const Footer = () => {
               <p className="text-text-muted text-sm font-medium">
                 {t('footer.copyright')}
               </p>
-              <Link to="/politica-privacidad" className="text-sm text-text-muted hover:text-primary transition-colors">
+              <Link to="/politica-privacidad" className="text-sm text-text-muted hover:text-primary transition-colors cursor-pointer">
                 {t('footer.privacidad')}
               </Link>
             </div>
@@ -94,7 +94,7 @@ const Footer = () => {
                   href="https://github.com/Shuh3n/CortezaWeb"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 hover:text-primary transition-colors"
+                  className="inline-flex items-center gap-2 hover:text-primary transition-colors cursor-pointer"
               >
                 <svg
                     viewBox="0 0 24 24"

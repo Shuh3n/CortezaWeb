@@ -39,7 +39,7 @@ const Mission = () => {
                 <p>{t('about.mission.p2')}</p>
                 <p>
                   {t('about.mission.p3_start')}
-                  <a href="/" className="text-primary font-semibold hover:underline">{t('about.mission.p3_link')}</a>
+                  <a href="/" className="text-primary font-semibold hover:underline cursor-pointer">{t('about.mission.p3_link')}</a>
                   {t('about.mission.p3_end')}
                 </p>
               </div>

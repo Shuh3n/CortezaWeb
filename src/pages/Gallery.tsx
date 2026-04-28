@@ -129,7 +129,7 @@ export default function PublicGalleryPage() {
                 ) : (
                     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                       {summary.map((item, index) => (
-                          <motion.article key={item.category.id} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05, duration: 0.35, ease: 'easeOut' }} className="overflow-hidden rounded-[32px] bg-white shadow-lg shadow-primary/5 transition hover:-translate-y-1">
+                          <motion.article key={item.category.id} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.05, duration: 0.35, ease: 'easeOut' }} className="overflow-hidden rounded-[32px] bg-white shadow-lg shadow-primary/5 transition hover:-translate-y-1 cursor-pointer">
                             <Link to={`/galeria/${item.category.slug}`} className="block">
                               <div className="relative h-52 w-full overflow-hidden bg-primary/10">
                                 {item.cover ? <img src={item.cover} alt={item.category.nombre} className="h-full w-full object-cover transition duration-500 hover:scale-105" /> : <div className="flex h-full items-center justify-center text-primary"><Images className="h-10 w-10" /></div>}

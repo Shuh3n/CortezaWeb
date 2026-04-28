@@ -55,7 +55,7 @@ const Testimonials = () => {
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={prev}
-                  className="bg-primary text-white p-3 rounded-full hover:bg-opacity-90 transition-all shadow-lg shadow-primary/20"
+                  className="bg-primary text-white p-3 rounded-full hover:bg-opacity-90 transition-all shadow-lg shadow-primary/20 cursor-pointer"
               >
                 <ChevronLeft className="w-6 h-6" />
               </motion.button>
@@ -66,7 +66,7 @@ const Testimonials = () => {
                         key={index}
                         whileHover={{ scale: 1.2 }}
                         onClick={() => setCurrentIndex(index)}
-                        className={`rounded-full transition-all ${
+                        className={`rounded-full transition-all cursor-pointer ${
                             index === currentIndex
                                 ? 'bg-primary w-3 h-3'
                                 : 'bg-text-muted/30 w-2 h-2 hover:bg-text-muted/50'
@@ -79,7 +79,7 @@ const Testimonials = () => {
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={next}
-                  className="bg-primary text-white p-3 rounded-full hover:bg-opacity-90 transition-all shadow-lg shadow-primary/20"
+                  className="bg-primary text-white p-3 rounded-full hover:bg-opacity-90 transition-all shadow-lg shadow-primary/20 cursor-pointer"
               >
                 <ChevronRight className="w-6 h-6" />
               </motion.button>

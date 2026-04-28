@@ -11,8 +11,15 @@ This registry tracks available skills and project standards.
 | `issue-creation` | When creating a GitHub issue, reporting a bug, or requesting a feature. | C:\Users\Jhony\.gemini\antigravity\skills\issue-creation\SKILL.md |
 | `judgment-day` | When user says "judgment day", "judgment-day", "review adversarial", "dual review", "doble review", "juzgar", "que lo juzguen". | C:\Users\Jhony\.gemini\antigravity\skills\judgment-day\SKILL.md |
 | `skill-creator` | When user asks to create a new skill, add agent instructions, or document patterns for AI. | C:\Users\Jhony\.gemini\antigravity\skills\skill-creator\SKILL.md |
+| `cortezaweb-ui` | When modifying UI components, buttons, forms, or layouts. | .gemini\antigravity\skills\cortezaweb-ui\SKILL.md |
 
 ## Compact Rules
+
+### cortezaweb-ui
+- Every button, link, and interactive card MUST have the `cursor-pointer` class.
+- Avoid redundant forms if direct WhatsApp contact is available.
+- Use rounded-2xl or rounded-[24px] for buttons.
+- Match primary and accent color conventions.
 
 ### branch-pr
 - Every PR MUST link an approved issue.

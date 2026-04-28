@@ -179,7 +179,7 @@ const SalvatoreStore = () => {
                     }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-bold transition-all duration-300 shadow-lg ${activeTab === cat.id
+                    className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-bold transition-all duration-300 shadow-lg cursor-pointer ${activeTab === cat.id
                         ? 'bg-primary text-white shadow-primary/20 ring-4 ring-primary/10'
                         : 'bg-white text-text-muted hover:bg-neutral-soft shadow-sm border border-slate-100'
                     }`}
@@ -269,7 +269,7 @@ const SalvatoreStore = () => {
                                 </p>
                                 <button
                                     disabled={product.stock === 0}
-                                    className={`w-full mt-auto py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 border ${product.stock > 0
+                                    className={`w-full mt-auto py-4 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 border cursor-pointer ${product.stock > 0
                                         ? 'bg-neutral-soft text-primary hover:bg-primary hover:text-white border-primary/10'
                                         : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
                                     }`}
@@ -297,7 +297,7 @@ const SalvatoreStore = () => {
                   <button
                       onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
-                      className="p-3 rounded-2xl bg-white border border-slate-200 text-text-h disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-soft hover:border-primary/20 transition-all shadow-sm"
+                      className="p-3 rounded-2xl bg-white border border-slate-200 text-text-h disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-soft hover:border-primary/20 transition-all shadow-sm cursor-pointer"
                   >
                     <ChevronLeft size={20} />
                   </button>
@@ -311,8 +311,8 @@ const SalvatoreStore = () => {
                             className={`w-12 h-12 rounded-2xl font-bold transition-all shadow-sm ${page === '...'
                                 ? 'bg-transparent text-text-muted border-none cursor-default shadow-none w-8'
                                 : currentPage === page
-                                    ? 'bg-primary text-white shadow-primary/20 ring-4 ring-primary/10'
-                                    : 'bg-white text-text-muted border border-slate-200 hover:bg-neutral-soft hover:border-primary/20'
+                                    ? 'bg-primary text-white shadow-primary/20 ring-4 ring-primary/10 cursor-pointer'
+                                    : 'bg-white text-text-muted border border-slate-200 hover:bg-neutral-soft hover:border-primary/20 cursor-pointer'
                             }`}
                         >
                           {page}
@@ -323,7 +323,7 @@ const SalvatoreStore = () => {
                   <button
                       onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                       disabled={currentPage === totalPages}
-                      className="p-3 rounded-2xl bg-white border border-slate-200 text-text-h disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-soft hover:border-primary/20 transition-all shadow-sm"
+                      className="p-3 rounded-2xl bg-white border border-slate-200 text-text-h disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-soft hover:border-primary/20 transition-all shadow-sm cursor-pointer"
                   >
                     <ChevronRight size={20} />
                   </button>
@@ -339,7 +339,7 @@ const SalvatoreStore = () => {
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       onClick={() => setSelectedProduct(null)}
-                      className="absolute inset-0 bg-black/40 backdrop-blur-md"
+                      className="absolute inset-0 bg-black/40 backdrop-blur-md cursor-pointer"
                   />
 
                   <motion.div
@@ -351,7 +351,7 @@ const SalvatoreStore = () => {
                   >
                     <button
                         onClick={() => setSelectedProduct(null)}
-                        className="absolute top-6 right-6 z-20 bg-black/10 hover:bg-black/20 text-text-h p-2 rounded-full transition-all"
+                        className="absolute top-6 right-6 z-20 bg-black/10 hover:bg-black/20 text-text-h p-2 rounded-full transition-all cursor-pointer"
                     >
                       <X size={20} />
                     </button>
@@ -412,7 +412,7 @@ const SalvatoreStore = () => {
                               window.open(`https://wa.me/573148114884?text=${message}`, '_blank');
                             }}
                             className={`w-full py-5 rounded-[24px] font-bold text-lg transition-all flex items-center justify-center gap-3 shadow-xl ${selectedProduct.stock > 0
-                                ? 'bg-primary text-white shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1'
+                                ? 'bg-primary text-white shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 cursor-pointer'
                                 : 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
                             }`}
                         >
@@ -515,7 +515,7 @@ const SalvatoreStore = () => {
             )}
           </AnimatePresence>
 
-          <div className="mt-24 grid lg:grid-cols-2 gap-8">
+          <div className="mt-24 grid lg:grid-cols-1 gap-8">
             <div className="bg-primary rounded-[48px] p-12 text-white relative overflow-hidden shadow-2xl shadow-primary/30">
               <div className="relative z-10">
                 <span className="inline-block px-4 py-1 bg-white/10 rounded-full text-xs font-bold mb-4 uppercase tracking-widest">{t('tienda.banner.etiqueta')}</span>
@@ -523,32 +523,8 @@ const SalvatoreStore = () => {
                 <p className="text-primary-foreground/90 text-lg leading-relaxed mb-10">
                   {t('tienda.banner.descripcion')}
                 </p>
-                <div className="flex flex-wrap gap-4">
-                  <div className="bg-primary-dark/30 backdrop-blur-sm border border-white/10 rounded-2xl p-4 flex items-center gap-4">
-                    <div className="h-10 w-10 bg-white/20 rounded-full flex items-center justify-center font-bold">D</div>
-                    <div>
-                      <p className="text-xs opacity-70">Nequi / Daviplata</p>
-                      <p className="font-bold">314 811 48 84</p>
-                    </div>
-                  </div>
-                </div>
               </div>
               <PawIcon className="absolute -bottom-12 -right-12 w-64 h-64 text-white/5 rotate-12" />
-            </div>
-
-            <div className="bg-white rounded-[48px] p-12 border border-slate-100 shadow-xl relative overflow-hidden group">
-              <h3 className="text-3xl font-bold text-text-h mb-6">{t('tienda.formulario.titulo')}</h3>
-              <p className="text-text-muted text-lg mb-10 leading-relaxed">
-                {t('tienda.formulario.descripcion')}
-              </p>
-              <form className="space-y-4">
-                <input type="text" placeholder={t('tienda.formulario.nombre')} className="w-full bg-neutral-soft border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-primary/20 outline-none transition-all" />
-                <input type="email" placeholder={t('tienda.formulario.correo')} className="w-full bg-neutral-soft border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-primary/20 outline-none transition-all" />
-                <textarea placeholder={t('tienda.formulario.mensaje')} rows={3} className="w-full bg-neutral-soft border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-primary/20 outline-none resize-none transition-all"></textarea>
-                <button className="w-full bg-primary text-white py-5 rounded-[24px] font-bold text-lg shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all flex items-center justify-center gap-3">
-                  {t('tienda.formulario.boton')} <Send size={20} />
-                </button>
-              </form>
             </div>
           </div>
 

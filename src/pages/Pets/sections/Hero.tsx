@@ -70,7 +70,7 @@ const Hero = ({ search, setSearch, species, setSpecies, total, loading }: HeroPr
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
                             onClick={() => setShowFilters(!showFilters)}
-                            className={`px-5 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-lg ${
+                            className={`px-5 rounded-2xl font-bold flex items-center gap-2 transition-all shadow-lg cursor-pointer ${
                                 showFilters
                                     ? 'bg-white text-primary'
                                     : 'bg-white/20 text-white border border-white/30 hover:bg-white/30'
@@ -95,7 +95,7 @@ const Hero = ({ search, setSearch, species, setSpecies, total, loading }: HeroPr
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={() => setSpecies(f.value)}
-                                className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 ${
+                                className={`px-4 py-2 rounded-full text-sm font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                                     species === f.value
                                         ? 'bg-primary text-white shadow-md shadow-primary/20'
                                         : 'bg-slate-100 text-text-muted hover:bg-primary/10 hover:text-primary'

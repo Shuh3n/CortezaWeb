@@ -110,7 +110,7 @@ const Navbar = () => {
               <div className="relative ml-2" ref={langMenuRef}>
                 <button
                     onClick={() => setIsLangOpen(!isLangOpen)}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 bg-white/50 hover:bg-white transition-all font-bold text-sm text-text-muted hover:text-primary"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 bg-white/50 hover:bg-white transition-all font-bold text-sm text-text-muted hover:text-primary cursor-pointer"
                 >
                   <img
                       src={currentLanguage.flagUrl}
@@ -133,7 +133,7 @@ const Navbar = () => {
                             <button
                                 key={lang.code}
                                 onClick={() => toggleLanguage(lang.code)}
-                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors ${
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold transition-colors cursor-pointer ${
                                     i18n.language.startsWith(lang.code)
                                         ? 'bg-primary/5 text-primary'
                                         : 'text-text-muted hover:bg-slate-50 hover:text-primary'
@@ -202,7 +202,7 @@ const Navbar = () => {
                           <button
                               key={lang.code}
                               onClick={() => { toggleLanguage(lang.code); setIsOpen(false); }}
-                              className={`flex items-center justify-center gap-2 p-3 rounded-2xl border-2 transition-all font-bold ${
+                              className={`flex items-center justify-center gap-2 p-3 rounded-2xl border-2 transition-all font-bold cursor-pointer ${
                                   i18n.language.startsWith(lang.code)
                                       ? 'border-primary bg-primary/5 text-primary'
                                       : 'border-slate-100 text-text-muted'

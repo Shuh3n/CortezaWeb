@@ -223,7 +223,7 @@ const PetCard = ({ pet, onAdopt, onSponsor }: PetCardProps) => {
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
                         onClick={() => onAdopt(pet)}
-                        className="flex-1 bg-primary text-white py-3 rounded-2xl font-bold text-sm hover:shadow-lg hover:shadow-primary/20 transition-all"
+                        className="flex-1 bg-primary text-white py-3 rounded-2xl font-bold text-sm hover:shadow-lg hover:shadow-primary/20 transition-all cursor-pointer"
                     >
                         Adoptar
                     </motion.button>
@@ -231,7 +231,7 @@ const PetCard = ({ pet, onAdopt, onSponsor }: PetCardProps) => {
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
                         onClick={() => onSponsor(pet)}
-                        className="flex-1 bg-white text-primary border-2 border-primary py-3 rounded-2xl font-bold text-sm hover:bg-primary/5 transition-all flex items-center justify-center gap-1.5"
+                        className="flex-1 bg-white text-primary border-2 border-primary py-3 rounded-2xl font-bold text-sm hover:bg-primary/5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                         <Heart size={14} />
                         Apadrinar

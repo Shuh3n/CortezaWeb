@@ -62,7 +62,7 @@ const Hero = () => {
                   <motion.button
                     whileHover={{ scale: 1.05, translateY: -4 }}
                     whileTap={{ scale: 0.95 }}
-                    className="w-full flex items-center justify-center gap-2 bg-primary text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-primary/20 group transition-shadow hover:shadow-primary/40"
+                    className="w-full flex items-center justify-center gap-2 bg-primary text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-primary/20 group transition-shadow hover:shadow-primary/40 cursor-pointer"
                   >
                     <ShoppingBag className="w-5 h-5 transition-transform group-hover:scale-110" />
                     {t('hero.botones.comprar')}
@@ -72,7 +72,7 @@ const Hero = () => {
                 <motion.button
                   whileHover={{ scale: 1.05, translateY: -4 }}
                   whileTap={{ scale: 0.95 }}
-                  className="flex items-center justify-center gap-2 bg-secondary text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-secondary/20 group transition-shadow hover:shadow-secondary/40"
+                  className="flex items-center justify-center gap-2 bg-secondary text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-secondary/20 group transition-shadow hover:shadow-secondary/40 cursor-pointer"
                 >
                   <Heart className="w-5 h-5 transition-transform group-hover:scale-110" />
                   {t('hero.botones.apadrinar')}
@@ -82,7 +82,7 @@ const Hero = () => {
                   whileHover={{ scale: 1.05, translateY: -4 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={openDonationModal}
-                  className="flex items-center justify-center gap-2 bg-accent text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-accent/20 group transition-shadow hover:shadow-accent/40"
+                  className="flex items-center justify-center gap-2 bg-accent text-white px-8 py-4 rounded-2xl font-bold text-lg shadow-lg shadow-accent/20 group transition-shadow hover:shadow-accent/40 cursor-pointer"
                 >
                   <HandHelping className="w-5 h-5 transition-transform group-hover:scale-110" />
                   {t('hero.botones.donar')}
