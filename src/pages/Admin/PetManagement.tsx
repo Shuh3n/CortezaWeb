@@ -244,7 +244,7 @@ function PeludoFormFields({
                             { key: 'vacunado', label: 'Vacunado', short: 'Vac.', Icon: Syringe },
                             { key: 'desparasitado', label: 'Desparasitado', short: 'Des.', Icon: Bug },
                         ] as const
-                    ).map(({ key, label, short, Icon }) => (
+                    ).map(({ key, short, Icon }) => (
                         <button
                             key={key}
                             type="button"
