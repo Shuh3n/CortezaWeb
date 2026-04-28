@@ -163,8 +163,15 @@
       "descripcion": "Nuestros productos son personalizados. Envíanos un mensaje y nos pondremos en contacto para coordinar los diseños y la entrega.",
       "nombre": "Tu Nombre",
       "correo": "Correo Electrónico",
+      "telefono": "Teléfono (ej: 3148114884)",
       "mensaje": "¿Qué producto te interesa?",
-      "boton": "Enviar Mensaje"
+      "boton": "Enviar Mensaje",
+      "validacion": "Por favor completa todos los campos",
+      "email_invalido": "Por favor ingresa un correo válido",
+      "telefono_invalido": "Por favor ingresa un teléfono válido (10 dígitos comenzando con 3)",
+      "exito": "¡Mensaje enviado! Nos pondremos en contacto pronto.",
+      "error": "Error al enviar el mensaje. Intenta de nuevo.",
+      "enviando": "Enviando..."
     },
     "sello": "100% materiales de calidad y sentido social"
   },

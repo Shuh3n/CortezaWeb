@@ -49,6 +49,11 @@ const SalvatoreStore = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 3;
 
+  // Form states
+  const [formData, setFormData] = useState({ name: '', email: '', message: '', phone: '' });
+  const [isSubmittingForm, setIsSubmittingForm] = useState(false);
+  const [formFeedback, setFormFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
+
   const categories = [
     { id: 'mugs', name: t('tienda.categorias.mugs'), icon: Coffee },
     { id: 'termos', name: t('tienda.categorias.termos'), icon: Thermometer },
@@ -102,6 +107,55 @@ const SalvatoreStore = () => {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim() || !formData.phone.trim()) {
+      setFormFeedback({ type: 'error', msg: t('tienda.formulario.validacion') });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setFormFeedback({ type: 'error', msg: t('tienda.formulario.email_invalido') });
+      return;
+    }
+
+    const phoneRegex = /^3\d{9}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      setFormFeedback({ type: 'error', msg: t('tienda.formulario.telefono_invalido') });
+      return;
+    }
+
+    setIsSubmittingForm(true);
+    setFormFeedback(null);
+
+    try {
+      const functionsBaseUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
+      const response = await fetch(`${functionsBaseUrl}/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombre: formData.name.trim(),
+          correo: formData.email.trim(),
+          telefono: formData.phone.trim(),
+          asunto: 'Pedido desde Tienda Salvatore',
+          mensaje: formData.message.trim(),
+        }),
+      });
+
+      if (!response.ok) throw new Error('Error al enviar');
+
+      setFormFeedback({ type: 'success', msg: t('tienda.formulario.exito') });
+      setFormData({ name: '', email: '', message: '', phone: '' });
+    } catch (error) {
+      console.error('Error:', error);
+      setFormFeedback({ type: 'error', msg: t('tienda.formulario.error') });
+    } finally {
+      setIsSubmittingForm(false);
+    }
+  };
 
   const groupedProducts = useMemo(() => {
     return products.reduce((acc, product) => {
@@ -541,14 +595,57 @@ const SalvatoreStore = () => {
               <p className="text-text-muted text-lg mb-10 leading-relaxed">
                 {t('tienda.formulario.descripcion')}
               </p>
-              <form className="space-y-4">
-                <input type="text" placeholder={t('tienda.formulario.nombre')} className="w-full bg-neutral-soft border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-primary/20 outline-none transition-all" />
-                <input type="email" placeholder={t('tienda.formulario.correo')} className="w-full bg-neutral-soft border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-primary/20 outline-none transition-all" />
-                <textarea placeholder={t('tienda.formulario.mensaje')} rows={3} className="w-full bg-neutral-soft border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-primary/20 outline-none resize-none transition-all"></textarea>
-                <button className="w-full bg-primary text-white py-5 rounded-[24px] font-bold text-lg shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all flex items-center justify-center gap-3">
-                  {t('tienda.formulario.boton')} <Send size={20} />
+              <form onSubmit={handleFormSubmit} className="space-y-4">
+                <input 
+                  type="text" 
+                  placeholder={t('tienda.formulario.nombre')} 
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  disabled={isSubmittingForm}
+                  className="w-full bg-neutral-soft border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-primary/20 outline-none transition-all disabled:opacity-50" 
+                />
+                <input 
+                  type="email" 
+                  placeholder={t('tienda.formulario.correo')} 
+                  value={formData.email}
+                  onChange={(e) => setFormData({...formData, email: e.target.value})}
+                  disabled={isSubmittingForm}
+                  className="w-full bg-neutral-soft border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-primary/20 outline-none transition-all disabled:opacity-50" 
+                />
+                <textarea 
+                  placeholder={t('tienda.formulario.mensaje')} 
+                  rows={3} 
+                  value={formData.message}
+                  onChange={(e) => setFormData({...formData, message: e.target.value})}
+                  disabled={isSubmittingForm}
+                  className="w-full bg-neutral-soft border-none rounded-2xl px-6 py-4 focus:ring-2 focus:ring-primary/20 outline-none resize-none transition-all disabled:opacity-50"
+                />
+                <button 
+                  type="submit"
+                  disabled={isSubmittingForm}
+                  className="w-full bg-primary text-white py-5 rounded-[24px] font-bold text-lg shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmittingForm ? <Loader2 size={20} className="animate-spin" /> : <Send size={20} />}
+                  {isSubmittingForm ? t('tienda.formulario.enviando') : t('tienda.formulario.boton')}
                 </button>
               </form>
+              
+              <AnimatePresence>
+                {formFeedback && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className={`mt-4 p-4 rounded-2xl text-sm font-bold ${
+                      formFeedback.type === 'success'
+                        ? 'bg-emerald-50 text-emerald-700 border border-emerald-100'
+                        : 'bg-red-50 text-red-700 border border-red-100'
+                    }`}
+                  >
+                    {formFeedback.msg}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 
