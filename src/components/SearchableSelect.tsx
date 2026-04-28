@@ -152,7 +152,7 @@ export default function SearchableSelect({
                                                 setIsOpen(false);
                                                 setSearch('');
                                             }}
-                                            className={`flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-left text-sm font-bold transition hover:bg-primary/5 ${
+                                            className={`flex w-full items-center justify-between rounded-xl px-4 py-2.5 text-left text-sm font-bold transition hover:bg-primary/5 cursor-pointer ${
                                                 Number(value) === opt.id ? 'bg-primary/10 text-primary' : 'text-text-h'
                                             }`}
                                         >

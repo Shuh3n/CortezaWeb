@@ -80,14 +80,14 @@ export default function AdminDashboardPage() {
           <div className="flex gap-4">
             <button
               onClick={() => navigate('/admin/galeria')}
-              className="h-14 px-8 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 font-black text-sm uppercase tracking-widest hover:bg-white/20 transition-all flex items-center gap-3"
+              className="h-14 px-8 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 font-black text-sm uppercase tracking-widest hover:bg-white/20 transition-all flex items-center gap-3 cursor-pointer"
             >
               Galería
               <ImagePlus size={18} />
             </button>
             <button
               onClick={() => navigate('/admin/tienda')}
-              className="h-14 px-8 rounded-2xl bg-white shadow-xl shadow-black/20 font-black text-sm uppercase tracking-widest text-primary hover:scale-[1.03] transition-all flex items-center gap-3"
+              className="h-14 px-8 rounded-2xl bg-white shadow-xl shadow-black/20 font-black text-sm uppercase tracking-widest text-primary hover:scale-[1.03] transition-all flex items-center gap-3 cursor-pointer"
             >
               Tienda
               <ShoppingBag size={18} />

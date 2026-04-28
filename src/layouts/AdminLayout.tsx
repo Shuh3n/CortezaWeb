@@ -309,7 +309,7 @@ export default function AdminLayout() {
                 <button
                   type="button"
                   onClick={() => setShowInstallGuide(false)}
-                  className="rounded-xl bg-primary px-4 py-2 font-semibold text-white transition hover:opacity-90"
+                  className="rounded-xl bg-primary px-4 py-2 font-semibold text-white transition hover:opacity-90 cursor-pointer"
                 >
                   Entendido
                 </button>
@@ -323,7 +323,7 @@ export default function AdminLayout() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             type="button"
-            className="fixed inset-0 z-30 bg-slate-950/40 lg:hidden"
+            className="fixed inset-0 z-30 bg-slate-950/40 lg:hidden cursor-pointer"
             onClick={() => setIsSidebarOpen(false)}
             aria-label="Cerrar menú lateral"
           />

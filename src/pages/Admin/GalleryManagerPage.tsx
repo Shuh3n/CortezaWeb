@@ -39,7 +39,7 @@ const GalleryImageCard = memo(({
       <button
         type="button"
         onClick={() => onToggleSelect(image.id)}
-        className={`absolute left-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-xl border transition-all duration-300 ${
+        className={`absolute left-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-xl border transition-all duration-300 cursor-pointer ${
           isSelected 
             ? 'bg-primary border-primary text-white shadow-lg' 
             : 'bg-white/80 border-primary/20 text-primary opacity-0 group-hover:opacity-100 hover:scale-110'
@@ -110,7 +110,7 @@ function BulkDeleteModal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         onClick={onClose}
-        className="fixed inset-0 z-[100] bg-red-950/20 backdrop-blur-sm"
+        className="fixed inset-0 z-[100] bg-red-950/20 backdrop-blur-sm cursor-pointer"
       />
 
       <div className="pointer-events-none fixed inset-0 z-[101] flex items-center justify-center p-2 sm:p-4">
@@ -588,7 +588,7 @@ export default function AdminGalleryManagerPage() {
           <motion.div initial={{ opacity: 0, x: 20, scale: 0.9 }} animate={{ opacity: 1, x: 0, scale: 1 }} exit={{ opacity: 0, x: 20, scale: 0.9, transition: { duration: 0.2 } }} className={`fixed top-6 right-6 z-[200] flex items-center gap-4 px-6 py-4 rounded-2xl shadow-2xl border backdrop-blur-md ${feedback.type === 'success' ? 'bg-emerald-50/90 border-emerald-100 text-emerald-800' : 'bg-red-50/90 border-red-100 text-red-800'}`}>
             <div className={`p-2 rounded-xl ${feedback.type === 'success' ? 'bg-emerald-100' : 'bg-red-100'}`}>{feedback.type === 'success' ? <CheckCircle2 size={24} /> : <AlertCircle size={24} />}</div>
             <div className="flex flex-col"><p className="font-black text-sm uppercase tracking-widest leading-none mb-1">{feedback.type === 'success' ? 'Éxito' : 'Error'}</p><p className="text-sm font-bold opacity-80">{feedback.msg}</p></div>
-            <button onClick={() => setFeedback(null)} className="ml-4 opacity-40 hover:opacity-100 transition-opacity"><X size={20} /></button>
+            <button onClick={() => setFeedback(null)} className="ml-4 opacity-40 hover:opacity-100 transition-opacity cursor-pointer"><X size={20} /></button>
           </motion.div>
         )}
       </AnimatePresence>

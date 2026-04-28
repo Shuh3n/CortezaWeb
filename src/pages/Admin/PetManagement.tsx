@@ -639,7 +639,7 @@ export default function PetManagementPage() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="flex-1 inline-flex h-12 items-center justify-center rounded-2xl bg-primary px-8 font-black text-[11px] uppercase tracking-widest text-white shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
+                            className="flex-1 inline-flex h-12 items-center justify-center rounded-2xl bg-primary px-8 font-black text-[11px] uppercase tracking-widest text-white shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
                         >
                             Filtrar
                         </button>

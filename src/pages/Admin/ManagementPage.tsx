@@ -358,7 +358,7 @@ export default function AdminManagementPage() {
         {/* Reactivate Confirmation */}
         {pendingReactivateCategory && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setPendingReactivateCategory(null)} className="fixed inset-0 z-[100] bg-emerald-950/20 backdrop-blur-sm" />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setPendingReactivateCategory(null)} className="fixed inset-0 z-[100] bg-emerald-950/20 backdrop-blur-sm cursor-pointer" />
             <div className="pointer-events-none fixed inset-0 z-[101] flex items-center justify-center px-4">
               <motion.div initial={{ opacity: 0, scale: 0.95, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 16 }} className="pointer-events-auto w-full max-w-xl rounded-[32px] bg-white p-6 shadow-2xl sm:p-10">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 mb-6">
