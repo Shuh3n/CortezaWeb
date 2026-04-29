@@ -16,27 +16,21 @@ function jsonResponse(status: number, payload: unknown) {
   });
 }
 
-function getEnvironment() {
-  const url = Deno.env.get("SUPABASE_URL");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-
-  if (!url || !serviceRoleKey) {
-    throw new Error("Faltan variables SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY.");
-  }
-
-  return { url, serviceRoleKey };
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { url, serviceRoleKey } = getEnvironment();
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+    if (!supabaseUrl || !supabaseServiceRoleKey) {
+      throw new Error("Faltan variables de entorno esenciales (URL o Service Role Key).");
+    }
     
-    // Omitimos validación JWT por requerimiento del usuario
-    const adminClient = createClient(url, serviceRoleKey, {
+    // Omitimos validación JWT por requerimiento del usuario (Gestion de especies es interna)
+    const adminClient = createClient(supabaseUrl, supabaseServiceRoleKey, {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
@@ -44,8 +38,8 @@ Deno.serve(async (req) => {
     });
 
     if (req.method === "GET") {
-      const requestUrl = new URL(req.url);
-      const includeInactive = requestUrl.searchParams.get("includeInactive") === "true";
+      const url = new URL(req.url);
+      const includeInactive = url.searchParams.get("includeInactive") === "true";
 
       let query = adminClient
         .from("especies")
@@ -59,14 +53,15 @@ Deno.serve(async (req) => {
       const { data, error } = await query;
 
       if (error) {
-        return jsonResponse(500, { error: error.message ?? "No se pudieron listar las especies." });
+        console.error("Database error (GET):", error);
+        return jsonResponse(500, { error: `No se pudieron listar las especies: ${error.message}` });
       }
 
       return jsonResponse(200, { data: data ?? [] });
     }
 
     if (req.method === "POST") {
-      const body = (await req.json().catch(() => null)) as { nombre?: string } | null;
+      const body = await req.json().catch(() => null);
       const nombre = body?.nombre?.trim();
 
       if (!nombre) {
@@ -79,25 +74,26 @@ Deno.serve(async (req) => {
           nombre,
           activa: true
         })
-        .select("id, nombre, activa, created_at")
+        .select()
         .single();
 
       if (error || !data) {
-        return jsonResponse(500, { error: error?.message ?? "No se pudo crear la especie." });
+        console.error("Database error (POST):", error);
+        return jsonResponse(500, { error: `No se pudo crear la especie: ${error.message}` });
       }
 
       return jsonResponse(200, { data });
     }
 
     if (req.method === "PATCH") {
-      const body = (await req.json().catch(() => null)) as { id?: number; nombre?: string; activa?: boolean } | null;
+      const body = await req.json().catch(() => null);
       const id = Number(body?.id ?? 0);
 
-      if (!Number.isFinite(id) || id <= 0) {
+      if (!id || id <= 0) {
         return jsonResponse(400, { error: "ID de especie inválido." });
       }
 
-      const updates: Record<string, unknown> = {};
+      const updates: Record<string, any> = {};
 
       if (typeof body?.nombre === "string") {
         const nombre = body.nombre.trim();
@@ -119,21 +115,22 @@ Deno.serve(async (req) => {
         .from("especies")
         .update(updates)
         .eq("id", id)
-        .select("id, nombre, activa, created_at")
+        .select()
         .single();
 
       if (error || !data) {
-        return jsonResponse(500, { error: error?.message ?? "No se pudo actualizar la especie." });
+        console.error("Database error (PATCH):", error);
+        return jsonResponse(500, { error: `No se pudo actualizar la especie: ${error.message}` });
       }
 
       return jsonResponse(200, { data });
     }
 
     if (req.method === "DELETE") {
-      const requestUrl = new URL(req.url);
-      const id = Number(requestUrl.searchParams.get("id") ?? 0);
+      const url = new URL(req.url);
+      const id = Number(url.searchParams.get("id") ?? 0);
 
-      if (!Number.isFinite(id) || id <= 0) {
+      if (!id || id <= 0) {
         return jsonResponse(400, { error: "ID de especie inválido." });
       }
 
@@ -142,19 +139,20 @@ Deno.serve(async (req) => {
         .from("especies")
         .update({ activa: false })
         .eq("id", id)
-        .select("id, nombre, activa, created_at")
+        .select()
         .single();
 
       if (error || !data) {
-        return jsonResponse(500, { error: error?.message ?? "No se pudo desactivar la especie." });
+        console.error("Database error (DELETE):", error);
+        return jsonResponse(500, { error: `No se pudo desactivar la especie: ${error.message}` });
       }
 
       return jsonResponse(200, { data });
     }
 
     return jsonResponse(405, { error: "Método no permitido." });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Error inesperado.";
-    return jsonResponse(500, { error: message });
+  } catch (error: any) {
+    console.error("Unexpected error in function:", error);
+    return jsonResponse(500, { error: error.message || "Error inesperado en el servidor." });
   }
 });

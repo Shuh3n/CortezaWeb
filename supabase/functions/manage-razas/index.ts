@@ -16,27 +16,21 @@ function jsonResponse(status: number, payload: unknown) {
   });
 }
 
-function getEnvironment() {
-  const url = Deno.env.get("SUPABASE_URL");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-
-  if (!url || !serviceRoleKey) {
-    throw new Error("Faltan variables SUPABASE_URL o SUPABASE_SERVICE_ROLE_KEY.");
-  }
-
-  return { url, serviceRoleKey };
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { url, serviceRoleKey } = getEnvironment();
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+
+    if (!supabaseUrl || !supabaseServiceRoleKey) {
+      throw new Error("Faltan variables de entorno esenciales (URL o Service Role Key).");
+    }
     
-    // Omitimos validación JWT por requerimiento del usuario
-    const adminClient = createClient(url, serviceRoleKey, {
+    // Omitimos validación JWT por requerimiento del usuario (Gestion de razas es interna)
+    const adminClient = createClient(supabaseUrl, supabaseServiceRoleKey, {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
@@ -44,9 +38,9 @@ Deno.serve(async (req) => {
     });
 
     if (req.method === "GET") {
-      const requestUrl = new URL(req.url);
-      const includeInactive = requestUrl.searchParams.get("includeInactive") === "true";
-      const especieId = requestUrl.searchParams.get("especieId");
+      const url = new URL(req.url);
+      const includeInactive = url.searchParams.get("includeInactive") === "true";
+      const especieId = url.searchParams.get("especieId");
 
       let query = adminClient
         .from("razas")
@@ -71,22 +65,23 @@ Deno.serve(async (req) => {
       const { data, error } = await query;
 
       if (error) {
-        return jsonResponse(500, { error: error.message ?? "No se pudieron listar las razas." });
+        console.error("Database error (GET):", error);
+        return jsonResponse(500, { error: `No se pudieron listar las razas: ${error.message}` });
       }
 
       return jsonResponse(200, { data: data ?? [] });
     }
 
     if (req.method === "POST") {
-      const body = (await req.json().catch(() => null)) as { nombre?: string, especie_id?: number } | null;
+      const body = await req.json().catch(() => null);
       const nombre = body?.nombre?.trim();
-      const especie_id = Number(body?.especie_id ?? 0);
+      const especieId = Number(body?.especie_id ?? 0);
 
       if (!nombre) {
         return jsonResponse(400, { error: "El nombre de la raza es obligatorio." });
       }
 
-      if (!Number.isFinite(especie_id) || especie_id <= 0) {
+      if (!especieId || especieId <= 0) {
         return jsonResponse(400, { error: "ID de especie inválido." });
       }
 
@@ -94,7 +89,7 @@ Deno.serve(async (req) => {
         .from("razas")
         .insert({
           nombre,
-          especie_id,
+          especie_id: especieId,
           activa: true
         })
         .select(`
@@ -108,21 +103,22 @@ Deno.serve(async (req) => {
         .single();
 
       if (error || !data) {
-        return jsonResponse(500, { error: error?.message ?? "No se pudo crear la raza." });
+        console.error("Database error (POST):", error);
+        return jsonResponse(500, { error: `No se pudo crear la raza: ${error.message}` });
       }
 
       return jsonResponse(200, { data });
     }
 
     if (req.method === "PATCH") {
-      const body = (await req.json().catch(() => null)) as { id?: number; nombre?: string; especie_id?: number; activa?: boolean } | null;
+      const body = await req.json().catch(() => null);
       const id = Number(body?.id ?? 0);
 
-      if (!Number.isFinite(id) || id <= 0) {
+      if (!id || id <= 0) {
         return jsonResponse(400, { error: "ID de raza inválido." });
       }
 
-      const updates: Record<string, unknown> = {};
+      const updates: Record<string, any> = {};
 
       if (typeof body?.nombre === "string") {
         const nombre = body.nombre.trim();
@@ -159,17 +155,18 @@ Deno.serve(async (req) => {
         .single();
 
       if (error || !data) {
-        return jsonResponse(500, { error: error?.message ?? "No se pudo actualizar la raza." });
+        console.error("Database error (PATCH):", error);
+        return jsonResponse(500, { error: `No se pudo actualizar la raza: ${error.message}` });
       }
 
       return jsonResponse(200, { data });
     }
 
     if (req.method === "DELETE") {
-      const requestUrl = new URL(req.url);
-      const id = Number(requestUrl.searchParams.get("id") ?? 0);
+      const url = new URL(req.url);
+      const id = Number(url.searchParams.get("id") ?? 0);
 
-      if (!Number.isFinite(id) || id <= 0) {
+      if (!id || id <= 0) {
         return jsonResponse(400, { error: "ID de raza inválido." });
       }
 
@@ -189,15 +186,16 @@ Deno.serve(async (req) => {
         .single();
 
       if (error || !data) {
-        return jsonResponse(500, { error: error?.message ?? "No se pudo desactivar la raza." });
+        console.error("Database error (DELETE):", error);
+        return jsonResponse(500, { error: `No se pudo desactivar la raza: ${error.message}` });
       }
 
       return jsonResponse(200, { data });
     }
 
     return jsonResponse(405, { error: "Método no permitido." });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Error inesperado.";
-    return jsonResponse(500, { error: message });
+  } catch (error: any) {
+    console.error("Unexpected error in function:", error);
+    return jsonResponse(500, { error: error.message || "Error inesperado en el servidor." });
   }
 });

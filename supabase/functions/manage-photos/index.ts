@@ -24,16 +24,14 @@ function normalizeText(value: string) {
 }
 
 function slugifyText(value: string) {
-  const sanitized = normalizeText(value)
+  return normalizeText(value)
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[¿?¡!]/g, "")
     .toLowerCase()
     .replace(/[^a-z0-9.]+/g, "-")
     .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-
-  return sanitized || "item";
+    .replace(/^-|-$/g, "") || "item";
 }
 
 function buildGalleryStoragePath(fileName: string, now = new Date()) {
@@ -52,9 +50,7 @@ function extractStoragePathFromPublicUrl(publicUrl: string) {
     const marker = `/storage/v1/object/public/${GALLERY_BUCKET}/`;
     const markerIndex = parsedUrl.pathname.indexOf(marker);
 
-    if (markerIndex === -1) {
-      return null;
-    }
+    if (markerIndex === -1) return null;
 
     const encodedPath = parsedUrl.pathname.slice(markerIndex + marker.length);
     return decodeURIComponent(encodedPath);
@@ -62,72 +58,6 @@ function extractStoragePathFromPublicUrl(publicUrl: string) {
     return null;
   }
 }
-
-function getEnvironment() {
-  const url = Deno.env.get("SUPABASE_URL");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
-
-  if (!url || !serviceRoleKey || !anonKey) {
-    throw new Error("Faltan variables SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY o SUPABASE_ANON_KEY.");
-  }
-
-  return { url, serviceRoleKey, anonKey };
-}
-
-function extractBearerToken(req: Request) {
-  const authHeader = req.headers.get("Authorization") ?? "";
-  if (!authHeader.startsWith("Bearer ")) {
-    return null;
-  }
-
-  return authHeader.slice("Bearer ".length).trim();
-}
-
-async function ensureAuthenticated(req: Request, url: string, anonKey: string) {
-  const token = extractBearerToken(req);
-  if (!token) {
-    throw new Error("Falta token de autorización.");
-  }
-
-  const authClient = createClient(url, anonKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-    global: {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  });
-
-  const { data, error } = await authClient.auth.getUser(token);
-  if (error || !data.user) {
-    throw new Error("No autorizado.");
-  }
-
-  return data.user;
-}
-
-type PhotoRow = {
-  id: number;
-  nombre: string;
-  fecha: string;
-  url: string;
-  created_at: string;
-  deleted_at: string | null;
-  categoria_id: number;
-  categoria: {
-    id: number;
-    nombre: string;
-    slug: string;
-    activa: boolean;
-    created_at: string;
-    updated_at: string;
-    deleted_at: string | null;
-  } | null;
-};
 
 const photoSelect = `
   id,
@@ -154,21 +84,39 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { url, serviceRoleKey, anonKey } = getEnvironment();
-    await ensureAuthenticated(req, url, anonKey);
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    
+    if (!supabaseUrl || !supabaseServiceRoleKey) {
+      throw new Error("Faltan variables de entorno esenciales (URL o Service Role Key).");
+    }
 
-    const adminClient = createClient(url, serviceRoleKey, {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return jsonResponse(401, { error: "Falta token de autorización." });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    
+    const adminClient = createClient(supabaseUrl, supabaseServiceRoleKey, {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
       },
     });
 
+    const { data: { user }, error: authError } = await adminClient.auth.getUser(token);
+    
+    if (authError || !user) {
+      console.error("Auth error:", authError);
+      return jsonResponse(401, { error: "No autorizado o token inválido." });
+    }
+
     if (req.method === "GET") {
-      const requestUrl = new URL(req.url);
-      const categoriaId = Number(requestUrl.searchParams.get("categoriaId") ?? 0);
-      const nombre = String(requestUrl.searchParams.get("nombre") ?? "").trim();
-      const includeDeleted = requestUrl.searchParams.get("includeDeleted") === "true";
+      const url = new URL(req.url);
+      const categoriaId = Number(url.searchParams.get("categoriaId") ?? 0);
+      const nombre = String(url.searchParams.get("nombre") ?? "").trim();
+      const includeDeleted = url.searchParams.get("includeDeleted") === "true";
 
       let query = adminClient
         .from("imagenes")
@@ -181,7 +129,7 @@ Deno.serve(async (req) => {
         query = query.is("deleted_at", null);
       }
 
-      if (Number.isFinite(categoriaId) && categoriaId > 0) {
+      if (categoriaId > 0) {
         query = query.eq("categoria_id", categoriaId);
       }
 
@@ -192,10 +140,11 @@ Deno.serve(async (req) => {
       const { data, error } = await query;
 
       if (error) {
-        return jsonResponse(500, { error: error.message ?? "No se pudieron listar las imágenes." });
+        console.error("Database error (GET):", error);
+        return jsonResponse(500, { error: `No se pudieron listar las imágenes: ${error.message}` });
       }
 
-      return jsonResponse(200, { data: (data ?? []) as PhotoRow[] });
+      return jsonResponse(200, { data: data ?? [] });
     }
 
     if (req.method === "POST") {
@@ -205,7 +154,7 @@ Deno.serve(async (req) => {
       const nombreInput = String(form.get("nombre") ?? "").trim();
       const files = form.getAll("files").filter((entry) => entry instanceof File) as File[];
 
-      if (!Number.isFinite(categoriaId) || categoriaId <= 0) {
+      if (!categoriaId || categoriaId <= 0) {
         return jsonResponse(400, { error: "Categoría inválida." });
       }
 
@@ -217,7 +166,7 @@ Deno.serve(async (req) => {
         return jsonResponse(400, { error: "Debe enviar al menos una imagen." });
       }
 
-      const createdRows: PhotoRow[] = [];
+      const createdRows = [];
 
       for (let index = 0; index < files.length; index += 1) {
         const file = files[index];
@@ -232,12 +181,11 @@ Deno.serve(async (req) => {
           });
 
         if (uploadError) {
-          return jsonResponse(500, { error: uploadError.message || "No se pudo subir una imagen." });
+          console.error("Storage error:", uploadError);
+          return jsonResponse(500, { error: `No se pudo subir una imagen: ${uploadError.message}` });
         }
 
-        const {
-          data: { publicUrl },
-        } = adminClient.storage.from(GALLERY_BUCKET).getPublicUrl(storagePath);
+        const { data: { publicUrl } } = adminClient.storage.from(GALLERY_BUCKET).getPublicUrl(storagePath);
 
         const nombre = nombreInput || getDefaultImageName(file.name);
 
@@ -254,78 +202,60 @@ Deno.serve(async (req) => {
           .single();
 
         if (insertError || !row) {
-          return jsonResponse(500, { error: insertError?.message ?? "No se pudo registrar la imagen en base de datos." });
+          console.error("Database error (POST):", insertError);
+          return jsonResponse(500, { error: `No se pudo registrar la imagen: ${insertError?.message}` });
         }
 
-        createdRows.push(row as PhotoRow);
+        createdRows.push(row);
       }
 
       return jsonResponse(200, { data: createdRows });
     }
 
     if (req.method === "PATCH") {
-      const body = (await req.json().catch(() => null)) as {
-        id?: number;
-        categoriaId?: number;
-        fecha?: string;
-        nombre?: string;
-      } | null;
-
+      const body = await req.json().catch(() => null);
       const id = Number(body?.id ?? 0);
 
-      if (!Number.isFinite(id) || id <= 0) {
+      if (!id || id <= 0) {
         return jsonResponse(400, { error: "ID de imagen inválido." });
       }
 
-      const categoriaId = Number(body?.categoriaId ?? 0);
-      const fecha = String(body?.fecha ?? "").trim();
-      const nombre = String(body?.nombre ?? "").trim();
-
-      if (!Number.isFinite(categoriaId) || categoriaId <= 0) {
-        return jsonResponse(400, { error: "Categoría inválida." });
-      }
-
-      if (!fecha) {
-        return jsonResponse(400, { error: "La fecha es obligatoria." });
-      }
-
-      const updatePayload = {
-        categoria_id: categoriaId,
-        fecha,
-        nombre: nombre || null,
-      };
+      const updates: Record<string, any> = {};
+      
+      if (body?.categoriaId) updates.categoria_id = Number(body.categoriaId);
+      if (body?.fecha) updates.fecha = String(body.fecha);
+      if (body?.nombre !== undefined) updates.nombre = String(body.nombre).trim() || null;
 
       const { data, error } = await adminClient
         .from("imagenes")
-        .update(updatePayload)
+        .update(updates)
         .eq("id", id)
         .select(photoSelect)
         .single();
 
       if (error || !data) {
-        return jsonResponse(500, { error: error?.message ?? "No se pudo actualizar la imagen." });
+        console.error("Database error (PATCH):", error);
+        return jsonResponse(500, { error: `No se pudo actualizar la imagen: ${error?.message}` });
       }
 
       return jsonResponse(200, { data });
     }
 
     if (req.method === "DELETE") {
-      const requestUrl = new URL(req.url);
-      const id = Number(requestUrl.searchParams.get("id") ?? 0);
-      const idsParam = requestUrl.searchParams.get("ids");
-      const categoriaId = Number(requestUrl.searchParams.get("categoriaId") ?? 0);
+      const url = new URL(req.url);
+      const id = Number(url.searchParams.get("id") ?? 0);
+      const idsParam = url.searchParams.get("ids");
+      const categoriaId = Number(url.searchParams.get("categoriaId") ?? 0);
 
       let query = adminClient.from("imagenes").select("id, url");
 
       if (idsParam) {
-        const ids = idsParam.split(",").map(Number).filter(n => Number.isFinite(n) && n > 0);
-        if (ids.length === 0) {
-          return jsonResponse(400, { error: "Lista de IDs inválida." });
-        }
+        const ids = idsParam.split(",").map(Number).filter(n => !isNaN(n) && n > 0);
+        if (ids.length === 0) return jsonResponse(400, { error: "Lista de IDs inválida." });
         query = query.in("id", ids);
-      } else if (Number.isFinite(categoriaId) && categoriaId > 0) {
+      } else if (categoriaId > 0) {
         query = query.eq("categoria_id", categoriaId);
-      } else if (Number.isFinite(id) && id > 0) {
+      } else if (id > 0) {
         query = query.eq("id", id);
       } else {
         return jsonResponse(400, { error: "Debe proporcionar id, ids o categoriaId para eliminar." });
@@ -333,12 +263,13 @@ Deno.serve(async (req) => {
 
       const { data: rows, error: fetchError } = await query;
 
-      if (fetchError) {
-        return jsonResponse(500, { error: fetchError.message ?? "No se pudieron obtener las imágenes a eliminar." });
+      if (fetchError || !rows) {
+        console.error("Database error (DELETE fetch):", fetchError);
+        return jsonResponse(500, { error: `Error obteniendo imágenes: ${fetchError?.message}` });
       }
 
-      if (!rows || rows.length === 0) {
-        return jsonResponse(200, { data: { count: 0 }, message: "No se encontraron imágenes para eliminar." });
+      if (rows.length === 0) {
+        return jsonResponse(200, { data: { count: 0 }, message: "No se encontraron imágenes." });
       }
 
       const storagePaths = rows
@@ -348,7 +279,8 @@ Deno.serve(async (req) => {
       if (storagePaths.length > 0) {
         const { error: storageError } = await adminClient.storage.from(GALLERY_BUCKET).remove(storagePaths);
         if (storageError) {
-          return jsonResponse(500, { error: storageError.message ?? "Error eliminando archivos de storage." });
+          console.error("Storage error (DELETE):", storageError);
+          return jsonResponse(500, { error: `Error eliminando archivos: ${storageError.message}` });
         }
       }
 
@@ -356,16 +288,16 @@ Deno.serve(async (req) => {
       const { error: deleteError } = await adminClient.from("imagenes").delete().in("id", rowIds);
 
       if (deleteError) {
-        return jsonResponse(500, { error: deleteError.message ?? "Error eliminando registros de base de datos." });
+        console.error("Database error (DELETE):", deleteError);
+        return jsonResponse(500, { error: `Error eliminando registros: ${deleteError.message}` });
       }
 
       return jsonResponse(200, { data: { deletedIds: rowIds, count: rowIds.length } });
     }
 
     return jsonResponse(405, { error: "Método no permitido." });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Error inesperado.";
-    const status = message === "No autorizado." || message === "Falta token de autorización." ? 401 : 500;
-    return jsonResponse(status, { error: message });
+  } catch (error: any) {
+    console.error("Unexpected error in function:", error);
+    return jsonResponse(500, { error: error.message || "Error inesperado en el servidor." });
   }
 });

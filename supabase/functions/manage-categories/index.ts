@@ -18,7 +18,7 @@ function jsonResponse(status: number, payload: unknown) {
 }
 
 function slugifyText(value: string) {
-  const normalized = value
+  return value
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[¿?¡!]/g, "")
@@ -27,59 +27,10 @@ function slugifyText(value: string) {
     .replace(/\s+/g, "-")
     .replace(/[^a-z0-9.-]+/g, "-")
     .replace(/-+/g, "-")
-    .replace(/^-|-$/g, "");
-
-  return normalized || "categoria";
+    .replace(/^-|-$/g, "") || "categoria";
 }
 
-function getEnvironment() {
-  const url = Deno.env.get("SUPABASE_URL");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
-
-  if (!url || !serviceRoleKey || !anonKey) {
-    throw new Error("Faltan variables SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY o SUPABASE_ANON_KEY.");
-  }
-
-  return { url, serviceRoleKey, anonKey };
-}
-
-function extractBearerToken(req: Request) {
-  const authHeader = req.headers.get("Authorization") ?? "";
-  if (!authHeader.startsWith("Bearer ")) {
-    return null;
-  }
-
-  return authHeader.slice("Bearer ".length).trim();
-}
-
-async function ensureAuthenticated(req: Request, url: string, anonKey: string) {
-  const token = extractBearerToken(req);
-  if (!token) {
-    throw new Error("Falta token de autorización.");
-  }
-
-  const authClient = createClient(url, anonKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-    global: {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    },
-  });
-
-  const { data, error } = await authClient.auth.getUser(token);
-  if (error || !data.user) {
-    throw new Error("No autorizado.");
-  }
-
-  return data.user;
-}
-
-async function createUniqueSlug(client: ReturnType<typeof createClient>, baseName: string, categoryId?: number) {
+async function createUniqueSlug(client: any, baseName: string, categoryId?: number) {
   const baseSlug = slugifyText(baseName);
 
   for (let attempt = 0; attempt < 50; attempt += 1) {
@@ -92,7 +43,7 @@ async function createUniqueSlug(client: ReturnType<typeof createClient>, baseNam
 
     const { data, error } = await query;
     if (error) {
-      throw new Error(error.message || "No se pudo validar el slug.");
+      throw new Error(`Error validando slug: ${error.message}`);
     }
 
     if (!data || data.length === 0) {
@@ -109,20 +60,43 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { url, serviceRoleKey, anonKey } = getEnvironment();
-    await ensureAuthenticated(req, url, anonKey);
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
 
-    const adminClient = createClient(url, serviceRoleKey, {
+    if (!supabaseUrl || !supabaseServiceRoleKey || !supabaseAnonKey) {
+      throw new Error("Faltan variables de entorno esenciales (URL o Keys).");
+    }
+
+    // El runtime de Supabase ya verifica el JWT si verify_jwt=true en config.toml
+    // Pero extraemos el token por si necesitamos validar permisos específicos o usar getUser
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return jsonResponse(401, { error: "Falta token de autorización." });
+    }
+
+    const token = authHeader.replace("Bearer ", "");
+    
+    // Cliente administrativo (Service Role) para operaciones de base de datos
+    const adminClient = createClient(supabaseUrl, supabaseServiceRoleKey, {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
       },
     });
 
+    // Validar que el usuario sea válido
+    const { data: { user }, error: authError } = await adminClient.auth.getUser(token);
+    
+    if (authError || !user) {
+      console.error("Auth error:", authError);
+      return jsonResponse(401, { error: "No autorizado o token inválido." });
+    }
+
     if (req.method === "GET") {
-      const requestUrl = new URL(req.url);
-      const includeInactive = requestUrl.searchParams.get("includeInactive") !== "false";
-      const includeDeleted = requestUrl.searchParams.get("includeDeleted") !== "false";
+      const url = new URL(req.url);
+      const includeInactive = url.searchParams.get("includeInactive") !== "false";
+      const includeDeleted = url.searchParams.get("includeDeleted") !== "false";
 
       let query = adminClient
         .from("galeria_categorias")
@@ -140,14 +114,15 @@ Deno.serve(async (req) => {
       const { data, error } = await query;
 
       if (error) {
-        return jsonResponse(500, { error: error.message ?? "No se pudieron listar las categorías." });
+        console.error("Database error (GET):", error);
+        return jsonResponse(500, { error: `No se pudieron listar las categorías: ${error.message}` });
       }
 
       return jsonResponse(200, { data: data ?? [] });
     }
 
     if (req.method === "POST") {
-      const body = (await req.json().catch(() => null)) as { nombre?: string } | null;
+      const body = await req.json().catch(() => null);
       const nombre = body?.nombre?.trim();
 
       if (!nombre) {
@@ -163,32 +138,32 @@ Deno.serve(async (req) => {
           activa: true,
           deleted_at: null,
         })
-        .select("id, nombre, slug, activa, created_at, updated_at, deleted_at")
+        .select()
         .single();
 
       if (error || !data) {
-        return jsonResponse(500, { error: error?.message ?? "No se pudo crear la categoría." });
+        console.error("Database error (POST):", error);
+        return jsonResponse(500, { error: `No se pudo crear la categoría: ${error.message}` });
       }
 
       return jsonResponse(200, { data });
     }
 
     if (req.method === "PATCH") {
-      const body = (await req.json().catch(() => null)) as { id?: number; nombre?: string; activa?: boolean } | null;
+      const body = await req.json().catch(() => null);
       const id = Number(body?.id ?? 0);
 
-      if (!Number.isFinite(id) || id <= 0) {
+      if (!id || id <= 0) {
         return jsonResponse(400, { error: "ID de categoría inválido." });
       }
 
-      const updates: Record<string, unknown> = {};
+      const updates: Record<string, any> = {};
 
       if (typeof body?.nombre === "string") {
         const nombre = body.nombre.trim();
         if (!nombre) {
           return jsonResponse(400, { error: "El nombre no puede estar vacío." });
         }
-
         updates.nombre = nombre;
         updates.slug = await createUniqueSlug(adminClient, nombre, id);
       }
@@ -202,46 +177,54 @@ Deno.serve(async (req) => {
         return jsonResponse(400, { error: "No hay campos para actualizar." });
       }
 
+      updates.updated_at = new Date().toISOString();
+
       const { data, error } = await adminClient
         .from("galeria_categorias")
         .update(updates)
         .eq("id", id)
-        .select("id, nombre, slug, activa, created_at, updated_at, deleted_at")
+        .select()
         .single();
 
       if (error || !data) {
-        return jsonResponse(500, { error: error?.message ?? "No se pudo actualizar la categoría." });
+        console.error("Database error (PATCH):", error);
+        return jsonResponse(500, { error: `No se pudo actualizar la categoría: ${error.message}` });
       }
 
       return jsonResponse(200, { data });
     }
 
     if (req.method === "DELETE") {
-      const requestUrl = new URL(req.url);
-      const id = Number(requestUrl.searchParams.get("id") ?? 0);
+      const url = new URL(req.url);
+      const id = Number(url.searchParams.get("id") ?? 0);
 
-      if (!Number.isFinite(id) || id <= 0) {
+      if (!id || id <= 0) {
         return jsonResponse(400, { error: "ID de categoría inválido." });
       }
 
       const { data, error } = await adminClient
         .from("galeria_categorias")
-        .update({ activa: false, deleted_at: new Date().toISOString() })
+        .update({ 
+          activa: false, 
+          deleted_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
         .eq("id", id)
-        .select("id, nombre, slug, activa, created_at, updated_at, deleted_at")
+        .select()
         .single();
 
       if (error || !data) {
-        return jsonResponse(500, { error: error?.message ?? "No se pudo desactivar la categoría." });
+        console.error("Database error (DELETE):", error);
+        return jsonResponse(500, { error: `No se pudo desactivar la categoría: ${error.message}` });
       }
 
       return jsonResponse(200, { data });
     }
 
     return jsonResponse(405, { error: "Método no permitido." });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Error inesperado.";
-    const status = message === "No autorizado." || message === "Falta token de autorización." ? 401 : 500;
-    return jsonResponse(status, { error: message });
+  } catch (error: any) {
+    console.error("Unexpected error in function:", error);
+    return jsonResponse(500, { error: error.message || "Error inesperado en el servidor." });
   }
 });
+
