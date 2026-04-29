@@ -1,22 +1,59 @@
+import { useEffect, useState } from 'react';
 import { ShoppingBag, Heart, HandHelping } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useModal } from '../context/ModalContext';
 import { useTranslation } from 'react-i18next';
+import { listGalleryImages } from '../lib/gallery';
+import type { GalleryImage } from '../types/gallery';
+
+const DEFAULT_HERO_IMAGE = "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=800";
 
 const Hero = () => {
   const { openDonationModal } = useModal();
   const { t } = useTranslation();
+  const [heroImage, setHeroImage] = useState<string>(DEFAULT_HERO_IMAGE);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadHeroImage() {
+      try {
+        const images = await listGalleryImages(undefined, 1, 10);
+        if (!ignore && images.length > 0) {
+          const randomIndex = Math.floor(Math.random() * images.length);
+          setHeroImage(images[randomIndex].url);
+        }
+      } catch (error) {
+        console.error('Error cargando imagen de hero:', error);
+      } finally {
+        if (!ignore) setIsLoading(false);
+      }
+    }
+
+    void loadHeroImage();
+    return () => {
+      ignore = true;
+    };
+  }, []);
   
   return (
     <section id="inicio" className="relative min-h-[550px] flex items-center overflow-hidden bg-neutral-soft py-10 pt-32">
       {/* Mobile background image - visible only on small screens */}
       <div className="absolute inset-0 lg:hidden">
-        <img
-          src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=800"
-          alt=""
-          className="w-full h-full object-cover opacity-20"
-        />
+        <AnimatePresence mode="wait">
+          {!isLoading && (
+            <motion.img
+              key={heroImage}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.2 }}
+              src={heroImage}
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          )}
+        </AnimatePresence>
         <div className="absolute inset-0 bg-gradient-to-b from-neutral-soft/80 via-transparent to-neutral-soft" />
       </div>
 
@@ -97,13 +134,31 @@ const Hero = () => {
               transition={{ duration: 1, ease: "backOut" }}
               className="hidden lg:block relative"
             >
-              <div className="relative z-10 w-full aspect-square rounded-[60px] overflow-hidden shadow-2xl border-8 border-white">
-                <img
-                  src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=800"
-                  alt="Perro del refugio"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent" />
+              <div className="relative z-10 w-full aspect-square rounded-[60px] overflow-hidden shadow-2xl border-8 border-white bg-neutral-soft">
+                <AnimatePresence mode="wait">
+                  {isLoading ? (
+                    <motion.div
+                      key="loader"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="absolute inset-0 flex items-center justify-center"
+                    >
+                      <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+                    </motion.div>
+                  ) : (
+                    <motion.img
+                      key={heroImage}
+                      initial={{ opacity: 0, scale: 1.1 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ duration: 0.8 }}
+                      src={heroImage}
+                      alt="Animal rescatado"
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </AnimatePresence>
+                <div className="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent pointer-events-none" />
                 <div className="absolute bottom-8 left-8 right-8 p-6 bg-white/90 backdrop-blur-md rounded-3xl shadow-xl">
                   <p className="text-primary font-bold text-lg mb-1">{t('hero.tarjeta.titulo')}</p>
                   <p className="text-text-muted text-sm font-medium">{t('hero.tarjeta.subtitulo')}</p>
