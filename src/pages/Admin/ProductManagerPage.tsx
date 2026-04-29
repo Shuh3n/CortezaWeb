@@ -5,13 +5,19 @@ import {
   Search,
   PencilLine,
   Trash2,
-  ImagePlus,
   Loader2,
   X,
   AlertCircle,
   CheckCircle2,
   Filter,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Type,
+  Tag,
+  ImageUp,
+  Ruler,
+  DollarSign,
+  FileText,
+  Package
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import type { Product } from '../../types/product';
@@ -47,7 +53,21 @@ export default function AdminProductManagerPage() {
   const [uploadFile, setUploadFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Dropdown state management
+  const [isCategoryFilterOpen, setIsCategoryFilterOpen] = useState(false);
+  const [isSortFilterOpen, setIsSortFilterOpen] = useState(false);
+  const [isModalCategoryOpen, setIsModalCategoryOpen] = useState(false);
+  const [dropdownRect, setDropdownRect] = useState<DOMRect | null>(null);
+  const [filterCategoryRect, setFilterCategoryRect] = useState<DOMRect | null>(null);
+  const [filterSortRect, setFilterSortRect] = useState<DOMRect | null>(null);
+
+  const categoryFilterTriggerRef = useRef<HTMLButtonElement>(null);
+  const sortFilterTriggerRef = useRef<HTMLButtonElement>(null);
+  const modalCategoryRef = useRef<HTMLDivElement>(null);
+  const dropdownTriggerRef = useRef<HTMLButtonElement>(null);
 
   const categories = [
     { id: 'mugs', name: 'Mugs' },
@@ -75,6 +95,18 @@ export default function AdminProductManagerPage() {
       setIsLoading(false);
     }
   };
+
+  // Close modal when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalCategoryRef.current && !modalCategoryRef.current.contains(event.target as Node)) {
+        setIsModalCategoryOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     fetchProducts();
@@ -137,6 +169,17 @@ export default function AdminProductManagerPage() {
     setCurrentPage(1);
   }, [activeCategory, searchName, sortBy]);
 
+  // Auto-hide feedback notifications after 3.5 seconds
+  useEffect(() => {
+    if (feedback) {
+      const timer = setTimeout(() => {
+        setFeedback(null);
+      }, 3500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [feedback]);
+
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const paginatedProducts = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
@@ -173,11 +216,41 @@ export default function AdminProductManagerPage() {
     setUploadProgress(0);
   };
 
+  const processImageFile = (file: File) => {
+    if (file.type.startsWith('image/')) {
+      setUploadFile(file);
+      setImagePreview(URL.createObjectURL(file));
+      setIsDragOver(false);
+    }
+  };
+
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setUploadFile(file);
-      setImagePreview(URL.createObjectURL(file));
+      processImageFile(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      processImageFile(files[0]);
     }
   };
 
@@ -241,7 +314,7 @@ export default function AdminProductManagerPage() {
       setUploadProgress(100);
       setTimeout(() => {
         closeModal();
-        fetchProducts();
+        // El real-time listener actualizará automáticamente la lista
       }, 500);
 
     } catch (error) {
@@ -341,33 +414,139 @@ export default function AdminProductManagerPage() {
             />
           </div>
 
-          <div className="relative">
-            <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary/40 pointer-events-none" />
-            <select
-              value={activeCategory}
-              onChange={(e) => setActiveCategory(e.target.value)}
-              className="w-full h-12 pl-12 pr-5 rounded-2xl border border-primary/10 bg-neutral-soft/50 text-sm font-bold text-text-h outline-none focus:border-primary focus:bg-white transition-all appearance-none cursor-pointer"
-            >
-              <option value="all">Todas las categorías</option>
-              {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </div>
+          <button
+            ref={categoryFilterTriggerRef}
+            type="button"
+            onClick={() => {
+              if (categoryFilterTriggerRef.current) {
+                const rect = categoryFilterTriggerRef.current.getBoundingClientRect();
+                setFilterCategoryRect(rect);
+                setIsCategoryFilterOpen(!isCategoryFilterOpen);
+              }
+            }}
+            className="w-full h-12 px-4 rounded-2xl border border-primary/10 bg-neutral-soft/50 text-sm font-bold text-text-h outline-none hover:border-primary/20 hover:bg-white transition-all flex items-center justify-between relative cursor-pointer"
+          >
+            <span>{categories.find(c => c.id === activeCategory)?.name || 'Todas las categorías'}</span>
+            <Filter className={`h-5 w-5 text-primary/40 transition-transform ${isCategoryFilterOpen ? 'rotate-180' : ''}`} />
+          </button>
+          <AnimatePresence>
+            {isCategoryFilterOpen && filterCategoryRect && (
+              <>
+                <div 
+                  className="fixed inset-0 z-[110]" 
+                  onClick={() => setIsCategoryFilterOpen(false)} 
+                />
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className="fixed z-[120] mt-2 max-h-60 overflow-y-auto rounded-2xl border border-primary/10 bg-white p-2 shadow-2xl custom-scrollbar"
+                  style={{
+                    top: filterCategoryRect.bottom,
+                    left: filterCategoryRect.left,
+                    width: filterCategoryRect.width
+                  }}
+                >
+                  {[{ id: 'all', name: 'Todas las categorías' }, ...categories].map(c => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => {
+                        setActiveCategory(c.id);
+                        setIsCategoryFilterOpen(false);
+                      }}
+                      className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-bold transition-all hover:bg-primary/5 ${
+                        activeCategory === c.id ? 'bg-primary/10 text-primary' : 'text-text-h'
+                      }`}
+                    >
+                      <div className={`h-2 w-2 rounded-full ${activeCategory === c.id ? 'bg-primary' : 'bg-primary/20'}`} />
+                      {c.name}
+                    </button>
+                  ))}
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
 
-          <div className="relative">
-            <SlidersHorizontal className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-primary/40 pointer-events-none" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="w-full h-12 pl-12 pr-5 rounded-2xl border border-primary/10 bg-neutral-soft/50 text-sm font-bold text-text-h outline-none focus:border-primary focus:bg-white transition-all appearance-none cursor-pointer"
+          <button
+            ref={sortFilterTriggerRef}
+            type="button"
+            onClick={() => {
+              if (sortFilterTriggerRef.current) {
+                const rect = sortFilterTriggerRef.current.getBoundingClientRect();
+                setFilterSortRect(rect);
+                setIsSortFilterOpen(!isSortFilterOpen);
+              }
+            }}
+            className="w-full h-12 px-4 rounded-2xl border border-primary/10 bg-neutral-soft/50 text-sm font-bold text-text-h outline-none hover:border-primary/20 hover:bg-white transition-all flex items-center justify-between relative cursor-pointer"
+          >
+            <span>
+              {sortBy === 'newest' ? 'Más recientes' :
+                sortBy === 'oldest' ? 'Más antiguos' :
+                sortBy === 'name-asc' ? 'Nombre (A-Z)' :
+                sortBy === 'name-desc' ? 'Nombre (Z-A)' :
+                sortBy === 'stock-asc' ? 'Menor stock' :
+                sortBy === 'stock-desc' ? 'Mayor stock' :
+                'Ordenar por'}
+            </span>
+            <motion.div
+              animate={isSortFilterOpen ? {
+                x: [0, -1, 1, -1, 0],
+                scale: [1, 1.05, 1]
+              } : { x: 0, scale: 1 }}
+              transition={isSortFilterOpen ? {
+                duration: 0.5,
+                ease: 'easeInOut'
+              } : { duration: 0.3 }}
             >
-              <option value="newest">Más recientes</option>
-              <option value="oldest">Más antiguos</option>
-              <option value="name-asc">Nombre (A-Z)</option>
-              <option value="name-desc">Nombre (Z-A)</option>
-              <option value="stock-asc">Menor stock</option>
-              <option value="stock-desc">Mayor stock</option>
-            </select>
-          </div>
+              <SlidersHorizontal className="h-5 w-5 text-primary/40" />
+            </motion.div>
+          </button>
+          <AnimatePresence>
+            {isSortFilterOpen && filterSortRect && (
+              <>
+                <div 
+                  className="fixed inset-0 z-[110]" 
+                  onClick={() => setIsSortFilterOpen(false)} 
+                />
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className="fixed z-[120] mt-2 max-h-60 overflow-y-auto rounded-2xl border border-primary/10 bg-white p-2 shadow-2xl custom-scrollbar"
+                  style={{
+                    top: filterSortRect.bottom,
+                    left: filterSortRect.left,
+                    width: filterSortRect.width
+                  }}
+                >
+                  {[
+                    { id: 'newest', name: 'Más recientes' },
+                    { id: 'oldest', name: 'Más antiguos' },
+                    { id: 'name-asc', name: 'Nombre (A-Z)' },
+                    { id: 'name-desc', name: 'Nombre (Z-A)' },
+                    { id: 'stock-asc', name: 'Menor stock' },
+                    { id: 'stock-desc', name: 'Mayor stock' }
+                  ].map(option => (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => {
+                        setSortBy(option.id);
+                        setIsSortFilterOpen(false);
+                      }}
+                      className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-bold transition-all hover:bg-primary/5 ${
+                        sortBy === option.id ? 'bg-primary/10 text-primary' : 'text-text-h'
+                      }`}
+                    >
+                      <div className={`h-2 w-2 rounded-full ${sortBy === option.id ? 'bg-primary' : 'bg-primary/20'}`} />
+                      {option.name}
+                    </button>
+                  ))}
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
 
           <button
             onClick={() => { setSearchName(''); setActiveCategory('all'); setSortBy('newest'); }}
@@ -576,7 +755,7 @@ export default function AdminProductManagerPage() {
               initial={{ opacity: 0, scale: 0.98, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.98, y: 10 }}
-              className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+              className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
             >
               <div className="p-6 border-b border-primary/5 flex items-center justify-between">
                 <div>
@@ -590,10 +769,10 @@ export default function AdminProductManagerPage() {
                 </button>
               </div>
 
-              <form onSubmit={handleSave} className="p-6 overflow-y-auto max-h-[75vh] space-y-5">
+              <form onSubmit={handleSave} className="p-6 overflow-y-auto overflow-x-visible max-h-[75vh] space-y-5">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black uppercase tracking-widest text-primary/60 ml-1">Nombre</label>
+                    <label className="mb-2 flex items-center gap-2 text-xs font-bold text-text-main"><Type className="h-4 w-4 text-primary" />Nombre del producto</label>
                     <input
                       required
                       type="text"
@@ -603,21 +782,68 @@ export default function AdminProductManagerPage() {
                       className="w-full h-12 rounded-xl border border-primary/10 bg-neutral-soft/50 px-4 text-sm font-bold text-text-h outline-none focus:border-primary focus:bg-white transition-all"
                     />
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-black uppercase tracking-widest text-primary/60 ml-1">Categoría</label>
-                    <select
-                      value={formData.category}
-                      onChange={e => setFormData({ ...formData, category: e.target.value })}
-                      className="w-full h-12 rounded-xl border border-primary/10 bg-neutral-soft/50 px-4 text-sm font-black text-text-h outline-none focus:border-primary focus:bg-white transition-all appearance-none cursor-pointer"
+                  <div className="space-y-1.5 relative">
+                    <label className="mb-2 flex items-center gap-2 text-xs font-bold text-text-main"><Tag className="h-4 w-4 text-primary" />Categoría</label>
+                    <button
+                      ref={dropdownTriggerRef}
+                      type="button"
+                      onClick={() => {
+                        if (dropdownTriggerRef.current) {
+                          const rect = dropdownTriggerRef.current.getBoundingClientRect();
+                          setDropdownRect(rect);
+                          setIsModalCategoryOpen(!isModalCategoryOpen);
+                        }
+                      }}
+                      className="flex w-full items-center justify-between rounded-xl border border-primary/10 bg-neutral-soft/50 px-4 py-3 text-sm font-bold text-text-h outline-none transition focus:border-primary focus:bg-white cursor-pointer h-12"
                     >
-                      {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                    </select>
+                      <span>{categories.find(c => c.id === formData.category)?.name || 'Seleccionar...'}</span>
+                      <Filter className={`h-4 w-4 text-primary/40 transition-transform ${isModalCategoryOpen ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    <AnimatePresence>
+                      {isModalCategoryOpen && dropdownRect && (
+                        <>
+                          <div 
+                            className="fixed inset-0 z-[110]" 
+                            onClick={() => setIsModalCategoryOpen(false)} 
+                          />
+                          <motion.div
+                            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                            className="fixed z-[120] mt-2 max-h-60 overflow-y-auto rounded-2xl border border-primary/10 bg-white p-2 shadow-2xl custom-scrollbar"
+                            style={{
+                              top: dropdownRect.bottom,
+                              left: dropdownRect.left,
+                              width: dropdownRect.width
+                            }}
+                          >
+                            {categories.map((category) => (
+                              <button
+                                key={category.id}
+                                type="button"
+                                onClick={() => {
+                                  setFormData({ ...formData, category: category.id });
+                                  setIsModalCategoryOpen(false);
+                                }}
+                                className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-bold transition-all hover:bg-primary/5 ${
+                                  formData.category === category.id ? 'bg-primary/10 text-primary' : 'text-text-h'
+                                }`}
+                              >
+                                <div className={`h-2 w-2 rounded-full ${formData.category === category.id ? 'bg-primary' : 'bg-primary/20'}`} />
+                                {category.name}
+                              </button>
+                            ))}
+                          </motion.div>
+                        </>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black uppercase tracking-widest text-primary/60 ml-1">Especificaciones</label>
+                    <label className="mb-2 flex items-center gap-2 text-xs font-bold text-text-main\"><Ruler className="h-4 w-4 text-primary" />Especificaciones</label>
                     <input
                       type="text"
                       value={formData.spec}
@@ -627,7 +853,7 @@ export default function AdminProductManagerPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black uppercase tracking-widest text-primary/60 ml-1">Precio / Info</label>
+                    <label className="mb-2 flex items-center gap-2 text-xs font-bold text-text-main\"><DollarSign className="h-4 w-4 text-primary" />Precio / Info</label>
                     <input
                       type="text"
                       value={formData.price}
@@ -638,7 +864,7 @@ export default function AdminProductManagerPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-black uppercase tracking-widest text-primary/60 ml-1">Descripción</label>
+                  <label className="mb-2 flex items-center gap-2 text-xs font-bold text-text-main\"><FileText className="h-4 w-4 text-primary" />Descripción</label>
                   <textarea
                     rows={3}
                     value={formData.detail}
@@ -650,7 +876,7 @@ export default function AdminProductManagerPage() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black uppercase tracking-widest text-primary/60 ml-1">Stock</label>
+                    <label className="mb-2 flex items-center gap-2 text-xs font-bold text-text-main\"><Package className="h-4 w-4 text-primary" />Stock</label>
                     <input
                       type="number"
                       min="0"
@@ -660,18 +886,38 @@ export default function AdminProductManagerPage() {
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-black uppercase tracking-widest text-primary/60 ml-1">Imagen del Producto</label>
+                    <label className="mb-2 flex items-center gap-2 text-xs font-bold text-text-main"><ImageUp className="h-4 w-4 text-primary" />Imagen del Producto</label>
                     <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" ref={fileInputRef} />
-                    <button
-                      type="button"
+                    <motion.div
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      animate={{
+                        borderColor: isDragOver ? 'rgb(45, 90, 39)' : 'rgb(45, 90, 39, 0.2)',
+                        backgroundColor: isDragOver ? 'rgb(45, 90, 39, 0.08)' : 'rgb(45, 90, 39, 0.03)'
+                      }}
+                      transition={{ duration: 0.2 }}
+                      className="group w-full relative flex flex-col items-center justify-center gap-4 rounded-3xl border-2 border-dashed border-primary/20 bg-neutral-soft/50 p-8 transition-all hover:border-primary/50 hover:bg-white cursor-pointer"
                       onClick={() => fileInputRef.current?.click()}
-                      className="w-full h-12 rounded-xl border border-dashed border-primary/30 flex items-center justify-between px-4 group hover:bg-neutral-soft transition-all"
                     >
-                      <span className="text-sm font-bold text-text-muted/60 truncate max-w-[180px]">
-                        {uploadFile ? uploadFile.name : 'Subir imagen...'}
-                      </span>
-                      <ImagePlus size={18} className="text-primary opacity-40 group-hover:opacity-100 transition-opacity" />
-                    </button>
+                      <motion.div
+                        animate={{
+                          scale: isDragOver ? 1.15 : 1
+                        }}
+                        transition={{ duration: 0.2 }}
+                        className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary transition-transform group-hover:scale-110"
+                      >
+                        <ImageUp size={24} />
+                      </motion.div>
+                      <div className="text-center">
+                        <p className="text-sm font-black uppercase tracking-widest text-primary">
+                          {uploadFile ? uploadFile.name : 'Seleccionar o arrastrar imagen'}
+                        </p>
+                        <p className="mt-1 text-[10px] font-bold text-text-muted opacity-60">
+                          Solo puedes subir una imagen a la vez
+                        </p>
+                      </div>
+                    </motion.div>
                   </div>
                 </div>
 
