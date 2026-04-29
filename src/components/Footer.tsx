@@ -89,7 +89,7 @@ const Footer = () => {
               </Link>
             </div>
             <div className="text-sm text-text-muted font-medium flex flex-col items-center md:items-end gap-1">
-              <span>{t('footer.creditos')}</span>
+              <span className="self-stretch whitespace-pre-line text-right">{t('footer.creditos')}</span>
               <a
                   href="https://github.com/Shuh3n/CortezaWeb"
                   target="_blank"
