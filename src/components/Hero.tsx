@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 import { useModal } from '../context/ModalContext';
 import { useTranslation } from 'react-i18next';
 import { listGalleryImages } from '../lib/gallery';
-import type { GalleryImage } from '../types/gallery';
 
 const DEFAULT_HERO_IMAGE = "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=800";
 

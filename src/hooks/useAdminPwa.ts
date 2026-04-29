@@ -98,7 +98,11 @@ export function useAdminPwa(enabled: boolean) {
     }
 
     function handleBeforeInstallPrompt(event: Event) {
+      // Prevent the mini-infobar from appearing on mobile
+      event.preventDefault();
+      // Stash the event so it can be triggered later.
       setDeferredPrompt(event as BeforeInstallPromptEvent);
+      console.log('✨ Install prompt deferred');
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
