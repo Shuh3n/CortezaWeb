@@ -17,44 +17,42 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     let ignore = false;
 
-    async function loadMetrics() {
-      const { count: total } = await supabase.from('products').select('id', { count: 'exact', head: true });
-      const { count: low } = await supabase.from('products').select('id', { count: 'exact', head: true }).lte('stock', 5);
+      async function loadMetrics() {
+          const { count: total } = await supabase.from('products').select('id', { count: 'exact', head: true });
+          const { count: low } = await supabase.from('products').select('id', { count: 'exact', head: true }).lte('stock', 5);
 
-      if (!ignore) {
-        setProductCount(total || 0);
-        setLowStockCount(low || 0);
+          if (!ignore) {
+              setProductCount(total || 0);
+              setLowStockCount(low || 0);
+          }
       }
-    }
 
     async function loadDashboard() {
       if (ignore) return;
       setIsLoading(true);
-      console.log('🔄 Iniciando carga de Dashboard...');
 
       // 1. Cargar Imágenes de Galería
       try {
         const galleryData = await listGalleryImages();
         if (!ignore) {
-          console.log('✅ Galería cargada:', galleryData.length, 'fotos');
           setImages(galleryData);
         }
       } catch (err) {
-        console.error('❌ Error en métricas de galería:', err);
+        console.error('Error en métricas de galería:', err);
       }
 
-      // 2. Cargar Métricas de Tienda
-      try {
-        await loadMetrics();
-        console.log('✅ Tienda cargada');
-      } catch (err) {
-        console.error('❌ Error en métricas de tienda:', err);
-      }
+      // 2. Cargar Métricas de Tienda (Individual para que no se bloqueen)
+        try {
+            await loadMetrics();
+            console.log('✅ Tienda cargada');
+        } catch (err) {
+            console.error('❌ Error en métricas de tienda:', err);
+        }
 
-      if (!ignore) {
-        setIsLoading(false);
-        setErrorMessage(null);
-      }
+        if (!ignore) {
+            setIsLoading(false);
+            setErrorMessage(null);
+        }
     }
 
     void loadDashboard();
