@@ -18,8 +18,8 @@ export default function AdminDashboardPage() {
     let ignore = false;
 
     async function loadMetrics() {
-      const { count: total, error: err1 } = await supabase.from('products').select('id', { count: 'exact', head: true });
-      const { count: low, error: err2 } = await supabase.from('products').select('id', { count: 'exact', head: true }).lte('stock', 5);
+      const { count: total } = await supabase.from('products').select('id', { count: 'exact', head: true });
+      const { count: low } = await supabase.from('products').select('id', { count: 'exact', head: true }).lte('stock', 5);
 
       if (!ignore) {
         setProductCount(total || 0);
