@@ -32,7 +32,7 @@ const VolunteerTestimonials = () => {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.6, delay: index * 0.1 }}
-                    className="bg-white rounded-2xl p-8 border border-slate-100 hover:border-primary/30 transition-all"
+                    className="bg-white rounded-2xl p-8 border border-slate-100 hover:border-primary/30 transition-all cursor-pointer"
                 >
                   <div className="flex gap-1 mb-4">
                     {[...Array(5)].map((_, i) => (

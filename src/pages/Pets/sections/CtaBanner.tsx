@@ -33,7 +33,7 @@ const CtaBanner = () => {
                             href="/contacto"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="inline-block bg-primary text-white px-10 py-4 rounded-2xl font-bold text-lg hover:shadow-2xl hover:shadow-primary/20 transition-all"
+                            className="inline-block bg-primary text-white px-10 py-4 rounded-2xl font-bold text-lg hover:shadow-2xl hover:shadow-primary/20 transition-all cursor-pointer"
                         >
                             {t('mascotas.cta.boton')}
                         </motion.a>

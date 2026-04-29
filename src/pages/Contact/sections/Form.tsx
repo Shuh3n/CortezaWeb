@@ -288,7 +288,7 @@ const ContactForm = () => {
                       href="https://www.instagram.com/corteza_terrestre/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-14 h-14 rounded-2xl bg-neutral-soft flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group shadow-sm border border-slate-100"
+                      className="w-14 h-14 rounded-2xl bg-neutral-soft flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group shadow-sm border border-slate-100 cursor-pointer"
                   >
                     <img
                         src="/icons/instagram.svg"
@@ -300,7 +300,7 @@ const ContactForm = () => {
                       href="https://www.facebook.com/cortezaterrestre/"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-14 h-14 rounded-2xl bg-neutral-soft flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group shadow-sm border border-slate-100"
+                      className="w-14 h-14 rounded-2xl bg-neutral-soft flex items-center justify-center text-text-muted hover:bg-primary hover:text-white transition-all group shadow-sm border border-slate-100 cursor-pointer"
                   >
                     <img
                         src="/icons/facebook.svg"

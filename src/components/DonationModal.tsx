@@ -76,7 +76,7 @@ const DonationModal = ({ isOpen, onClose }: DonationModalProps) => {
                             <p className="text-primary font-bold">31900001585</p>
                             <button
                                 onClick={() => handleCopy('31900001585', 'bancolombia')}
-                                className="p-1.5 hover:bg-primary/5 rounded-lg transition-colors text-primary/60 hover:text-primary"
+                                className="p-1.5 hover:bg-primary/5 rounded-lg transition-colors text-primary/60 hover:text-primary cursor-pointer"
                                 title={t('donacion_modal.bancos.copiar')}
                             >
                               {copiedAccount === 'bancolombia' ? <Check size={14} /> : <Copy size={14} />}
@@ -90,7 +90,7 @@ const DonationModal = ({ isOpen, onClose }: DonationModalProps) => {
                             <p className="text-primary font-bold">108900693624</p>
                             <button
                                 onClick={() => handleCopy('108900693624', 'davivienda')}
-                                className="p-1.5 hover:bg-primary/5 rounded-lg transition-colors text-primary/60 hover:text-primary"
+                                className="p-1.5 hover:bg-primary/5 rounded-lg transition-colors text-primary/60 hover:text-primary cursor-pointer"
                                 title={t('donacion_modal.bancos.copiar')}
                             >
                               {copiedAccount === 'davivienda' ? <Check size={14} /> : <Copy size={14} />}

@@ -18,13 +18,14 @@ import {
     Syringe,
     Bug,
     X,
+    XCircle,
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import SearchableSelect from '../../components/SearchableSelect';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type Sexo = 'macho' | 'hembra';
-type Especie = 'perro' | 'gato' | 'otra';
 
 export interface PeludoImagen {
     id: number;
@@ -42,6 +43,10 @@ export interface Peludo {
     desparasitado: boolean;
     especie: string;
     peso: number | null;
+    especie_id: number | null;
+    raza_id: number | null;
+    especies?: { id: number; nombre: string };
+    razas?: { id: number; nombre: string };
     imagenes?: PeludoImagen[];
 }
 
@@ -53,21 +58,6 @@ function getErrorMessage(error: unknown) {
         return String((error as Record<string, unknown>).error);
     }
     return 'No se pudo completar la operación.';
-}
-
-function normalizeEspecie(value: string): Especie {
-    const normalized = value.trim().toLowerCase();
-    if (normalized.includes('perr') || normalized.includes('dog')) return 'perro';
-    if (normalized.includes('gat') || normalized.includes('cat')) return 'gato';
-    return 'otra';
-}
-
-function getEspeciePersonalizada(value: string): string {
-    return normalizeEspecie(value) === 'otra' ? value.trim() : '';
-}
-
-function resolveEspecie(form: FormState): string {
-    return form.especie === 'otra' ? form.especiePersonalizada.trim() : form.especie;
 }
 
 /** Obtiene el JWT de la sesión activa para enviarlo a las Edge Functions */
@@ -84,8 +74,9 @@ const EMPTY_FORM = {
     nombre: '',
     sexo: 'macho' as Sexo,
     edad: '',
-    especie: 'perro' as Especie,
-    especiePersonalizada: '',
+    especie_id: '',
+    raza_id: '',
+    especie: '',
     peso: '',
     caracteristicas: '',
     esterilizado: false,
@@ -95,17 +86,53 @@ const EMPTY_FORM = {
 
 type FormState = typeof EMPTY_FORM;
 
-// ─── PeludoFormFields — definido FUERA del componente principal para que React
-//     no lo destruya y recree en cada render (lo que causaría pérdida de foco). ──
+// ─── Custom Components ────────────────────────────────────────────────────────
+
+function CustomSexoSelect({
+    value,
+    onChange,
+}: {
+    value: string;
+    onChange: (value: string) => void;
+}) {
+    return (
+        <div className="flex gap-2 p-1.5 bg-neutral-soft rounded-[24px] border border-primary/5">
+            {[
+                { id: 'macho', label: 'Macho', icon: '♂️' },
+                { id: 'hembra', label: 'Hembra', icon: '♀️' },
+            ].map((opt) => (
+                <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => onChange(opt.id)}
+                    className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-300 cursor-pointer ${
+                        value === opt.id
+                            ? 'bg-white text-primary shadow-sm ring-1 ring-primary/10'
+                            : 'text-text-muted opacity-60 hover:opacity-100'
+                    }`}
+                >
+                    <span className="text-base">{opt.icon}</span>
+                    {opt.label}
+                </button>
+            ))}
+        </div>
+    );
+}
+
+// ─── PeludoFormFields ─────────────────────────────────────────────────────────
 
 function PeludoFormFields({
                               form,
                               onChangeText,
                               onChangeBool,
+                              especies,
+                              razas,
                           }: {
     form: FormState;
     onChangeText: (key: keyof FormState, value: string) => void;
     onChangeBool: (key: keyof FormState, value: boolean) => void;
+    especies: { id: number; nombre: string }[];
+    razas: { id: number; nombre: string }[];
 }) {
     return (
         <>
@@ -120,59 +147,47 @@ function PeludoFormFields({
                         value={form.nombre}
                         onChange={(e) => onChangeText('nombre', e.target.value)}
                         placeholder="Ej: Luna"
-                        className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
+                        className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary font-medium"
                     />
                 </label>
 
-                <label className="block">
+                <div className="block">
           <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main">
             <Filter className="h-4 w-4 text-primary" /> Sexo *
           </span>
-                    <select
-                        required
-                        value={form.sexo}
-                        onChange={(e) => onChangeText('sexo', e.target.value)}
-                        className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
-                    >
-                        <option value="macho">Macho</option>
-                        <option value="hembra">Hembra</option>
-                    </select>
-                </label>
+                    <CustomSexoSelect 
+                        value={form.sexo} 
+                        onChange={(val) => onChangeText('sexo', val)} 
+                    />
+                </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-                <label className="block">
-          <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main">
-            <Stethoscope className="h-4 w-4 text-primary" /> Especie *
-          </span>
-                    <select
-                        required
-                        value={form.especie}
-                        onChange={(e) => onChangeText('especie', e.target.value)}
-                        className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
-                    >
-                        <option value="perro">Perro</option>
-                        <option value="gato">Gato</option>
-                        <option value="otra">Otra</option>
-                    </select>
-                </label>
+                <SearchableSelect
+                    label="Especie"
+                    icon={Stethoscope}
+                    options={especies}
+                    value={form.especie_id}
+                    onChange={(id) => {
+                        onChangeText('especie_id', String(id));
+                        onChangeText('raza_id', '');
+                    }}
+                    placeholder="Seleccionar especie..."
+                    required
+                />
 
-                {form.especie === 'otra' && (
-                    <label className="block">
-          <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main">
-            <Stethoscope className="h-4 w-4 text-primary" /> ¿Cuál especie? *
-          </span>
-                        <input
-                            type="text"
-                            required
-                            value={form.especiePersonalizada}
-                            onChange={(e) => onChangeText('especiePersonalizada', e.target.value)}
-                            placeholder="Ej: Conejo"
-                            className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
-                        />
-                    </label>
-                )}
+                <SearchableSelect
+                    label="Raza"
+                    icon={PawPrint}
+                    options={razas}
+                    value={form.raza_id}
+                    onChange={(id) => onChangeText('raza_id', String(id))}
+                    placeholder="Seleccionar raza..."
+                    required
+                />
+            </div>
 
+            <div className="grid gap-4 md:grid-cols-2">
                 <label className="block">
           <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main">
             <CalendarDays className="h-4 w-4 text-primary" /> Edad (meses) *
@@ -185,25 +200,25 @@ function PeludoFormFields({
                         value={form.edad}
                         onChange={(e) => onChangeText('edad', e.target.value)}
                         placeholder="Ej: 18"
-                        className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
+                        className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary font-medium"
+                    />
+                </label>
+
+                <label className="block">
+          <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main">
+            <Weight className="h-4 w-4 text-primary" /> Peso (kg)
+          </span>
+                    <input
+                        type="number"
+                        min={0}
+                        step="0.1"
+                        value={form.peso}
+                        onChange={(e) => onChangeText('peso', e.target.value)}
+                        placeholder="Ej: 4.5"
+                        className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary font-medium"
                     />
                 </label>
             </div>
-
-            <label className="block">
-        <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main">
-          <Weight className="h-4 w-4 text-primary" /> Peso (kg)
-        </span>
-                <input
-                    type="number"
-                    min={0}
-                    step="0.1"
-                    value={form.peso}
-                    onChange={(e) => onChangeText('peso', e.target.value)}
-                    placeholder="Ej: 4.5"
-                    className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary"
-                />
-            </label>
 
             <label className="block">
         <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main">
@@ -215,36 +230,52 @@ function PeludoFormFields({
                     value={form.caracteristicas}
                     onChange={(e) => onChangeText('caracteristicas', e.target.value)}
                     placeholder="Comportamiento, historial médico, necesidades especiales..."
-                    className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary resize-none"
+                    className="w-full rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 outline-none transition focus:border-primary resize-none font-medium"
                 />
             </label>
 
-            {/* Boolean toggles */}
-            <div className="grid grid-cols-3 gap-3">
-                {(
-                    [
-                        { key: 'esterilizado', label: 'Esterilizado', Icon: ShieldCheck },
-                        { key: 'vacunado', label: 'Vacunado', Icon: Syringe },
-                        { key: 'desparasitado', label: 'Desparasitado', Icon: Bug },
-                    ] as const
-                ).map(({ key, label, Icon }) => (
-                    <button
-                        key={key}
-                        type="button"
-                        onClick={() => onChangeBool(key, !form[key])}
-                        className={`flex flex-col items-center gap-2 rounded-2xl border px-4 py-3 text-xs font-black uppercase tracking-wider transition ${
-                            form[key]
-                                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                                : 'border-primary/10 bg-neutral-soft text-text-muted'
-                        }`}
-                    >
-                        <Icon className="h-5 w-5" />
-                        {label}
-                        <span className={`text-[10px] font-black ${form[key] ? 'text-emerald-600' : 'text-text-muted/50'}`}>
-              {form[key] ? 'Sí' : 'No'}
-            </span>
-                    </button>
-                ))}
+            <div>
+                <span className="mb-3 block text-xs font-black uppercase tracking-widest text-primary/50 text-center">
+                    Estado de Salud (Selecciona los que apliquen)
+                </span>
+                <div className="grid grid-cols-3 gap-3">
+                    {(
+                        [
+                            { key: 'esterilizado', label: 'Esterilizado', short: 'Est.', Icon: ShieldCheck },
+                            { key: 'vacunado', label: 'Vacunado', short: 'Vac.', Icon: Syringe },
+                            { key: 'desparasitado', label: 'Desparasitado', short: 'Des.', Icon: Bug },
+                        ] as const
+                    ).map(({ key, short, Icon }) => (
+                        <button
+                            key={key}
+                            type="button"
+                            onClick={() => onChangeBool(key, !form[key])}
+                            className={`group relative flex flex-col items-center gap-2 rounded-2xl border p-4 transition-all duration-300 cursor-pointer ${
+                                form[key]
+                                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700 shadow-sm'
+                                    : 'border-primary/5 bg-neutral-soft text-text-muted hover:border-primary/20'
+                            }`}
+                        >
+                            <div className={`p-2 rounded-xl transition-colors ${form[key] ? 'bg-emerald-100' : 'bg-white/50 group-hover:bg-white'}`}>
+                                <Icon className={`h-5 w-5 ${form[key] ? 'text-emerald-600' : 'text-primary/40'}`} />
+                            </div>
+                            <div className="text-center">
+                                <span className="block text-[10px] font-black uppercase tracking-wider">{short}</span>
+                                <span className={`text-[8px] font-bold uppercase tracking-tighter transition-opacity ${form[key] ? 'opacity-100' : 'opacity-0'}`}>
+                                    Seleccionado
+                                </span>
+                            </div>
+                            {form[key] && (
+                                <motion.div 
+                                    layoutId={`check-${key}`}
+                                    className="absolute -top-1 -right-1 bg-emerald-500 text-white rounded-full p-0.5 shadow-md"
+                                >
+                                    <CheckCircle2 size={12} />
+                                </motion.div>
+                            )}
+                        </button>
+                    ))}
+                </div>
             </div>
         </>
     );
@@ -254,49 +285,90 @@ function PeludoFormFields({
 
 export default function PetManagementPage() {
     const [peludos, setPeludos] = useState<Peludo[]>([]);
+    const [especies, setEspecies] = useState<{ id: number; nombre: string }[]>([]);
+    const [allRazas, setAllRazas] = useState<{ id: number; nombre: string; especie_id: number }[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; msg: string } | null>(null);
 
-    // Filters
-    const [searchText, setSearchText] = useState('');
-    const [especieFilter, setEspecieFilter] = useState('');
+    // Auto-close feedback
+    useEffect(() => {
+        if (feedback) {
+            const timer = setTimeout(() => {
+                setFeedback(null);
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [feedback]);
 
-    // Pagination
+    const [searchText, setSearchText] = useState('');
+    const [especieFilter, setEspecieFilter] = useState<string>('');
+
     const [currentPage, setCurrentPage] = useState(1);
     const PETS_PER_PAGE = 12;
 
-    // Modals
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [editingPeludo, setEditingPeludo] = useState<Peludo | null>(null);
     const [pendingDeletePeludo, setPendingDeletePeludo] = useState<Peludo | null>(null);
 
-    // Create form
     const [createForm, setCreateForm] = useState<FormState>(EMPTY_FORM);
     const [createFile, setCreateFile] = useState<File | null>(null);
     const [createPreview, setCreatePreview] = useState<string | null>(null);
     const createFileRef = useRef<HTMLInputElement | null>(null);
 
-    // Edit form
     const [editForm, setEditForm] = useState<FormState>(EMPTY_FORM);
     const [editFile, setEditFile] = useState<File | null>(null);
     const [editPreview, setEditPreview] = useState<string | null>(null);
     const editFileRef = useRef<HTMLInputElement | null>(null);
 
+    // ── Pagination & Options ─────────────────────────────────────────────────────
+
+    const totalPages = Math.max(1, Math.ceil(peludos.length / PETS_PER_PAGE));
+    const paginatedPeludos = useMemo(() => {
+        const start = (currentPage - 1) * PETS_PER_PAGE;
+        return peludos.slice(start, start + PETS_PER_PAGE);
+    }, [currentPage, peludos]);
+
+    const createRazas = useMemo(() => {
+        if (!createForm.especie_id) return [];
+        const filtered = allRazas.filter(r => Number(r.especie_id) === Number(createForm.especie_id));
+        console.log(`🔍 Filtrando razas para especie_id: ${createForm.especie_id}. Encontradas: ${filtered.length}`);
+        return filtered;
+    }, [allRazas, createForm.especie_id]);
+
+    const editRazas = useMemo(() => {
+        if (!editForm.especie_id) return [];
+        const filtered = allRazas.filter(r => Number(r.especie_id) === Number(editForm.especie_id));
+        console.log(`🔍 Filtrando razas para edición (especie_id: ${editForm.especie_id}). Encontradas: ${filtered.length}`);
+        return filtered;
+    }, [allRazas, editForm.especie_id]);
+
     // ── Fetch ────────────────────────────────────────────────────────────────────
 
-    async function fetchPeludos() {
+    async function fetchData() {
         setIsLoading(true);
         try {
             const params = new URLSearchParams();
-            if (especieFilter.trim()) params.set('especie', especieFilter.trim());
+            if (especieFilter) params.set('especie_id', especieFilter);
             if (searchText.trim()) params.set('search', searchText.trim());
 
-            const res = await fetch(`${FUNCTION_URL}/get-peludos?${params.toString()}`);
-            const json = (await res.json()) as { data?: Peludo[]; error?: string };
+            const [peludosRes, metadataRes] = await Promise.all([
+                fetch(`${FUNCTION_URL}/get-peludos?${params.toString()}`),
+                fetch(`${FUNCTION_URL}/get-metadata`)
+            ]);
 
-            if (!res.ok) throw new Error(json.error ?? 'Error al cargar peludos.');
-            setPeludos(json.data ?? []);
+            const peludosJson = await peludosRes.json();
+            const metadataJson = await metadataRes.json();
+
+            console.log('📊 Metadata cargada:', metadataJson);
+
+            if (!peludosRes.ok) throw new Error(peludosJson.error ?? 'Error al cargar peludos.');
+            if (!metadataRes.ok) throw new Error(metadataJson.error ?? 'Error al cargar metadatos.');
+            
+            setPeludos(peludosJson.data ?? []);
+            setEspecies(metadataJson.data?.especies ?? []);
+            setAllRazas(metadataJson.data?.razas ?? []);
+            console.log('✅ Razas configuradas en estado:', metadataJson.data?.razas?.length);
             setCurrentPage(1);
         } catch (err) {
             setFeedback({ type: 'error', msg: getErrorMessage(err) });
@@ -306,19 +378,11 @@ export default function PetManagementPage() {
     }
 
     useEffect(() => {
-        void fetchPeludos();
+        void fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // ── Pagination ────────────────────────────────────────────────────────────────
-
-    const totalPages = Math.max(1, Math.ceil(peludos.length / PETS_PER_PAGE));
-    const paginatedPeludos = useMemo(() => {
-        const start = (currentPage - 1) * PETS_PER_PAGE;
-        return peludos.slice(start, start + PETS_PER_PAGE);
-    }, [currentPage, peludos]);
-
-    // ── Create ────────────────────────────────────────────────────────────────────
+    // ── Handlers ──────────────────────────────────────────────────────────────────
 
     function handleCreateFileChange(e: ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0] ?? null;
@@ -341,18 +405,18 @@ export default function PetManagementPage() {
             setIsSubmitting(true);
             setFeedback(null);
 
-            const especie = resolveEspecie(createForm);
-            if (!especie) {
-                setFeedback({ type: 'error', msg: 'Debe indicar la especie del peludo.' });
-                return;
-            }
-
             const headers = await getAuthHeader();
             const formData = new FormData();
             formData.append('nombre', createForm.nombre);
             formData.append('sexo', createForm.sexo);
             formData.append('edad', createForm.edad);
-            formData.append('especie', especie);
+            formData.append('especie_id', createForm.especie_id);
+            formData.append('raza_id', createForm.raza_id);
+            
+            // Sincronizar nombre de especie para compatibilidad
+            const especieName = especies.find(e => e.id === Number(createForm.especie_id))?.nombre || '';
+            formData.append('especie', especieName);
+
             formData.append('caracteristicas', createForm.caracteristicas);
             formData.append('esterilizado', String(createForm.esterilizado));
             formData.append('vacunado', String(createForm.vacunado));
@@ -366,16 +430,12 @@ export default function PetManagementPage() {
                 body: formData,
             });
 
-            const json = (await res.json()) as { data?: Peludo; error?: string; warning?: string };
-            if (!res.ok && res.status !== 207) throw new Error(json.error ?? 'Error al crear peludo.');
+            const json = (await res.json()) as { data?: Peludo; error?: string };
+            if (!res.ok) throw new Error(json.error ?? 'Error al crear peludo.');
 
-            const msg = json.warning
-                ? `${createForm.nombre} creado. Advertencia: ${json.warning}`
-                : `${createForm.nombre} fue registrado correctamente.`;
-
-            setFeedback({ type: json.warning ? 'error' : 'success', msg });
+            setFeedback({ type: 'success', msg: `${createForm.nombre} fue registrado correctamente.` });
             closeCreateModal();
-            await fetchPeludos();
+            await fetchData();
         } catch (err) {
             setFeedback({ type: 'error', msg: getErrorMessage(err) });
         } finally {
@@ -383,16 +443,15 @@ export default function PetManagementPage() {
         }
     }
 
-    // ── Edit ──────────────────────────────────────────────────────────────────────
-
     function handleOpenEdit(peludo: Peludo) {
         setEditingPeludo(peludo);
         setEditForm({
             nombre: peludo.nombre,
             sexo: peludo.sexo,
             edad: String(peludo.edad),
-            especie: normalizeEspecie(peludo.especie),
-            especiePersonalizada: getEspeciePersonalizada(peludo.especie),
+            especie_id: String(peludo.especie_id ?? ''),
+            raza_id: String(peludo.raza_id ?? ''),
+            especie: peludo.especie,
             peso: peludo.peso != null ? String(peludo.peso) : '',
             caracteristicas: peludo.caracteristicas,
             esterilizado: peludo.esterilizado,
@@ -416,19 +475,19 @@ export default function PetManagementPage() {
             setIsSubmitting(true);
             setFeedback(null);
 
-            const especie = resolveEspecie(editForm);
-            if (!especie) {
-                setFeedback({ type: 'error', msg: 'Debe indicar la especie del peludo.' });
-                return;
-            }
-
             const headers = await getAuthHeader();
             const formData = new FormData();
             formData.append('id', String(editingPeludo.id));
             formData.append('nombre', editForm.nombre);
             formData.append('sexo', editForm.sexo);
             formData.append('edad', editForm.edad);
-            formData.append('especie', especie);
+            formData.append('especie_id', editForm.especie_id);
+            formData.append('raza_id', editForm.raza_id);
+            
+            // Sincronizar nombre de especie para compatibilidad
+            const especieName = especies.find(e => e.id === Number(editForm.especie_id))?.nombre || '';
+            formData.append('especie', especieName);
+
             formData.append('caracteristicas', editForm.caracteristicas);
             formData.append('esterilizado', String(editForm.esterilizado));
             formData.append('vacunado', String(editForm.vacunado));
@@ -447,15 +506,13 @@ export default function PetManagementPage() {
 
             setFeedback({ type: 'success', msg: 'Animal actualizado correctamente.' });
             setEditingPeludo(null);
-            await fetchPeludos();
+            await fetchData();
         } catch (err) {
             setFeedback({ type: 'error', msg: getErrorMessage(err) });
         } finally {
             setIsSubmitting(false);
         }
     }
-
-    // ── Delete ─────────────────────────────────────────────────────────────────────
 
     async function handleConfirmDelete() {
         if (!pendingDeletePeludo) return;
@@ -469,8 +526,10 @@ export default function PetManagementPage() {
                 headers,
             });
 
-            const json = (await res.json()) as { data?: unknown; error?: string };
-            if (!res.ok) throw new Error(json.error ?? 'Error al eliminar peludo.');
+            if (!res.ok) {
+                const json = await res.json();
+                throw new Error(json.error ?? 'Error al eliminar peludo.');
+            }
 
             setPeludos((current) => current.filter((p) => p.id !== pendingDeletePeludo.id));
             setPendingDeletePeludo(null);
@@ -482,13 +541,6 @@ export default function PetManagementPage() {
         }
     }
 
-    // ── Filter submit ─────────────────────────────────────────────────────────────
-
-    async function handleSubmitFilters(e: FormEvent<HTMLFormElement>) {
-        e.preventDefault();
-        await fetchPeludos();
-    }
-
     // ── Render ────────────────────────────────────────────────────────────────────
 
     return (
@@ -498,7 +550,6 @@ export default function PetManagementPage() {
             transition={{ duration: 0.45, ease: 'easeOut' }}
             className="space-y-8"
         >
-            {/* Floating notifications */}
             <AnimatePresence>
                 {feedback && (
                     <motion.div
@@ -527,7 +578,6 @@ export default function PetManagementPage() {
                 )}
             </AnimatePresence>
 
-            {/* Hero banner */}
             <section className="relative overflow-hidden rounded-[32px] bg-[linear-gradient(135deg,_#2d5a27_0%,_#8b4513_100%)] px-6 py-10 text-white shadow-2xl shadow-primary/20 sm:px-10">
                 <motion.div
                     animate={{ scale: [1, 1.06, 1], opacity: [0.18, 0.28, 0.18] }}
@@ -537,8 +587,8 @@ export default function PetManagementPage() {
                 <div className="relative flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
                     <div className="flex-1">
                         <p className="text-sm font-semibold uppercase tracking-[0.35em] text-white/70">Módulo de Peludos</p>
-                        <h1 className="mt-3 text-4xl font-black md:text-5xl">Gestión de Peludos</h1>
-                        <p className="mt-4 max-w-2xl text-lg text-white/85">
+                        <h1 className="mt-3 text-4xl font-black md:text-5xl italic uppercase tracking-tighter">Gestión de Peludos</h1>
+                        <p className="mt-4 max-w-2xl text-lg text-white/85 font-medium">
                             Registrá, editá y gestioná cada animal de la Fundación en un solo lugar.
                         </p>
                     </div>
@@ -549,18 +599,17 @@ export default function PetManagementPage() {
                 </div>
             </section>
 
-            {/* Controls */}
             <section className="rounded-[32px] bg-white p-6 shadow-lg shadow-primary/5 sm:p-8">
                 <button
                     type="button"
                     onClick={() => setIsCreateModalOpen(true)}
-                    className="inline-flex h-16 w-full cursor-pointer items-center justify-center gap-3 rounded-2xl bg-secondary px-8 text-lg font-black text-white transition hover:opacity-90 shadow-lg shadow-secondary/20"
+                    className="inline-flex h-16 w-full cursor-pointer items-center justify-center gap-3 rounded-2xl bg-secondary px-8 text-lg font-black text-white transition hover:opacity-90 shadow-lg shadow-secondary/20 uppercase tracking-widest"
                 >
                     <PlusCircle className="h-6 w-6" />
                     Registrar nuevo peludo
                 </button>
 
-                <form className="mt-8 grid gap-4 md:grid-cols-[1fr_1fr_auto]" onSubmit={handleSubmitFilters}>
+                <form className="mt-8 grid gap-6 md:grid-cols-[1fr_1fr_auto]" onSubmit={(e) => { e.preventDefault(); fetchData(); }}>
                     <label className="block">
                         <span className="mb-2 block text-xs font-black uppercase tracking-widest text-primary/50">Buscar</span>
                         <div className="flex h-12 items-center gap-3 rounded-2xl border border-primary/10 bg-neutral-soft/50 px-4 focus-within:border-primary focus-within:bg-white transition-all">
@@ -575,36 +624,49 @@ export default function PetManagementPage() {
                         </div>
                     </label>
 
-                    <label className="block">
-                        <span className="mb-2 block text-xs font-black uppercase tracking-widest text-primary/50">Especie</span>
-                        <div className="flex h-12 items-center gap-3 rounded-2xl border border-primary/10 bg-neutral-soft/50 px-4 focus-within:border-primary focus-within:bg-white transition-all">
-                            <Stethoscope className="h-5 w-5 text-primary/30" />
-                            <input
-                                type="text"
-                                value={especieFilter}
-                                onChange={(e) => setEspecieFilter(e.target.value)}
-                                placeholder="Ej: perro, gato..."
-                                className="w-full bg-transparent text-sm font-bold text-text-h outline-none placeholder:text-text-muted/30"
-                            />
-                        </div>
-                    </label>
+                    <SearchableSelect
+                        label="Filtrar por Especie"
+                        icon={Stethoscope}
+                        options={[{ id: 0, nombre: 'Todas las especies' }, ...especies]}
+                        value={especieFilter}
+                        onChange={(id) => {
+                            setEspecieFilter(id === 0 ? '' : String(id));
+                        }}
+                        placeholder="Todas las especies"
+                    />
 
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="inline-flex h-12 self-end items-center justify-center rounded-2xl bg-primary px-8 font-black text-[11px] uppercase tracking-widest text-white shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:hover:scale-100"
-                    >
-                        Filtrar
-                    </button>
+                    <div className="flex self-end items-center gap-2">
+                        <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="flex-1 inline-flex h-12 items-center justify-center rounded-2xl bg-primary px-8 font-black text-[11px] uppercase tracking-widest text-white shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+                        >
+                            Filtrar
+                        </button>
+                        {(searchText.trim() !== '' || especieFilter !== '') && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSearchText('');
+                                    setEspecieFilter('');
+                                    void fetchData();
+                                }}
+                                disabled={isLoading}
+                                className="inline-flex h-12 w-12 items-center justify-center rounded-2xl border border-primary/10 bg-white text-primary shadow-lg shadow-primary/5 hover:bg-primary/5 active:scale-95 transition-all disabled:opacity-50 cursor-pointer"
+                                title="Limpiar filtros"
+                            >
+                                <XCircle size={20} />
+                            </button>
+                        )}
+                    </div>
                 </form>
             </section>
 
-            {/* Grid */}
             <section className="rounded-[32px] bg-white p-6 shadow-lg shadow-primary/5 sm:p-8">
                 <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary/60">Resultados</p>
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <h2 className="mt-2 text-2xl font-black text-text-h">Peludos Registrados</h2>
-                    <p className="text-sm text-text-muted">Página {currentPage} de {totalPages}</p>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
+                    <h2 className="mt-2 text-2xl font-black text-text-h italic uppercase tracking-tighter">Peludos Registrados</h2>
+                    <p className="text-sm text-text-muted font-bold">Página {currentPage} de {totalPages}</p>
                 </div>
 
                 <div className="mt-6">
@@ -615,7 +677,7 @@ export default function PetManagementPage() {
                             ))}
                         </div>
                     ) : peludos.length === 0 ? (
-                        <div className="rounded-3xl border border-dashed border-primary/20 bg-primary/5 px-5 py-12 text-center text-text-muted">
+                        <div className="rounded-3xl border border-dashed border-primary/20 bg-primary/5 px-5 py-12 text-center text-text-muted font-bold italic">
                             No hay peludos para los filtros seleccionados.
                         </div>
                     ) : (
@@ -628,9 +690,8 @@ export default function PetManagementPage() {
                                             key={peludo.id}
                                             initial={{ opacity: 0, y: 12 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            className="group overflow-hidden rounded-[32px] border border-primary/10 bg-white transition hover:shadow-xl hover:shadow-primary/5"
+                                            className="group overflow-hidden rounded-[32px] border border-primary/10 bg-white transition hover:shadow-xl hover:shadow-primary/5 flex flex-col h-full"
                                         >
-                                            {/* Photo */}
                                             <div className="relative aspect-square overflow-hidden bg-neutral-100">
                                                 {foto ? (
                                                     <img
@@ -643,8 +704,7 @@ export default function PetManagementPage() {
                                                         <PawPrint className="h-12 w-12 text-primary/20" />
                                                     </div>
                                                 )}
-                                                {/* Sexo badge */}
-                                                <span className={`absolute top-3 right-3 rounded-full px-3 py-1 text-xs font-black uppercase tracking-wider ${
+                                                <span className={`absolute top-3 right-3 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-wider ${
                                                     peludo.sexo === 'macho'
                                                         ? 'bg-blue-100 text-blue-700'
                                                         : 'bg-pink-100 text-pink-700'
@@ -653,19 +713,20 @@ export default function PetManagementPage() {
                         </span>
                                             </div>
 
-                                            {/* Info */}
-                                            <div className="space-y-3 p-5">
+                                            <div className="space-y-3 p-5 flex-1 flex flex-col">
                                                 <div>
-                                                    <p className="truncate text-lg font-black text-text-h">{peludo.nombre}</p>
-                                                    <p className="mt-0.5 text-sm font-semibold text-primary/60 uppercase tracking-wider">
-                                                        {peludo.especie}
+                                                    <p className="truncate text-lg font-black text-text-h italic uppercase tracking-tight">{peludo.nombre}</p>
+                                                    <p className="mt-0.5 text-[11px] font-bold text-primary uppercase tracking-widest flex items-center gap-1.5 italic">
+                                                        {peludo.especies?.nombre || peludo.especie}
+                                                        <span className="h-1 w-1 rounded-full bg-primary/30" />
+                                                        {peludo.razas?.nombre || 'Criollo'}
                                                     </p>
                                                 </div>
 
-                                                <div className="flex flex-wrap gap-2 text-xs text-text-muted font-semibold">
+                                                <div className="flex flex-wrap gap-2 text-[10px] text-text-muted font-black uppercase tracking-widest">
                           <span className="flex items-center gap-1">
                             <CalendarDays className="h-3.5 w-3.5" />
-                              {peludo.edad}m
+                              {peludo.edad} meses
                           </span>
                                                     {peludo.peso != null && (
                                                         <span className="flex items-center gap-1">
@@ -675,7 +736,6 @@ export default function PetManagementPage() {
                                                     )}
                                                 </div>
 
-                                                {/* Health indicators */}
                                                 <div className="flex gap-1.5">
                                                     {[
                                                         { ok: peludo.esterilizado, label: 'Est.' },
@@ -684,7 +744,7 @@ export default function PetManagementPage() {
                                                     ].map(({ ok, label }) => (
                                                         <span
                                                             key={label}
-                                                            className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${
+                                                            className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase tracking-tighter ${
                                                                 ok ? 'bg-emerald-100 text-emerald-700' : 'bg-neutral-100 text-text-muted/50'
                                                             }`}
                                                         >
@@ -693,7 +753,7 @@ export default function PetManagementPage() {
                                                     ))}
                                                 </div>
 
-                                                <div className="flex gap-2 pt-1">
+                                                <div className="flex gap-2 pt-4 mt-auto">
                                                     <button
                                                         type="button"
                                                         onClick={() => handleOpenEdit(peludo)}
@@ -716,24 +776,19 @@ export default function PetManagementPage() {
                                 })}
                             </div>
 
-                            {/* Pagination */}
                             {totalPages > 1 && (
                                 <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
                                     <button
                                         type="button"
                                         onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                                         disabled={currentPage === 1}
-                                        className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary shadow-sm transition hover:-translate-y-0.5 disabled:opacity-50"
                                     >
                                         Anterior
                                     </button>
                                     <div className="flex items-center gap-2">
                                         {Array.from({ length: totalPages }).map((_, i) => {
                                             const page = i + 1;
-                                            if (totalPages > 7 && page !== 1 && page !== totalPages && Math.abs(page - currentPage) > 2) {
-                                                if (Math.abs(page - currentPage) === 3) return <span key={page} className="px-1 text-primary/40">...</span>;
-                                                return null;
-                                            }
                                             return (
                                                 <button
                                                     key={page}
@@ -741,7 +796,7 @@ export default function PetManagementPage() {
                                                     onClick={() => setCurrentPage(page)}
                                                     className={`h-11 w-11 cursor-pointer rounded-2xl font-bold transition ${
                                                         page === currentPage
-                                                            ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                                                            ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105'
                                                             : 'bg-white text-primary shadow-sm hover:-translate-y-0.5'
                                                     }`}
                                                 >
@@ -754,7 +809,7 @@ export default function PetManagementPage() {
                                         type="button"
                                         onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                                         disabled={currentPage === totalPages}
-                                        className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary shadow-sm transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
+                                        className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary shadow-sm transition hover:-translate-y-0.5 disabled:opacity-50"
                                     >
                                         Siguiente
                                     </button>
@@ -765,62 +820,30 @@ export default function PetManagementPage() {
                 </div>
             </section>
 
-            {/* ── CREATE MODAL ─────────────────────────────────────────────────────── */}
             <AnimatePresence>
                 {isCreateModalOpen && (
                     <>
-                        <motion.div
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            onClick={closeCreateModal}
-                            className="fixed inset-0 z-[100] bg-primary/20 backdrop-blur-sm"
-                        />
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={closeCreateModal} className="fixed inset-0 z-[100] bg-primary/20 backdrop-blur-sm" />
                         <div className="pointer-events-none fixed inset-0 z-[101] flex items-center justify-center px-4">
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95, y: 16 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, y: 16 }}
-                                className="pointer-events-auto w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[32px] bg-white p-6 shadow-2xl sm:p-8"
-                            >
-                                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary/60">Nuevo registro</p>
-                                <h3 className="mt-2 text-2xl font-black text-text-h">Registrar peludo</h3>
-
-                                <form className="mt-6 space-y-4" onSubmit={handleCreateSubmit}>
+                            <motion.div initial={{ opacity: 0, scale: 0.95, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 16 }} className="pointer-events-auto w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[32px] bg-white p-6 shadow-2xl sm:p-8 custom-scrollbar">
+                                <p className="text-xs font-black uppercase tracking-[0.25em] text-primary/60">Nuevo registro</p>
+                                <h3 className="mt-2 text-2xl font-black text-text-h italic uppercase tracking-tighter">Registrar peludo</h3>
+                                <form className="mt-6 space-y-6" onSubmit={handleCreateSubmit}>
                                     <PeludoFormFields
                                         form={createForm}
+                                        especies={especies}
+                                        razas={createRazas}
                                         onChangeText={(key, value) => setCreateForm((prev) => ({ ...prev, [key]: value }))}
                                         onChangeBool={(key, value) => setCreateForm((prev) => ({ ...prev, [key]: value }))}
                                     />
-
                                     <label className="block">
-                    <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main">
-                      <ImageUp className="h-4 w-4 text-primary" /> Foto del peludo
-                    </span>
-                                        <input
-                                            ref={createFileRef}
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handleCreateFileChange}
-                                            className="w-full cursor-pointer rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 text-text-muted outline-none transition file:mr-4 file:cursor-pointer file:rounded-full file:border-0 file:bg-primary file:px-4 file:py-2 file:font-semibold file:text-white hover:file:opacity-90"
-                                        />
+                                        <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main"><ImageUp className="h-4 w-4 text-primary" /> Foto del peludo</span>
+                                        <input ref={createFileRef} type="file" accept="image/*" onChange={handleCreateFileChange} className="w-full cursor-pointer rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 text-text-muted text-sm outline-none transition file:bg-primary file:text-white file:rounded-full file:px-4 file:py-1 file:border-0 file:mr-4 font-bold" />
                                     </label>
-
-                                    {createPreview && (
-                                        <div className="overflow-hidden rounded-2xl border border-primary/10">
-                                            <img src={createPreview} alt="Vista previa" className="h-48 w-full object-cover" />
-                                        </div>
-                                    )}
-
-                                    <div className="mt-4 flex flex-wrap justify-end gap-3">
-                                        <button type="button" onClick={closeCreateModal} className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary">
-                                            Cancelar
-                                        </button>
-                                        <button
-                                            type="submit"
-                                            disabled={isSubmitting}
-                                            className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-primary px-4 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-                                        >
-                                            {isSubmitting ? 'Guardando...' : 'Registrar peludo'}
-                                        </button>
+                                    {createPreview && <img src={createPreview} className="h-48 w-full object-cover rounded-2xl border border-primary/10 shadow-sm" alt="Preview" />}
+                                    <div className="mt-8 flex justify-end gap-3 font-black">
+                                        <button type="button" onClick={closeCreateModal} className="px-6 py-4 text-primary uppercase text-xs tracking-widest cursor-pointer hover:bg-neutral-100 rounded-2xl transition-all">Cancelar</button>
+                                        <button type="submit" disabled={isSubmitting} className="bg-primary text-white px-10 py-4 rounded-2xl uppercase text-xs tracking-widest shadow-xl shadow-primary/20 disabled:opacity-50 cursor-pointer hover:opacity-90 transition-all">{isSubmitting ? 'Guardando...' : 'Registrar peludo'}</button>
                                     </div>
                                 </form>
                             </motion.div>
@@ -829,64 +852,31 @@ export default function PetManagementPage() {
                 )}
             </AnimatePresence>
 
-            {/* ── EDIT MODAL ───────────────────────────────────────────────────────── */}
             <AnimatePresence>
                 {editingPeludo && (
                     <>
-                        <motion.div
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            onClick={() => setEditingPeludo(null)}
-                            className="fixed inset-0 z-[100] bg-primary/20 backdrop-blur-sm"
-                        />
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setEditingPeludo(null)} className="fixed inset-0 z-[100] bg-primary/20 backdrop-blur-sm" />
                         <div className="pointer-events-none fixed inset-0 z-[101] flex items-center justify-center px-4">
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95, y: 16 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, y: 16 }}
-                                className="pointer-events-auto w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[32px] bg-white p-6 shadow-2xl sm:p-8"
-                            >
-                                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-primary/60">Editar peludo</p>
-                                <h3 className="mt-2 text-2xl font-black text-text-h">Actualizar información</h3>
-
-                                <div className="mt-6 space-y-4">
+                            <motion.div initial={{ opacity: 0, scale: 0.95, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 16 }} className="pointer-events-auto w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-[32px] bg-white p-6 shadow-2xl sm:p-8 custom-scrollbar">
+                                <p className="text-xs font-black uppercase tracking-[0.25em] text-primary/60">Editar registro</p>
+                                <h3 className="mt-2 text-2xl font-black text-text-h italic uppercase tracking-tighter">Actualizar información</h3>
+                                <div className="mt-6 space-y-6">
                                     <PeludoFormFields
                                         form={editForm}
+                                        especies={especies}
+                                        razas={editRazas}
                                         onChangeText={(key, value) => setEditForm((prev) => ({ ...prev, [key]: value }))}
                                         onChangeBool={(key, value) => setEditForm((prev) => ({ ...prev, [key]: value }))}
                                     />
-
                                     <label className="block">
-                    <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main">
-                      <ImageUp className="h-4 w-4 text-primary" /> Reemplazar foto
-                    </span>
-                                        <input
-                                            ref={editFileRef}
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handleEditFileChange}
-                                            className="w-full cursor-pointer rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 text-text-muted outline-none transition file:mr-4 file:cursor-pointer file:rounded-full file:border-0 file:bg-primary file:px-4 file:py-2 file:font-semibold file:text-white hover:file:opacity-90"
-                                        />
+                                        <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main"><ImageUp className="h-4 w-4 text-primary" /> Reemplazar foto</span>
+                                        <input ref={editFileRef} type="file" accept="image/*" onChange={handleEditFileChange} className="w-full cursor-pointer rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 text-text-muted text-sm outline-none transition file:bg-primary file:text-white file:rounded-full file:px-4 file:py-1 file:border-0 file:mr-4 font-bold" />
                                     </label>
-
-                                    {editPreview && (
-                                        <div className="overflow-hidden rounded-2xl border border-primary/10">
-                                            <img src={editPreview} alt="Vista previa" className="h-48 w-full object-cover" />
-                                        </div>
-                                    )}
+                                    {editPreview && <img src={editPreview} className="h-48 w-full object-cover rounded-2xl border border-primary/10 shadow-sm" alt="Preview" />}
                                 </div>
-
-                                <div className="mt-6 flex flex-wrap justify-end gap-3">
-                                    <button type="button" onClick={() => setEditingPeludo(null)} className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary">
-                                        Cancelar
-                                    </button>
-                                    <button
-                                        type="button"
-                                        disabled={isSubmitting}
-                                        onClick={() => void handleSaveEdit()}
-                                        className="inline-flex cursor-pointer items-center gap-2 rounded-2xl bg-primary px-4 py-3 font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
-                                    >
-                                        {isSubmitting ? 'Guardando...' : 'Guardar cambios'}
-                                    </button>
+                                <div className="mt-8 flex justify-end gap-3 font-black">
+                                    <button type="button" onClick={() => setEditingPeludo(null)} className="px-6 py-4 text-primary uppercase text-xs tracking-widest cursor-pointer hover:bg-neutral-100 rounded-2xl transition-all">Cancelar</button>
+                                    <button type="button" onClick={() => void handleSaveEdit()} disabled={isSubmitting} className="bg-primary text-white px-10 py-4 rounded-2xl uppercase text-xs tracking-widest shadow-xl shadow-primary/20 disabled:opacity-50 cursor-pointer hover:opacity-90 transition-all">{isSubmitting ? 'Guardando...' : 'Guardar cambios'}</button>
                                 </div>
                             </motion.div>
                         </div>
@@ -894,47 +884,18 @@ export default function PetManagementPage() {
                 )}
             </AnimatePresence>
 
-            {/* ── DELETE CONFIRM MODAL ─────────────────────────────────────────────── */}
             <AnimatePresence>
                 {pendingDeletePeludo && (
                     <>
-                        <motion.div
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            onClick={() => setPendingDeletePeludo(null)}
-                            className="fixed inset-0 z-[100] bg-primary/20 backdrop-blur-sm"
-                        />
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setPendingDeletePeludo(null)} className="fixed inset-0 z-[100] bg-primary/20 backdrop-blur-sm" />
                         <div className="pointer-events-none fixed inset-0 z-[101] flex items-center justify-center px-4">
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.95, y: 16 }}
-                                animate={{ opacity: 1, scale: 1, y: 0 }}
-                                exit={{ opacity: 0, scale: 0.95, y: 16 }}
-                                className="pointer-events-auto w-full max-w-xl rounded-[32px] bg-white p-6 shadow-2xl sm:p-8"
-                            >
-                                <p className="text-sm font-semibold uppercase tracking-[0.25em] text-red-600">Confirmación</p>
-                                <h3 className="mt-2 text-2xl font-black text-text-h">¿Estás seguro de eliminar este peludo?</h3>
-                                <p className="mt-3 text-text-muted">
-                                    Esta acción elimina el registro y sus imágenes del Storage permanentemente.
-                                </p>
-
-                                <div className="mt-5 rounded-2xl border border-red-200 bg-red-50 px-4 py-3">
-                                    <p className="text-sm font-semibold text-red-800">Peludo seleccionado</p>
-                                    <p className="mt-1 text-lg font-black text-red-700">{pendingDeletePeludo.nombre}</p>
-                                    <p className="text-sm text-red-600">{pendingDeletePeludo.especie} · {pendingDeletePeludo.sexo}</p>
-                                </div>
-
-                                <div className="mt-6 flex flex-wrap justify-end gap-3">
-                                    <button type="button" onClick={() => setPendingDeletePeludo(null)} className="cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary">
-                                        Cancelar
-                                    </button>
-                                    <button
-                                        type="button"
-                                        disabled={isSubmitting}
-                                        onClick={() => void handleConfirmDelete()}
-                                        className="inline-flex cursor-pointer items-center gap-2 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 font-semibold text-red-700 transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                        Sí, eliminar
-                                    </button>
+                            <motion.div initial={{ opacity: 0, scale: 0.95, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 16 }} className="pointer-events-auto w-full max-w-xl rounded-[32px] bg-white p-10 shadow-2xl text-center">
+                                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-100 text-red-600 mb-8"><Trash2 size={40} /></div>
+                                <h3 className="text-3xl font-black text-text-h italic uppercase tracking-tighter">¿Eliminar peludo?</h3>
+                                <p className="mt-4 text-text-muted font-bold text-lg">Esta acción es permanente. Se eliminará el registro de <span className="text-red-600 uppercase">"{pendingDeletePeludo.nombre}"</span> y todas sus fotos del sistema.</p>
+                                <div className="mt-10 flex justify-center gap-4 font-black">
+                                    <button type="button" onClick={() => setPendingDeletePeludo(null)} className="px-8 py-4 text-primary uppercase text-xs tracking-widest cursor-pointer hover:bg-neutral-100 rounded-2xl transition-all">No, cancelar</button>
+                                    <button type="button" onClick={() => void handleConfirmDelete()} disabled={isSubmitting} className="bg-red-600 text-white px-10 py-4 rounded-2xl uppercase text-xs tracking-widest shadow-xl shadow-red-200 disabled:opacity-50 cursor-pointer hover:bg-red-700 transition-all">Sí, eliminar para siempre</button>
                                 </div>
                             </motion.div>
                         </div>

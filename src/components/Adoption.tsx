@@ -61,7 +61,7 @@ const Adoption = () => {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => window.location.href = "/adoptar"}
-                    className="bg-primary text-white px-10 py-5 rounded-2xl font-bold text-xl hover:shadow-2xl hover:shadow-primary/20 transition-all shadow-lg"
+                    className="bg-primary text-white px-10 py-5 rounded-2xl font-bold text-xl hover:shadow-2xl hover:shadow-primary/20 transition-all shadow-lg cursor-pointer"
                 >
                   {t('adopcion.boton')}
                 </motion.button>

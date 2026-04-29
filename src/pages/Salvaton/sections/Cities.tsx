@@ -28,7 +28,7 @@ const SalvatonCities = () => {
                   <button
                       key={city.id}
                       onClick={() => setActiveCity(city)}
-                      className={`w-full group flex items-center gap-4 p-5 rounded-[24px] transition-all duration-300 ${
+                      className={`w-full group flex items-center gap-4 p-5 rounded-[24px] transition-all duration-300 cursor-pointer ${
                           activeCity.id === city.id
                               ? 'bg-primary text-white shadow-xl shadow-primary/20 translate-x-2'
                               : 'bg-white text-text-muted hover:bg-white hover:shadow-lg'
@@ -69,9 +69,16 @@ const SalvatonCities = () => {
                           <h4 className="text-sm font-black uppercase tracking-[0.2em] text-primary/60 mb-6 bg-primary/5 inline-block px-4 py-1 rounded-full">
                             {zone.title}
                           </h4>
-                          <ul className="space-y-6">
+                          <ul className="space-y-4">
                             {zone.points.map((point, pIdx) => (
-                                <li key={pIdx} className="group flex items-start gap-4">
+                                <li 
+                                    key={pIdx} 
+                                    className="group flex items-start gap-4 cursor-pointer p-4 rounded-3xl transition-all duration-300 hover:bg-neutral-soft hover:shadow-md border border-transparent hover:border-primary/5"
+                                    onClick={() => {
+                                      const query = encodeURIComponent(`${point.name}, ${point.address}, ${activeCity.name}, Quindío, Colombia`);
+                                      window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+                                    }}
+                                >
                                   <div className="mt-1 w-6 h-6 rounded-lg bg-accent/10 flex items-center justify-center group-hover:bg-accent transition-colors">
                                     {pIdx % 2 === 0 ? <Dog size={14} className="text-accent group-hover:text-white" /> : <Cat size={14} className="text-accent group-hover:text-white" />}
                                   </div>

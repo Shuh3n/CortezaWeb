@@ -67,7 +67,7 @@ const WorkAxes = () => {
                       viewport={{ once: true }}
                       transition={{ duration: 0.5, delay: index * 0.1 }}
                       whileHover={{ y: -10 }}
-                      className="bg-white p-8 rounded-[32px] shadow-sm hover:shadow-xl transition-all border border-slate-100 group cursor-default"
+                      className="bg-white p-8 rounded-[32px] shadow-sm hover:shadow-xl transition-all border border-slate-100 group cursor-pointer"
                   >
                     <div className={`w-14 h-14 ${axesConfig[index].color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg`}>
                       <Icon size={28} />

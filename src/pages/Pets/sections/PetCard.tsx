@@ -165,7 +165,11 @@ const PetCard = ({ pet, onAdopt, onSponsor }: PetCardProps) => {
                         <h3 className="text-2xl font-black text-text-h">{pet.name}</h3>
                         <img src={speciesIcon[pet.species]} alt={pet.species} className="w-6 h-6 opacity-60" />
                     </div>
-                    <p className="text-sm font-bold text-primary">{pet.breed}</p>
+                    <div className="flex items-center gap-2 text-sm font-bold text-primary italic">
+                        <span>{pet.species_name}</span>
+                        <span className="w-1 h-1 rounded-full bg-primary/30" />
+                        <span>{pet.breed}</span>
+                    </div>
                 </div>
 
                 {/* Quick stats chips */}
@@ -219,7 +223,7 @@ const PetCard = ({ pet, onAdopt, onSponsor }: PetCardProps) => {
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
                         onClick={() => onAdopt(pet)}
-                        className="flex-1 bg-primary text-white py-3 rounded-2xl font-bold text-sm hover:shadow-lg hover:shadow-primary/20 transition-all"
+                        className="flex-1 bg-primary text-white py-3 rounded-2xl font-bold text-sm hover:shadow-lg hover:shadow-primary/20 transition-all cursor-pointer"
                     >
                         Adoptar
                     </motion.button>
@@ -227,7 +231,7 @@ const PetCard = ({ pet, onAdopt, onSponsor }: PetCardProps) => {
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
                         onClick={() => onSponsor(pet)}
-                        className="flex-1 bg-white text-primary border-2 border-primary py-3 rounded-2xl font-bold text-sm hover:bg-primary/5 transition-all flex items-center justify-center gap-1.5"
+                        className="flex-1 bg-white text-primary border-2 border-primary py-3 rounded-2xl font-bold text-sm hover:bg-primary/5 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                         <Heart size={14} />
                         Apadrinar

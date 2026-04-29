@@ -36,6 +36,17 @@
     font-family: var(--heading);
     font-weight: 700;
   }
+
+  button, 
+  [role="button"],
+  select,
+  summary,
+  a,
+  input[type="submit"],
+  input[type="button"],
+  label {
+    cursor: pointer;
+  }
 }
 
 /* Custom Scrollbar */

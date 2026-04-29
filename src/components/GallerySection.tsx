@@ -95,7 +95,7 @@ export default function GallerySection() {
                           whileInView={{ opacity: 1, y: 0 }}
                           viewport={{ once: true, amount: 0.25 }}
                           transition={{ duration: 0.45, delay: index * 0.06, ease: 'easeOut' }}
-                          className="aspect-square overflow-hidden rounded-[32px] bg-white shadow-xl shadow-primary/8 transition hover:-translate-y-1"
+                          className="aspect-square overflow-hidden rounded-[32px] bg-white shadow-xl shadow-primary/8 transition hover:-translate-y-1 cursor-pointer"
                       >
                         <img
                             src={image.url}

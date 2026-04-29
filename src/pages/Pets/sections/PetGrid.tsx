@@ -56,7 +56,7 @@ const PetGrid = ({ pets, loading, onAdopt, onSponsor, onClearFilters }: PetGridP
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={onClearFilters}
-                    className="mt-6 bg-primary text-white px-8 py-3 rounded-2xl font-bold"
+                    className="mt-6 bg-primary text-white px-8 py-3 rounded-2xl font-bold cursor-pointer"
                 >
                     {t('mascotas.grid.btn_ver_todos')}
                 </motion.button>
