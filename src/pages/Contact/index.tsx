@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
 import ContactForm from './sections/Form';
-import Map from './sections/Map';
 
 const Contact = () => {
   const { t } = useTranslation();
@@ -46,8 +45,6 @@ const Contact = () => {
         </motion.section>
 
         <ContactForm />
-
-        <Map />
       </motion.div>
   );
 };
