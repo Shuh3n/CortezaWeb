@@ -44,9 +44,9 @@ export default function AdminDashboardPage() {
       // 2. Cargar Métricas de Tienda (Individual para que no se bloqueen)
         try {
             await loadMetrics();
-            console.log('✅ Tienda cargada');
+            console.log('Tienda cargada');
         } catch (err) {
-            console.error('❌ Error en métricas de tienda:', err);
+            console.error('Error en métricas de tienda:', err);
         }
 
         if (!ignore) {
