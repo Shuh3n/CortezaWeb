@@ -22,6 +22,7 @@ function mapPeludoToPet(p: {
     especies?: { id: number; nombre: string };
     razas?: { id: number; nombre: string };
     imagenes?: { id: number; url: string }[];
+    sonido_url?: string;
 }): Pet {
     const speciesName = p.especies?.nombre || p.especie || 'Otra';
     const breedName = p.razas?.nombre || 'Criollo';
@@ -36,6 +37,8 @@ function mapPeludoToPet(p: {
     const size: Pet['size'] =
         p.peso == null ? 'medium' : p.peso < 10 ? 'small' : p.peso < 25 ? 'medium' : 'large';
 
+    const soundUrl = p.sonido_url || (p as any).sound_url || null;
+
     return {
         id: String(p.id),
         name: p.nombre,
@@ -48,7 +51,7 @@ function mapPeludoToPet(p: {
         gender: p.sexo === 'macho' ? 'male' : 'female',
         description: p.caracteristicas,
         image_url: p.imagenes?.[0]?.url ?? '',
-        sound_url: null,
+        sound_url: soundUrl,
         is_available: true,
         is_urgent: false,
         esterilizado: p.esterilizado,
@@ -74,12 +77,13 @@ const Pets = () => {
                 if (species === 'dog') params.set('especie', 'perro');
                 if (species === 'cat') params.set('especie', 'gato');
                 if (search.trim()) params.set('search', search.trim());
+                params.set('_t', Date.now().toString());
 
                 const res = await fetch(`${SUPABASE_URL}/functions/v1/get-peludos?${params.toString()}`);
-                const json = (await res.json()) as { data?: unknown[]; error?: string };
+                const json = (await res.json()) as { data?: any[]; error?: string };
                 if (!res.ok) throw new Error(json.error ?? 'Error al cargar peludos.');
 
-                setPets((json.data ?? []).map((p) => mapPeludoToPet(p as Parameters<typeof mapPeludoToPet>[0])));
+                setPets((json.data ?? []).map((p) => mapPeludoToPet(p)));
             } catch (err) {
                 console.error('Error cargando peludos:', err);
                 setPets([]);

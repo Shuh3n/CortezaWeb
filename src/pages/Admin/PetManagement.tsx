@@ -17,6 +17,7 @@ import {
     ShieldCheck,
     Syringe,
     Bug,
+    Music,
     X,
     XCircle,
 } from 'lucide-react';
@@ -45,6 +46,7 @@ export interface Peludo {
     peso: number | null;
     especie_id: number | null;
     raza_id: number | null;
+    sonido_url: string | null;
     especies?: { id: number; nombre: string };
     razas?: { id: number; nombre: string };
     imagenes?: PeludoImagen[];
@@ -316,10 +318,16 @@ export default function PetManagementPage() {
     const [createPreview, setCreatePreview] = useState<string | null>(null);
     const createFileRef = useRef<HTMLInputElement | null>(null);
 
+    const [createSoundFile, setCreateSoundFile] = useState<File | null>(null);
+    const createSoundFileRef = useRef<HTMLInputElement | null>(null);
+
     const [editForm, setEditForm] = useState<FormState>(EMPTY_FORM);
     const [editFile, setEditFile] = useState<File | null>(null);
     const [editPreview, setEditPreview] = useState<string | null>(null);
     const editFileRef = useRef<HTMLInputElement | null>(null);
+
+    const [editSoundFile, setEditSoundFile] = useState<File | null>(null);
+    const editSoundFileRef = useRef<HTMLInputElement | null>(null);
 
     // ── Pagination & Options ─────────────────────────────────────────────────────
 
@@ -331,16 +339,12 @@ export default function PetManagementPage() {
 
     const createRazas = useMemo(() => {
         if (!createForm.especie_id) return [];
-        const filtered = allRazas.filter(r => Number(r.especie_id) === Number(createForm.especie_id));
-        console.log(`🔍 Filtrando razas para especie_id: ${createForm.especie_id}. Encontradas: ${filtered.length}`);
-        return filtered;
+        return allRazas.filter(r => Number(r.especie_id) === Number(createForm.especie_id));
     }, [allRazas, createForm.especie_id]);
 
     const editRazas = useMemo(() => {
         if (!editForm.especie_id) return [];
-        const filtered = allRazas.filter(r => Number(r.especie_id) === Number(editForm.especie_id));
-        console.log(`🔍 Filtrando razas para edición (especie_id: ${editForm.especie_id}). Encontradas: ${filtered.length}`);
-        return filtered;
+        return allRazas.filter(r => Number(r.especie_id) === Number(editForm.especie_id));
     }, [allRazas, editForm.especie_id]);
 
     // ── Fetch ────────────────────────────────────────────────────────────────────
@@ -360,15 +364,12 @@ export default function PetManagementPage() {
             const peludosJson = await peludosRes.json();
             const metadataJson = await metadataRes.json();
 
-            console.log('📊 Metadata cargada:', metadataJson);
-
             if (!peludosRes.ok) throw new Error(peludosJson.error ?? 'Error al cargar peludos.');
             if (!metadataRes.ok) throw new Error(metadataJson.error ?? 'Error al cargar metadatos.');
             
             setPeludos(peludosJson.data ?? []);
             setEspecies(metadataJson.data?.especies ?? []);
             setAllRazas(metadataJson.data?.razas ?? []);
-            console.log('✅ Razas configuradas en estado:', metadataJson.data?.razas?.length);
             setCurrentPage(1);
         } catch (err) {
             setFeedback({ type: 'error', msg: getErrorMessage(err) });
@@ -395,8 +396,10 @@ export default function PetManagementPage() {
         setIsCreateModalOpen(false);
         setCreateForm(EMPTY_FORM);
         setCreateFile(null);
+        setCreateSoundFile(null);
         if (createPreview) { URL.revokeObjectURL(createPreview); setCreatePreview(null); }
         if (createFileRef.current) createFileRef.current.value = '';
+        if (createSoundFileRef.current) createSoundFileRef.current.value = '';
     }
 
     async function handleCreateSubmit(e: FormEvent<HTMLFormElement>) {
@@ -423,6 +426,7 @@ export default function PetManagementPage() {
             formData.append('desparasitado', String(createForm.desparasitado));
             if (createForm.peso) formData.append('peso', createForm.peso);
             if (createFile) formData.append('foto', createFile);
+            if (createSoundFile) formData.append('sonido', createSoundFile);
 
             const res = await fetch(`${FUNCTION_URL}/manage-peludos`, {
                 method: 'POST',
@@ -459,6 +463,7 @@ export default function PetManagementPage() {
             desparasitado: peludo.desparasitado,
         });
         setEditFile(null);
+        setEditSoundFile(null);
         setEditPreview(peludo.imagenes?.[0]?.url ?? null);
         setFeedback(null);
     }
@@ -494,6 +499,7 @@ export default function PetManagementPage() {
             formData.append('desparasitado', String(editForm.desparasitado));
             formData.append('peso', editForm.peso);
             if (editFile) formData.append('foto', editFile);
+            if (editSoundFile) formData.append('sonido', editSoundFile);
 
             const res = await fetch(`${FUNCTION_URL}/manage-peludos`, {
                 method: 'PATCH',
@@ -836,11 +842,52 @@ export default function PetManagementPage() {
                                         onChangeText={(key, value) => setCreateForm((prev) => ({ ...prev, [key]: value }))}
                                         onChangeBool={(key, value) => setCreateForm((prev) => ({ ...prev, [key]: value }))}
                                     />
-                                    <label className="block">
-                                        <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main"><ImageUp className="h-4 w-4 text-primary" /> Foto del peludo</span>
-                                        <input ref={createFileRef} type="file" accept="image/*" onChange={handleCreateFileChange} className="w-full cursor-pointer rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 text-text-muted text-sm outline-none transition file:bg-primary file:text-white file:rounded-full file:px-4 file:py-1 file:border-0 file:mr-4 font-bold" />
-                                    </label>
-                                    {createPreview && <img src={createPreview} className="h-48 w-full object-cover rounded-2xl border border-primary/10 shadow-sm" alt="Preview" />}
+
+                                    <div className="grid gap-4 md:grid-cols-2">
+                                        <div>
+                                            <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main"><ImageUp className="h-4 w-4 text-primary" /> Foto del peludo</span>
+                                            <div onClick={() => createFileRef.current?.click()} className="relative aspect-video rounded-3xl border-2 border-dashed border-primary/10 bg-neutral-soft flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-white transition-all overflow-hidden group">
+                                                {createPreview ? (
+                                                    <>
+                                                        <img src={createPreview} alt="Preview" className="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
+                                                        <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                            <div className="bg-white/90 backdrop-blur p-3 rounded-2xl shadow-xl">
+                                                                <ImageUp className="h-6 w-6 text-primary" />
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <div className="p-4 rounded-2xl bg-white shadow-sm text-primary group-hover:scale-110 transition-transform"><PlusCircle size={24} /></div>
+                                                        <p className="text-[10px] font-black uppercase tracking-widest text-text-muted">Subir Imagen</p>
+                                                    </>
+                                                )}
+                                                <input ref={createFileRef} type="file" accept="image/*" onChange={handleCreateFileChange} className="hidden" />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main"><Music className="h-4 w-4 text-primary" /> Sonido (MP3 y M4A)</span>
+                                            <div onClick={() => createSoundFileRef.current?.click()} className={`relative aspect-video rounded-3xl border-2 border-dashed flex flex-col items-center justify-center gap-2 cursor-pointer transition-all overflow-hidden group ${createSoundFile ? 'border-emerald-200 bg-emerald-50' : 'border-primary/10 bg-neutral-soft hover:bg-white'}`}>
+                                                <div className={`p-4 rounded-2xl shadow-sm transition-transform group-hover:scale-110 ${createSoundFile ? 'bg-emerald-500 text-white' : 'bg-white text-primary'}`}>
+                                                    <Music size={24} />
+                                                </div>
+                                                <p className={`px-4 text-[10px] font-black uppercase tracking-widest text-center truncate w-full ${createSoundFile ? 'text-emerald-700' : 'text-text-muted'}`}>
+                                                    {createSoundFile ? createSoundFile.name : 'Subir Sonido'}
+                                                </p>
+                                                {createSoundFile && (
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); setCreateSoundFile(null); if(createSoundFileRef.current) createSoundFileRef.current.value=''; }}
+                                                        className="absolute top-2 right-2 p-1.5 bg-white text-red-500 rounded-xl shadow-md hover:bg-red-50 transition-colors"
+                                                    >
+                                                        <X size={14} />
+                                                    </button>
+                                                )}
+                                                <input type="file" ref={createSoundFileRef} onChange={(e) => setCreateSoundFile(e.target.files?.[0] ?? null)} accept="audio/mpeg,audio/mp3,audio/m4a,audio/x-m4a,.m4a" className="hidden" />
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div className="mt-8 flex justify-end gap-3 font-black">
                                         <button type="button" onClick={closeCreateModal} className="px-6 py-4 text-primary uppercase text-xs tracking-widest cursor-pointer hover:bg-neutral-100 rounded-2xl transition-all">Cancelar</button>
                                         <button type="submit" disabled={isSubmitting} className="bg-primary text-white px-10 py-4 rounded-2xl uppercase text-xs tracking-widest shadow-xl shadow-primary/20 disabled:opacity-50 cursor-pointer hover:opacity-90 transition-all">{isSubmitting ? 'Guardando...' : 'Registrar peludo'}</button>
@@ -868,11 +915,51 @@ export default function PetManagementPage() {
                                         onChangeText={(key, value) => setEditForm((prev) => ({ ...prev, [key]: value }))}
                                         onChangeBool={(key, value) => setEditForm((prev) => ({ ...prev, [key]: value }))}
                                     />
-                                    <label className="block">
-                                        <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main"><ImageUp className="h-4 w-4 text-primary" /> Reemplazar foto</span>
-                                        <input ref={editFileRef} type="file" accept="image/*" onChange={handleEditFileChange} className="w-full cursor-pointer rounded-2xl border border-primary/10 bg-neutral-soft px-4 py-3 text-text-muted text-sm outline-none transition file:bg-primary file:text-white file:rounded-full file:px-4 file:py-1 file:border-0 file:mr-4 font-bold" />
-                                    </label>
-                                    {editPreview && <img src={editPreview} className="h-48 w-full object-cover rounded-2xl border border-primary/10 shadow-sm" alt="Preview" />}
+                                    
+                                    <div className="grid gap-4 md:grid-cols-2">
+                                        <div>
+                                            <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main"><ImageUp className="h-4 w-4 text-primary" /> Reemplazar foto</span>
+                                            <div onClick={() => editFileRef.current?.click()} className="relative aspect-video rounded-3xl border-2 border-dashed border-primary/10 bg-neutral-soft flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-white transition-all overflow-hidden group">
+                                                {editPreview ? (
+                                                    <>
+                                                        <img src={editPreview} alt="Preview" className="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
+                                                        <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                            <div className="bg-white/90 backdrop-blur p-3 rounded-2xl shadow-xl">
+                                                                <ImageUp className="h-6 w-6 text-primary" />
+                                                            </div>
+                                                        </div>
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <div className="p-4 rounded-2xl bg-white shadow-sm text-primary group-hover:scale-110 transition-transform"><PlusCircle size={24} /></div>
+                                                        <p className="text-[10px] font-black uppercase tracking-widest text-text-muted">Subir Imagen</p>
+                                                    </>
+                                                )}
+                                                <input ref={editFileRef} type="file" accept="image/*" onChange={handleEditFileChange} className="hidden" />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <span className="mb-2 flex items-center gap-2 text-sm font-bold text-text-main"><Music className="h-4 w-4 text-primary" /> Reemplazar Sonido</span>
+                                            <div onClick={() => editSoundFileRef.current?.click()} className={`relative aspect-video rounded-3xl border-2 border-dashed flex flex-col items-center justify-center gap-2 cursor-pointer transition-all overflow-hidden group ${editSoundFile || editingPeludo.sonido_url ? 'border-emerald-200 bg-emerald-50' : 'border-primary/10 bg-neutral-soft hover:bg-white'}`}>
+                                                <div className={`p-4 rounded-2xl shadow-sm transition-transform group-hover:scale-110 ${editSoundFile || editingPeludo.sonido_url ? 'bg-emerald-500 text-white' : 'bg-white text-primary'}`}>
+                                                    <Music size={24} />
+                                                </div>
+                                                <p className={`px-4 text-[10px] font-black uppercase tracking-widest text-center truncate w-full ${editSoundFile || editingPeludo.sonido_url ? 'text-emerald-700' : 'text-text-muted'}`}>
+                                                    {editSoundFile ? editSoundFile.name : editingPeludo.sonido_url ? 'Sonido actual' : 'Subir Sonido'}
+                                                </p>
+                                                {editSoundFile && (
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); setEditSoundFile(null); if(editSoundFileRef.current) editSoundFileRef.current.value=''; }}
+                                                        className="absolute top-2 right-2 p-1.5 bg-white text-red-500 rounded-xl shadow-md hover:bg-red-50 transition-colors"
+                                                    >
+                                                        <X size={14} />
+                                                    </button>
+                                                )}
+                                                <input type="file" ref={editSoundFileRef} onChange={(e) => setEditSoundFile(e.target.files?.[0] ?? null)} accept="audio/mpeg,audio/mp3,audio/m4a,audio/x-m4a,.m4a" className="hidden" />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="mt-8 flex justify-end gap-3 font-black">
                                     <button type="button" onClick={() => setEditingPeludo(null)} className="px-6 py-4 text-primary uppercase text-xs tracking-widest cursor-pointer hover:bg-neutral-100 rounded-2xl transition-all">Cancelar</button>

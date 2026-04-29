@@ -20,17 +20,15 @@ export default function AdminDashboardPage() {
     async function loadDashboard() {
       if (ignore) return;
       setIsLoading(true);
-      console.log('🔄 Iniciando carga de Dashboard...');
 
       // 1. Cargar Imágenes de Galería
       try {
         const galleryData = await listGalleryImages();
         if (!ignore) {
-          console.log('✅ Galería cargada:', galleryData.length, 'fotos');
           setImages(galleryData);
         }
       } catch (err) {
-        console.error('❌ Error en métricas de galería:', err);
+        console.error('Error en métricas de galería:', err);
       }
 
       // 2. Cargar Métricas de Tienda (Individual para que no se bloqueen)
@@ -38,16 +36,15 @@ export default function AdminDashboardPage() {
         const { count: total, error: err1 } = await supabase.from('products').select('id', { count: 'exact', head: true });
         const { count: low, error: err2 } = await supabase.from('products').select('id', { count: 'exact', head: true }).lte('stock', 5);
 
-        if (err1) console.error('❌ Error Supabase (Total Productos):', err1);
-        if (err2) console.error('❌ Error Supabase (Stock Bajo):', err2);
+        if (err1) console.error('Error Supabase (Total Productos):', err1);
+        if (err2) console.error('Error Supabase (Stock Bajo):', err2);
 
         if (!ignore) {
           setProductCount(total || 0);
           setLowStockCount(low || 0);
-          console.log('✅ Tienda cargada:', { total, low });
         }
       } catch (err) {
-        console.error('❌ Error en métricas de tienda:', err);
+        console.error('Error en métricas de tienda:', err);
       }
 
       if (!ignore) {

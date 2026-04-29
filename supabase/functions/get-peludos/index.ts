@@ -44,7 +44,7 @@ Deno.serve(async (req) => {
         const selectQuery = `
             id, nombre, sexo, edad, caracteristicas,
             esterilizado, vacunado, desparasitado, especie, peso,
-            especie_id, raza_id,
+            especie_id, raza_id, sonido_url,
             especies (id, nombre),
             razas (id, nombre),
             imagenes (id, url)
