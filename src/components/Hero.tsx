@@ -133,7 +133,7 @@ const Hero = () => {
               transition={{ duration: 1, ease: "backOut" }}
               className="hidden lg:block relative"
             >
-              <div className="relative z-10 w-full aspect-square rounded-[60px] overflow-hidden shadow-2xl border-8 border-white bg-neutral-soft">
+              <div className="relative z-10 w-full aspect-square rounded-[60px] overflow-hidden shadow-2xl border-8 border-white bg-white">
                 <AnimatePresence mode="wait">
                   {isLoading ? (
                     <motion.div

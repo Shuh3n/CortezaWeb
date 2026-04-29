@@ -104,11 +104,9 @@ export default function AdminLayout() {
     }
   }
 
-  // Button visible only when native install prompt is available (Android / PC).
-  // iOS users see the guide modal automatically — no button needed.
-  const showInstallButton = canInstallPrompt;
-  const installLabel = 'Instalar app';
-  const installTitle = 'Instalar el panel en este dispositivo';
+  // Button visible only when native install prompt is available (Android / PC) or already installed.
+  const showInstallButton = canInstallPrompt || isStandalone;
+  const installTitle = isStandalone ? 'Panel ya instalado' : 'Instalar el panel en este dispositivo';
 
   return (
     <div className="min-h-screen bg-neutral-soft text-text-main">
@@ -129,7 +127,7 @@ export default function AdminLayout() {
                   className="flex items-center gap-4"
                 >
                   <div className="relative">
-                    <img src="/logo.png" alt="Corteza" className="h-11 w-11 rounded-2xl bg-white/10 p-1.5 shadow-inner backdrop-blur-md" />
+                    <img src="/logo.png" alt="Corteza" className="h-11 w-11 rounded-2xl bg-white p-1.5 shadow-lg" />
                     <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full border-2 border-[#2d5a27] bg-emerald-400 shadow-sm" />
                   </div>
                   <div>
@@ -211,23 +209,40 @@ export default function AdminLayout() {
 
               <div className="flex gap-2">
                 {showInstallButton && (
-                  <button
-                    type="button"
-                    onClick={handleInstall}
-                    className={`flex cursor-pointer items-center justify-center rounded-2xl border border-white/10 bg-white/5 p-3.5 text-white transition-all hover:bg-white/15 active:scale-95 ${showExpandedDesktop ? 'flex-1 gap-2 text-xs font-black uppercase tracking-widest' : 'w-full'}`}
-                    title={installTitle}
-                  >
-                    <Download size={18} />
-                    {showExpandedDesktop && <span>Instalar</span>}
-                  </button>
+                  <div className="relative group">
+                    <button
+                      type="button"
+                      onClick={handleInstall}
+                      disabled={isStandalone}
+                      className={`flex h-12 w-12 cursor-pointer items-center justify-center rounded-2xl border border-white/10 transition-all active:scale-95 ${
+                        isStandalone 
+                          ? 'bg-white/5 text-white/20 cursor-not-allowed' 
+                          : 'bg-white/5 text-white hover:bg-white/15'
+                      }`}
+                    >
+                      <Download size={20} />
+                    </button>
+                    
+                    {/* Tooltip personalizado */}
+                    <div className="absolute bottom-full left-0 mb-3 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-50">
+                      <motion.div 
+                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                        className="bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest px-3 py-2 rounded-xl shadow-2xl border border-white/10 whitespace-nowrap"
+                      >
+                        {installTitle}
+                        <div className="absolute top-full left-5 -mt-1 border-4 border-transparent border-t-slate-900" />
+                      </motion.div>
+                    </div>
+                  </div>
                 )}
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className={`flex cursor-pointer items-center justify-center rounded-2xl bg-accent p-3.5 text-white shadow-lg shadow-black/10 transition-all hover:opacity-90 active:scale-95 ${showExpandedDesktop ? 'flex-1 gap-2 text-xs font-black uppercase tracking-widest' : 'w-full'}`}
+                  className={`flex h-12 cursor-pointer items-center justify-center rounded-2xl bg-accent text-white shadow-lg shadow-black/10 transition-all hover:opacity-90 active:scale-95 ${showExpandedDesktop ? 'flex-1 gap-2 text-xs font-black uppercase tracking-widest' : 'w-12'}`}
                   title="Cerrar sesión"
                 >
-                  <LogOut size={18} />
+                  <LogOut size={20} />
                   {showExpandedDesktop && <span>Salir</span>}
                 </button>
               </div>
@@ -245,17 +260,6 @@ export default function AdminLayout() {
               </div>
 
               <div className="flex items-center gap-3">
-                {showInstallButton ? (
-                  <button
-                    type="button"
-                    onClick={handleInstall}
-                    className="hidden cursor-pointer rounded-2xl border border-primary/10 bg-white px-4 py-3 font-semibold text-primary shadow-sm transition hover:-translate-y-0.5 lg:inline-flex lg:items-center lg:gap-2"
-                    title={installTitle}
-                  >
-                    <Download className="h-4 w-4" />
-                    {installLabel}
-                  </button>
-                ) : null}
                 <button
                   type="button"
                   onClick={() => setIsSidebarOpen(true)}

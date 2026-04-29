@@ -84,7 +84,7 @@ const Mission = () => {
                 className="relative group"
             >
               <div className="absolute inset-0 bg-primary/20 rounded-[32px] blur-2xl transform group-hover:scale-105 transition-transform duration-500" />
-              <div className="relative aspect-square md:aspect-[4/5] rounded-[32px] overflow-hidden shadow-2xl border-8 border-white bg-neutral-soft">
+              <div className="relative aspect-square md:aspect-[4/5] rounded-[32px] overflow-hidden shadow-2xl border-8 border-white bg-white">
                 <AnimatePresence mode="wait">
                   {isLoading ? (
                     <motion.div
