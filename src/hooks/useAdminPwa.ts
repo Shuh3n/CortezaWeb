@@ -53,7 +53,9 @@ async function registerAdminSw(): Promise<() => void> {
 }
 
 export function useAdminPwa(enabled: boolean) {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(
+    (window as any).getPwaDeferredPrompt?.() || null
+  );
   const [isStandalone, setIsStandalone] = useState(false);
   const [isIos, setIsIos] = useState(false);
 
@@ -76,9 +78,9 @@ export function useAdminPwa(enabled: boolean) {
     };
   }, [enabled]);
 
-  // Detect device + standalone mode + install prompt.
+  // Detect device + standalone mode + listen for prompt availability.
   useEffect(() => {
-    if (!enabled || typeof document === 'undefined') {
+    if (typeof document === 'undefined') {
       return;
     }
 
@@ -97,34 +99,33 @@ export function useAdminPwa(enabled: boolean) {
       setIsStandalone(event.matches || fromSafariStandalone);
     }
 
-    function handleBeforeInstallPrompt(event: Event) {
-      // Prevent the mini-infobar from appearing on mobile
-      event.preventDefault();
-      // Stash the event so it can be triggered later.
-      setDeferredPrompt(event as BeforeInstallPromptEvent);
-      console.log('✨ Install prompt deferred');
+    // Listener for the global capture event
+    function handlePromptAvailable(e: any) {
+      setDeferredPrompt(e.detail);
     }
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('pwa-prompt-available', handlePromptAvailable);
     standaloneMatch.addEventListener('change', handleDisplayModeChange);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('pwa-prompt-available', handlePromptAvailable);
       standaloneMatch.removeEventListener('change', handleDisplayModeChange);
     };
-  }, [enabled]);
+  }, []);
 
   const canInstallPrompt = useMemo(() => deferredPrompt !== null, [deferredPrompt]);
   const canShowIosGuide = useMemo(() => isIos && !isStandalone, [isIos, isStandalone]);
   const canInstall = useMemo(() => !isStandalone, [isStandalone]);
 
   async function installApp() {
-    if (!deferredPrompt) {
+    const prompt = deferredPrompt || (window as any).getPwaDeferredPrompt?.();
+    if (!prompt) {
       return false;
     }
 
-    await deferredPrompt.prompt();
-    const choice = await deferredPrompt.userChoice;
+    await prompt.prompt();
+    const choice = await prompt.userChoice;
+    (window as any).clearPwaDeferredPrompt?.();
     setDeferredPrompt(null);
     return choice.outcome === 'accepted';
   }

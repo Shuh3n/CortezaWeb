@@ -42,20 +42,20 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-180x180.png" />
+    <link rel="manifest" href="/manifest.webmanifest" id="pwa-manifest" />
     <script>
       /**
        * PWA Admin Booster:
-       * Inyectamos el manifiesto de admin ANTES de que el navegador lo pida.
-       * Esto asegura que el prompt de "Instalar" se dispare correctamente en Chrome/Android.
+       * Si estamos en /admin, cambiamos el manifiesto al de admin inmediatamente
+       * para que la experiencia de instalación sea la correcta desde el primer segundo.
        */
       (function () {
-        const isAdmin = window.location.pathname.startsWith('/admin');
-        if (isAdmin) {
-          const link = document.createElement('link');
-          link.rel = 'manifest';
-          link.href = '/admin-manifest.webmanifest';
-          document.head.appendChild(link);
-          console.log('🚀 Admin PWA Manifest injected');
+        if (window.location.pathname.startsWith('/admin')) {
+          const manifest = document.getElementById('pwa-manifest');
+          if (manifest) {
+            manifest.setAttribute('href', '/admin-manifest.webmanifest');
+            console.log('🚀 Admin PWA Manifest swapped');
+          }
         }
       })();
     </script>

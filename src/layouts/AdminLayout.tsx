@@ -104,8 +104,9 @@ export default function AdminLayout() {
     }
   }
 
-  // Button visible only when native install prompt is available (Android / PC) or already installed.
-  const showInstallButton = canInstallPrompt || isStandalone;
+  // El botón ahora es siempre visible en la sidebar (a menos que sea iOS donde mostramos guía automática).
+  // Si ya está instalado, sale inactivo. Si no hay prompt, abre la guía manual.
+  const showInstallButton = !canShowIosGuide; 
   const installTitle = isStandalone ? 'Panel ya instalado' : 'Instalar el panel en este dispositivo';
 
   return (
